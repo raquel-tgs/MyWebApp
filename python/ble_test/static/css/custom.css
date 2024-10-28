@@ -1,0 +1,30 @@
+body {
+  font-family: Sans-Serif;
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 250px;
+  
+    label {
+      color: blue;
+    }
+  
+    button {
+      border: 1px solid blue;
+      border-radius: 5px;
+      color: blue;
+    }
+  
+    .error {
+      color: red;
+    }
+  }
+}

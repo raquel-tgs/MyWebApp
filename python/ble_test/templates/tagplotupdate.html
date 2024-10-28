@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Plotly Graph</title>
+    <style>
+        /* Basic styling for the button */
+        .go-back-button {
+            padding: 5px 5px;
+            font-size: 16px;
+            color: white;
+            background-color: #7079f0;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .go-back-button:hover {
+             background-color: #0056b3;
+        }
+    </style>
+
+    <!-- Include Plotly.js library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- Include jQuery library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            function fetchDataAndUpdatePlot() {
+                $.ajax({
+                    url: '/api/locationdata', // Flask API endpoint to get data
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function(response) {
+                        // Data returned from the API
+                        var data = response;
+
+                        // Prepare the trace with updated markers, labels, and colors
+                        var trace = {
+                            x: data.x,
+                            y: data.y,
+                            text: data.text, // Labels for the markers
+                            textposition: data.textposition,
+                            mode: 'markers+text', // Show both markers and text
+                            marker: {
+                                size: data.marker_size, // Sizes of the markers
+                                opacity: 0.5 ,
+                                color: data.marker_color // Colors of the markers
+                            },
+                            textfont: {
+                                size: 10, // Size of the text labels for markers
+                                color: 'black' // Color of the text labels
+                            },
+                            type: 'scatter'
+                        };
+
+                        var layout = {
+                            title: 'Dynamic Plotly Graph',
+                            xaxis: {
+                                title: 'X Axis  [mts]',
+                                range: [0, 10]
+                            },
+                            yaxis: {
+                                title: 'Y Axis  [mts]',
+                                range: [0, 10]
+                            }
+                        };
+
+                        // Update the Plotly graph
+                        Plotly.newPlot('plotly-graph', [trace], layout);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error fetching data:', error);
+                    }
+                });
+            }
+
+            // Initial plot creation
+            fetchDataAndUpdatePlot();
+
+            // Example of refreshing data every 10 seconds
+            setInterval(fetchDataAndUpdatePlot, 10000);
+        });
+    </script>
+</head>
+<body>
+    <!-- Button to go back to the previous page -->
+    <button class="go-back-button" onclick="goBack()">Go Back</button>
+
+    <script>
+        // Function to go back to the previous page
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+
+    <div id="plotly-graph" style="width:1600px;height:800px;"></div>
+</body>
+</html>

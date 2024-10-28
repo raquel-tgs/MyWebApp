@@ -1,0 +1,31 @@
+<html>
+  <head>
+    <title>Login</title>
+    <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" /> -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  </head>
+  <body class="flex items-center justify-center">
+    <form class="flex flex-col items-center justify-center gap-5 w-96 h-full" method="post" action="/login">
+      <h4 class="text-2xl font-bold pb-5">Sign in to your account</h4>
+      <div class="flex flex-col gap-2 w-full">
+        <label class="text-sm font-medium" for="username">Role</label>
+        <select class="rounded-md border border-gray-500" name="role">
+          <option value="well_service">Well Service</option>
+          <option value="certification">Certification</option>
+        </select>
+      </div>
+      <div class="flex flex-col gap-2 w-full">
+        <label class="text-sm font-medium" for="username">Username</label>
+        <input class="rounded-md border border-gray-500" type="text" name="username" />
+      </div>
+      <div class="flex flex-col gap-2 w-full">
+        <label class="text-sm font-medium" for="password">Password</label>
+        <input class="rounded-md border border-gray-500" type="password" name="password" />
+      </div>
+      <button class="rounded-md bg-indigo-600 text-sm text-white font-semibold w-full py-2" type="submit">Sign in</button>
+      {% if error %}
+        <p class="error">{{ error }}</p>
+      {% endif %}
+    </form>
+  </body>
+</html>
