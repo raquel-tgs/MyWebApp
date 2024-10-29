@@ -8,6 +8,7 @@
 import asyncio
 
 import bleak
+import pandas as pd
 from bleak import BleakScanner
 from bleak import BleakClient
 from uuid import UUID
@@ -16,7 +17,7 @@ from construct.core import ConstError
 import keyboard
 from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
-
+import numpy as np
 import time
 
 ibeacon_format = Struct(
@@ -190,9 +191,9 @@ async def notify_callback_asset_id_Characteristic(sender: bleak.BleakGATTCharact
     print("notify_callback_Custom_Characteristic")
     print(f"{sender}: {data}")
 
-
 async def main():
     """Scan for devices."""
+
     scanner = BleakScanner()
     scanner.register_detection_callback(device_found)
 
@@ -210,11 +211,41 @@ async def main():
         devices = await scanner.discover()
         myDevice = None
         myDevice_1 = None
+        scannaddress=[]
+        connect=True
         for d in devices:
             # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
             if d.name is not None:
                 if d.name.startswith("BoldTag")  :
-                    print(d.name)
+                    address=d.address
+                    #print(d.name, address)
+                    scannaddress.append({"address": address, "client": None, "connected": True,"device":d})
+                    ix=len(scannaddress)-1
+                    if connect:
+                        conn = False
+                        ncount = 0
+                        while not conn and ncount < 3:
+                            ncount=ncount+1
+                            try:
+                                    client= BleakClient(address)
+                                    scannaddress[ix]["client"]=client
+                                    scannaddress[ix]["connected"]=True
+                                    conn=True
+                            except Exception as e:
+                                print(e)
+                                scannaddress[ix]["connected"]=False
+                    #print(scannaddress[ix])
+                    char_uuid_enable_cte="c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                    char_uuid_update_nfc="1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+                    char_uuid_tag_enabled="886eb62a-2c17-4e8e-9579-1c5483973577"
+
+
+        if len(scannaddress)>0:
+            for i in range(len(scannaddress)):
+                tags=scannaddress[i]
+                result,dfupdate=tag_command_update(tags, "enable_cte", new_value=1)
+                result, dfupdate = tag_command_update(tags, "enable_cte", new_value=0)
+
             else:
                 #print("..")
                 pass
@@ -222,11 +253,11 @@ async def main():
             #     print('Found it')
             #     myDevice = d
             #     break
-            if d.name=="BoldTag":
-                print('Found it')
-                myDevice_1 = d
-                # myDevice = d
-                break
+            # if d.name=="BoldTag":
+            #     print('Found it')
+            #     myDevice_1 = d
+            #     # myDevice = d
+            #     break
         if False:
             if myDevice_1 is not None:
                 address = str(myDevice_1.address)  # details.adv.bluetooth_address)

@@ -1295,6 +1295,7 @@ async def main():
                         doscan = True
                         print("Doing Updating and updating data...")
                     dfupdate=pd.read_csv(file_path_update)
+                    dfupdate=pd.read_csv(file_path_update)
                     dfupdate_read=dfupdate.copy()
                     idupdate=dfupdate['mac'].values
                     update_mac_filter=[x.replace(":","") for x in idupdate]
@@ -1614,7 +1615,7 @@ async def main():
 
                                                                                     if not read_nfc and (scan_list[k]["id"] == "read_nfc"):
                                                                                         read_nfc =  (newval==1)
-                                                                                        index_read_nfc=rec.index
+                                                                                        #index_read_nfc=rec.index
                                                                                         id_read_nfc=id
                                                                                         char_uuid_id_read_nfc = char_uuid_id
                                                                                         k_read_nfc = k
@@ -1682,7 +1683,7 @@ async def main():
                                                                                 bytearray("1", 'utf-8'),
                                                                                 response=True)
                                                                             print(res)
-                                                                            if (not error_update): dfupdate_read.loc[index_read_nfc, "status"] = "updated"
+                                                                            if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
                                                                         except Exception as e:
                                                                             print(e)
                                                                             app.print_statuslog("Error {0}".format(e))
@@ -1693,12 +1694,12 @@ async def main():
                                                                             read_nfc_done = True
                                                                             newval= newval.to_bytes(scan_list[k_read_nfc]['length'], byteorder='big', signed=False)
                                                                             res = await client.write_gatt_char( service.get_characteristic( char_uuid_id_read_nfc),newval, response=True)
-                                                                            dfupdate_read.loc[index_read_nfc, id_read_nfc] = 0  #clear flag
-                                                                            if (not error_update): dfupdate_read.loc[index_read_nfc, "status"] = "updated"
+                                                                            dfupdate_read.loc[index_update, id_read_nfc] = 0  #clear flag
+                                                                            if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
                                                                         except Exception as e:
                                                                             print(e)
                                                                             app.print_statuslog("Error {0}".format(e))
-                                                                            dfupdate_read.loc[index_read_nfc, "status"] = "update error"
+                                                                            dfupdate_read.loc[index_update, "status"] = "update error"
                                                                 else:
                                                                     pass
 
