@@ -32,7 +32,7 @@ from scipy.optimize import minimize
 import subprocess
 import psutil
 import webapp as app
-import ble_scan_tag as bldtag
+
 import logging
 
 logging.basicConfig(
@@ -1144,7 +1144,6 @@ async def main():
     global val_outliers
     global directo
 
-
     app.anchors_init = anchors_init
     app.readscanfile()
     app.columnIds=scan_columnIds
@@ -1167,7 +1166,7 @@ async def main():
     time_process=None
     scanner = BleakScanner()
     scanner.register_detection_callback(device_found)
-    mqttclient=None
+
     time.sleep(5)
     print("MQTT paused")
     if use_MQTT:
@@ -1177,13 +1176,6 @@ async def main():
 
     scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan":False, "scan_loop":0}
     action=""
-
-    bscanner = bldtag.boldscanner(serv_uuid_Custom_Service = serv_uuid_Custom_Service,
-                                  disableCTE_duringlocation=disableCTE_duringlocation,
-                                  keepactive_all_CTE_during_location=keepactive_all_CTE_during_location,
-                                    use_MQTT =use_MQTT, mqttclient = mqttclient, keep_mqtt_on = keep_mqtt_on,
-                                    wait_for_mqtt_angles = wait_for_mqtt_angles, CTE_Wait_Time_prescan = CTE_Wait_Time_prescan, CTE_Wait_Time = CTE_Wait_Time,webapp=app)
-
     while True:
         srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
         # #chck servers
@@ -1366,15 +1358,12 @@ async def main():
                     and not (sum([0 if x in scannaddress_trim else 1 for x in update_mac_filter])==0 and len(update_mac_filter)>0)):  #((len(update_mac_filter)>0) and (len(scannaddress)==len(update_mac_filter)))):
                 #srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
                 #await asyncio.sleep(1.0)
-
-                await bscanner.scan_tags(connect=True)
-
                 nscan=nscan+1
-                #devices = await scanner.discover()
+                devices = await scanner.discover()
                 print("Scan %d" % nscan)
                 app.print_statuslog("Scan %d" % nscan)
 
-                totaldevices_general =bscanner.tags.limit # sum([0 if d.name is None else 1 if d.name.startswith("BoldTag") else 0 for d in devices])
+                totaldevices_general = sum([0 if d.name is None else 1 if d.name.startswith("BoldTag") else 0 for d in devices])
                 dev=0
 
 
@@ -1387,18 +1376,18 @@ async def main():
                 devices_filter_mac = [ x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in devices_filter]
                 devices_filtered=[]
                 if len(devices_filter) > 0:
-                    # devices_filtered = [x for x in [x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                    devices_filtered = [x for x in[x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
+                    devices_filtered = [x for x in [x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in devices] if x != ""]
                 else:
-                    # devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                    devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
+                    devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in devices] if x != ""]
                 totaldevices = len(devices_filtered)
                 for d in devices_filtered:
                     # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
                     if app.webcancel:
                         webcancelprocess = True
                         break
-                    addressdetected = [x for x in list(set([x.address if x.name == "BoldTag" else "" for x in bscanner.tags])) if x != ""]
+                    addressdetected = [x for x in
+                                       list(set([x.address if x.name == "BoldTag" else "" for x in devices])) if
+                                       x != ""]
                     #All detected devices were already processed - break
                     if sum([1 if x in devprocessed else 0 for x in addressdetected]) == len(addressdetected):
                         break
@@ -1455,9 +1444,9 @@ async def main():
                                         print('{}% -->> Processing {} {} '.format(int(dev/totaldevices*100.0), myDevice_1.name, address))
                                         app.print_statuslog('{}% -->> Processing {} {} '.format(int(dev/totaldevices*100.0), myDevice_1.name, address))
 
-                                        # csv_row_new=csv_row.copy()
-                                        # csv_row_new["mac"]=address
-                                        # csv_row_new["name"]=myDevice_1.name
+                                        csv_row_new=csv_row.copy()
+                                        csv_row_new["mac"]=address
+                                        csv_row_new["name"]=myDevice_1.name
                                         print("address {}".format(address))
 
                                         location_fx=((address.replace(":", "") in startCTE_address_filter ) or (
@@ -1468,25 +1457,269 @@ async def main():
                                             devprocessed.append(address)
 
                                         if (location_fx and action=="LOCATION" ) or action!="LOCATION":
-                                            #try:
-                                            #try to connect
-                                            #async with BleakClient(address) as client:
                                             try:
-                                                scannaddress.append(d.address)
-                                                devprocessed.append(address)
+                                                #try to connect
+                                                async with BleakClient(address) as client:
+                                                    try:
+                                                        scannaddress.append(d.address)
+                                                        devprocessed.append(address)
+                                                        nconerr = -1
+                                                        connected = client.is_connected
+                                                        if connected:
+                                                            print("Connected to Device")
+                                                            print("Performing action {}".format(action))
+                                                            app.print_statuslog("Performing action {}".format(action))
 
-                                                res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,uuid_data_type_filter='base',
-                                                                            init_location=init_location,dfupdate=dfupdate,keep_connected=True)
-                                                ressult = res["result"]
-                                                dfupdate_read = res["dfupdate_read"]
-                                                csv_read_data = res["csv_read_data"]
-                                                recupdate = res["recupdate"]
-                                                devices_processed_location = res["devices_processed_location"]
+                                                            svcs = await client.get_services()
+
+                                                            print("Services:")
+                                                            service = None
+                                                            for service_1 in svcs:
+                                                                # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                                                                if service_1.uuid == serv_uuid_Custom_Service:
+                                                                    service = service_1
+                                                                    break
+
+                                                            if (action=="READ"):
+                                                                if service is not None:
+
+                                                                    # if disableCTE:
+                                                                    #     # Sart advertisement
+                                                                    #     #char_uuid_enable_cte = "c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                                                                    #     res = await client.write_gatt_char(
+                                                                    #         service.get_characteristic(char_uuid_enable_cte),
+                                                                    #         bytearray([0x01]),
+                                                                    #         response=True)
+                                                                    scan_list=filter_db(id=None,data_type="base",scan=True)
+                                                                    scan_list.append(filter_db(id="status_code"))
+                                                                    for k in range(len(scan_list)):
+                                                                        try:
+                                                                            char_uuid_id = scan_list[k]['uuid']
+                                                                            id=scan_list[k]['id']
+                                                                            scan = scan_list[k]['scan']
+                                                                            char_uuid_val = bytes(await client.read_gatt_char(char_uuid_id))
+                                                                            print("{0} ({1}): {2}".format(id,scan,char_uuid_val))
+                                                                            if scan:
+                                                                                if (scan_list[k]['type'] == 'HEX'):
+                                                                                    val=int.from_bytes(char_uuid_val, byteorder='big')
+                                                                                else:
+                                                                                    if type(char_uuid_val) is bytes:
+                                                                                        val=char_uuid_val.decode('utf-8')
+                                                                                    else:
+                                                                                        val = str(char_uuid_val)
+                                                                                scan_list[k]['value'] = val
+                                                                                if id in csv_row_new.keys():
+                                                                                    csv_row_new[id]= val
+                                                                        except Exception as e:
+                                                                            print("address: {0}".format(address))
+                                                                            print("char_uuid_id: {0}".format(char_uuid_id))
+                                                                            print(e)
+                                                                    csv_read_data.append(csv_row_new)
+
+                                                            if (action=="LOCATION"):
+                                                                ini_loc=False
+                                                                if not init_location:
+                                                                    init_location=True
+                                                                    start_mqtt = True
+                                                                    try:
+                                                                        Stop_collecting = False
+                                                                        datadf = {}
+                                                                        janhors_processed = []
+                                                                        datadf_pos = {}
+                                                                        datadf_corr = {}
+                                                                        jmpos_processed = []
+                                                                        jang_corr_processed = []
+                                                                        ini_loc = True
+                                                                        print("Starting MQTT server")
+                                                                        app.print_statuslog("Starting MQTT server")
+                                                                        if use_MQTT:
+                                                                            if not keep_mqtt_on: mqttclient.loop_start()
+                                                                        # time.sleep(CTE_Wait_Time_prescan)
+                                                                    except Exception as e:
+                                                                        start_mqtt=False
+                                                                        print("ERROR starting MQTT server")
+                                                                        app.print_statuslog("ERROR starting MQTT server")
+
+                                                                if service is not None and start_mqtt:
+                                                                    devices_processed.append(address)     #device should remain ON until finished the scan
+                                                                    if disableCTE_duringlocation or keepactive_all_CTE_during_location:
+                                                                        #char_uuid_enable_cte = "c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                                                                        res = await client.write_gatt_char(
+                                                                            service.get_characteristic(char_uuid_enable_cte),
+                                                                            bytearray([0x01]),
+                                                                            response=True)
+                                                                        # if ini_loc: time.sleep(CTE_Wait_Time_prescan)
+                                                                    dev_found=False
+                                                                    n=0
+                                                                    t1 = time.time()
+                                                                    while (wait_for_mqtt_angles and not dev_found or not wait_for_mqtt_angles) and (n<=CTE_Wait_Time_prescan or CTE_Wait_Time_prescan==0) and ini_loc:
+                                                                        n=n+1
+                                                                        # print("Staring Location for address: {0}".format(address))
+                                                                        # app.print_statuslog("Staring Location for address: {0}".format(address))
+                                                                        dev_found=(address.replace(":","") in janhors_processed)
+                                                                        if (address.replace(":","") in janhors_processed):
+                                                                            print("..angles? {0}={1}..".format(address.replace(":","") , address.replace(":","") in janhors_processed))
+                                                                        time.sleep(1)
+                                                                    print("Delta time {}".format(time.time()-t1))
+                                                                    for n in range(CTE_Wait_Time):
+                                                                        time.sleep(1)
+                                                                        print("..{0}%%".format(int(n/CTE_Wait_Time*100.0)),end="")
+                                                                        app.print_statuslog("..{0}%%".format(int(n/CTE_Wait_Time*100.0)), addLFCR=False)
+
+                                                                    print("")
+                                                                    if not keepactive_all_CTE_during_location: print("Finish Location for address: {0}".format(address))
+
+                                                                    # Stop advertisement CTE
+                                                                    if disableCTE_duringlocation:
+                                                                        res = await client.write_gatt_char(
+                                                                            service.get_characteristic(char_uuid_enable_cte),
+                                                                            bytearray([0x00]),
+                                                                            response=True)
+                                                                    #else:
+                                                                    #    print("disableCTE is FALSE!! - no scan")
+
+
+                                                            if (action == "UPDATE"):
+                                                                scan_list = filter_db(id=None, data_type="base",scan=True)
+                                                                if service is not None:
+                                                                    rec=dfupdate[dfupdate["mac"] == myDevice_1.address]
+                                                                    fupdate=False
+                                                                    # # Sart advertisement
+                                                                    # #char_uuid_enable_cte = "c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                                                                    # res = await client.write_gatt_char(
+                                                                    #     service.get_characteristic(char_uuid_enable_cte),
+                                                                    tag_updated=False
+                                                                    error_update=False
+                                                                    read_nfc=False
+                                                                    index_update = rec.index
+                                                                    for k in range(len(scan_list)):
+                                                                        try:
+                                                                            scan = scan_list[k]['scan']
+                                                                            if scan:
+                                                                                char_uuid_id = scan_list[k]['uuid']
+                                                                                id = scan_list[k]['id']
+                                                                                if not rec[id].isna().values[0]:           #only update what is not None (value has changed)
+                                                                                    print("Updating {0}".format(id))
+                                                                                    app.print_statuslog(
+                                                                                        "Updating {0}".format(id))
+                                                                                    if scan_list[k]['type']=='UTF-8':
+                                                                                        newval = str(rec[id].values[0])
+                                                                                    elif (scan_list[k]['type'] == 'HEX'):
+                                                                                        if np.isnan(rec[id].values[0]):
+                                                                                            newval = int(0)
+                                                                                        else:
+                                                                                            newval = int(rec[id].values[0])
+
+                                                                                    else:
+                                                                                        newval =""
+
+                                                                                    if not read_nfc and (scan_list[k]["id"] == "read_nfc"):
+                                                                                        read_nfc =  (newval==1)
+                                                                                        #index_read_nfc=rec.index
+                                                                                        id_read_nfc=id
+                                                                                        char_uuid_id_read_nfc = char_uuid_id
+                                                                                        k_read_nfc = k
+
+                                                                                    if scan_list[k]["id"] != "read_nfc":
+                                                                                        fupdate = True
+
+                                                                                        if (scan_list[k]['type'] == 'HEX'):
+                                                                                            res = await client.write_gatt_char(
+                                                                                                service.get_characteristic(
+                                                                                                    char_uuid_id), newval.to_bytes(scan_list[k]['length'],byteorder='big',signed=False),
+                                                                                                response=True)
+                                                                                        else:
+                                                                                            res = await client.write_gatt_char(
+                                                                                            service.get_characteristic(char_uuid_id),
+                                                                                            bytearray(newval, 'utf-8'),
+                                                                                            response=True)
+
+
+                                                                                        # print(res)
+                                                                                        valread_raw=await client.read_gatt_char(char_uuid_id)
+                                                                                        if valread_raw is not None:
+                                                                                            if type(valread_raw) is bytearray:
+                                                                                                valread = bytes(valread_raw)
+                                                                                            else:
+                                                                                                pass
+                                                                                        else:
+                                                                                            valread=bytes(b'')
+
+                                                                                        if (scan_list[k]['type'] == 'HEX'):
+                                                                                            val=int.from_bytes(valread, byteorder='big')
+                                                                                        else:
+                                                                                            if type(valread) is bytes:
+                                                                                                val = valread.decode('utf-8')
+                                                                                            else:
+                                                                                                val = str(valread)
+                                                                                        if (val!=newval and not error_update):
+                                                                                            error_update=True
+                                                                                        else:
+                                                                                            tag_updated=True
+                                                                                        dfupdate_read.loc[rec.index,id]=val
+                                                                                        print("{0} read: {1}".format(id,val))
+                                                                                        app.print_statuslog("{0} read: {1}".format(id,val))
+
+                                                                        except Exception as e:
+                                                                            print("address: {0}".format(address))
+                                                                            print("id: {0} char_uuid_id: {1}".format(id,char_uuid_id))
+                                                                            print(e)
+                                                                            app.print_statuslog("Error {0}".format(e))
+                                                                            error_update=True
+                                                                            dfupdate_read.loc[index_update, "status"] = "update error"
+
+                                                                    if (tag_updated and not error_update):
+                                                                        dfupdate_read.loc[rec.index, "status"] = "updated"
+                                                                    if (error_update):
+                                                                        dfupdate_read.loc[rec.index,"status"]="update error"
+
+                                                                    recupdate.drop(recupdate[recupdate["mac"] == myDevice_1.address].index,
+                                                                                   inplace=True)
+                                                                    if fupdate:
+                                                                        #Update NFC if not read NFC command
+                                                                        try:
+                                                                            res = await client.write_gatt_char(
+                                                                                service.get_characteristic(char_uuid_update_nfc),
+                                                                                bytearray("1", 'utf-8'),
+                                                                                response=True)
+                                                                            print(res)
+                                                                            if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
+                                                                        except Exception as e:
+                                                                            print(e)
+                                                                            app.print_statuslog("Error {0}".format(e))
+                                                                            dfupdate_read.loc[index_update, "status"] = "update error"
+
+                                                                    if read_nfc:
+                                                                        try:
+                                                                            read_nfc_done = True
+                                                                            newval= newval.to_bytes(scan_list[k_read_nfc]['length'], byteorder='big', signed=False)
+                                                                            res = await client.write_gatt_char( service.get_characteristic( char_uuid_id_read_nfc),newval, response=True)
+                                                                            dfupdate_read.loc[index_update, id_read_nfc] = 0  #clear flag
+                                                                            if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
+                                                                        except Exception as e:
+                                                                            print(e)
+                                                                            app.print_statuslog("Error {0}".format(e))
+                                                                            dfupdate_read.loc[index_update, "status"] = "update error"
+                                                                else:
+                                                                    pass
+
+                                                            await client.disconnect()
+
+                                                        else:
+                                                            print(f"Failed to connect to Device {address}")
+                                                            app.print_statuslog(f"Failed to connect to Device {address}")
+
+                                                    except Exception as e:
+                                                        print(e)
+                                                        app.print_statuslog("Error {0}".format(e))
+
 
 
                                             except Exception as e:
+                                                print(f"Failed to connect to Device {0}".format(address))
+                                                app.print_statuslog(f"Failed to connect to Device {address}")
                                                 print(e)
-                                                app.print_statuslog("Error {0}".format(e))
+                                                nconerr=nconerr+1
                                 else:
                                     nconerr=-1
                                 if app.webcancel:
@@ -1559,11 +1792,29 @@ async def main():
             if keepactive_all_CTE_during_location and not keepCTE_ON_aftert_location:
                 for address in devprocessed:
                     try:
-                        ix=bscanner.tags.find_tag(address=address)
-                        bscanner.tags.scanner_param(ix)
-                        bscanner.tags.gatewaydb.set_csv_cfg_row_id(id="enable_cte", value=0)
-                        dfupdate_cfg = bscanner.tags.gatewaydb.dfupdate_cfg()
-                        res_tag = await bscanner.tags.tag_functions(action="UPDATE",uuid_data_type_filter="configuration",dfupdate=dfupdate_cfg)
+                        async with BleakClient(address) as client:
+                            connected = client.is_connected
+                            if connected:
+                                svcs = await client.get_services()
+
+                                print("Services:")
+                                service = None
+                                service_generic = None
+                                for service_1 in svcs:
+                                    # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                                    if service_1.uuid == serv_uuid_Custom_Service:
+                                        service = service_1
+                                        break
+
+                                # Stop advertisement CTE
+                                print("Finish Location for address - disabling CTE: {0}".format(address))
+                                app.print_statuslog("Finish Location for address - disabling CTE: {0}".format(address))
+
+                                res = await client.write_gatt_char(
+                                    service.get_characteristic(char_uuid_enable_cte),
+                                    bytearray([0x00]),
+                                    response=True)
+                                await client.disconnect()
                     except Exception as e:
                         print(e)
 
@@ -1670,7 +1921,7 @@ async def main():
                                     for k in app.columnIds[1:-2]:
                                         df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
                                     df_back.loc[ix, "status"] = \
-                                    df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
+                                    dfupdate_read.loc[df_back.loc[ix, "mac"] == dfupdate_read["mac"], "status"].values[0]
                                 df=df_back[app.columnIds[:-2]]
                     # Check if the file exists
                     if os.path.exists(file_path):

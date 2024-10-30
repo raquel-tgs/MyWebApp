@@ -14,7 +14,15 @@ from bleak.backends.scanner import AdvertisementData
 import numpy as np
 import time
 
-
+class tag:
+    def __init__(self,device,address,connected,client,custom_service,index,name):
+        self.device=device
+        self.address=address
+        self.connected=connected
+        self.client=client
+        self.custom_service=custom_service
+        self.index=index
+        self.name=name
 
 class boldtag:
     char_uuid = {}
@@ -76,7 +84,6 @@ class boldtag:
                      'type': "UTF-8", "length": 50, "data_type": "detail"}
     char_uuid[28] = {"id": "mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": True,
                      'type': "UTF-8", "length": 20, "data_type": "configuration"}
-
     char_uuid[29] = {"id": "enable_cte", "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "", "scan": True,
                      'type': "HEX", "length": 1, "data_type": "configuration"}
     char_uuid[30] = {"id": "tag_enabled", "uuid": "886eb62a-2c17-4e8e-9579-1c5483973577", "value": "", "scan": True,
@@ -106,8 +113,8 @@ class boldtag:
         self.limit = 0
         self.index = 0
         self.items = []
-        self.current=None
-
+        self.current= None
+        self._index = 0
         self.device=None
         self.address=None
         self.connected=False
@@ -118,39 +125,19 @@ class boldtag:
         self.csv_row = self.gatewaydb.csv_row
 
     def __iter__(self):
-        if (self.limit>0):
-            return self.items[self.index]
-        else:
-            return None
+        self._index=0
+        return self
 
     def __next__(self):
-        if self.index < self.limit:
-            self.set_current(self.index)
-            self.index += 1
+        if self._index < self.limit:
+            self.set_current(self._index)
+            self._index += 1
             return self.current
         else:
             raise StopIteration  # Stops the iteration when the limit is reached
-    def update_current(self):
-        if self.index>=0 and self.index<self.limit and self.current is not None:
-            self.current["device"]=self.device
-            self.current["address"]=self.address
-            self.current["connected"]=self.connected
-            self.current["client"]=self.client
-            self.items[self.index]=self.current
-    def set_current(self, index):
-        self.update_current()
-        if index!=self.index:
-            self.index=index
-            self.current = self.items[self.index]
-            self.device=self.current["device"]
-            self.address=self.current["address"]
-            self.connected=self.current["connected"]
-            self.client=self.current["client"]
-
-    def get_current(self):
-        return self.current
 
     def __getitem__(self, index):
+        self.update_current()
         if index < self.limit and index>=0:
             return self.items[index]
         else:
@@ -160,8 +147,37 @@ class boldtag:
         for i in range(len(self.items)):
             self.dicconnect_and_remove(i)
 
-    def new(self, device, max_retry=3):
-        self.limit = self.limit +1
+    def __len__(self):
+        # Returns the length of the list
+        return self.limit
+
+    def update_current(self):
+        if self.index>=0 and self.index<self.limit and self.current is not None:
+            self.current.device=self.device
+            self.current.address=self.address
+            self.current.connected=self.connected
+            self.current.client=self.client
+            self.current.name = self.name
+            self.current.custom_service = self.custom_service
+            self.current.index= self.index
+            self.items[self.index]=self.current
+    def set_current(self, index):
+        self.update_current()
+        if index!=self.index:
+            self.index=index
+            self.current = self.items[self.index]
+            self.device=self.current.device
+            self.address=self.current.address
+            self.connected=self.current.connected
+            self.name = self.current.name
+            self.client=self.current.client
+            self.custom_service=self.current.custom_service
+
+    def get_current(self):
+        return self.current
+
+
+    async def new(self, device, connect=False, max_retry=3):
         self.device=device
         self.address=device.address
         self.connected=False
@@ -169,12 +185,19 @@ class boldtag:
         self.client=None
         self.custom_service=None
         self.gatewaydb.set_mac(self.address)
-        item={"client": self.client, "connected": self.connected, "device": self.device, "address":self.address,"custom_service":self.custom_service}
+        self.name=device.name
+        item=tag(client=self.client, connected=self.connected, device=self.device, address=self.address,custom_service=self.custom_service, index=self.limit, name=self.name)
         self.items.append(item)
+        self.limit = self.limit + 1
+        self.index=self.limit-1
+        self.update_current()
+        self.current=item
+        if connect:
+            await self.connect(max_retry=max_retry)
 
     async def connect(self,max_retry=3):
         ncount = 0
-        res=False
+        res=self.connected
         while not self.connected and ncount < max_retry:
             print("connecting to {} retry:{}".format(self.address,ncount ))
             ncount = ncount + 1
@@ -276,8 +299,8 @@ class boldtag:
             try:
                 result = True
                 myDevice_1_address = device.address
-                char_uuid_enable_cte = self.filter_db(id="enable_cte")["uuid"]
-                char_uuid_update_nfc = self.filter_db(id="update_nfc")["uuid"]
+                char_uuid_enable_cte = self.filter_db(id="enable_cte")[0]["uuid"]
+                char_uuid_update_nfc = self.filter_db(id="update_nfc")[0]["uuid"]
                 nconerr = -1
                 if client is not None:
                     connected = client.is_connected
@@ -311,7 +334,7 @@ class boldtag:
                         if service is not None:
 
                             scan_list = self.filter_db(id=uuid_filter_id, data_type=uuid_data_type_filter, scan=True)
-                            scan_list.append(self.filter_db(id="status_code"))
+                            scan_list.extend(self.filter_db(id="status_code"))
                             for k in range(len(scan_list)):
                                 try:
                                     char_uuid_id = scan_list[k]['uuid']
@@ -407,7 +430,7 @@ class boldtag:
                             #    print("disableCTE is FALSE!! - no scan")
 
                     if (action == "UPDATE"):
-                        scan_list = self.filter_db(id=None, data_type="base", scan=True)
+                        scan_list = self.filter_db(id=None, data_type=uuid_data_type_filter, scan=True)
                         dfupdate_read = dfupdate.copy()
                         recupdate = dfupdate.copy()
                         if service is not None:
@@ -428,7 +451,7 @@ class boldtag:
                                         char_uuid_id = scan_list[k]['uuid']
                                         id = scan_list[k]['id']
                                         if not rec[id].isna().values[
-                                            0]:  # only update what is not None (value has changed)
+                                            0] and scan_list[k]["id"] !="mac":  # only update what is not None (value has changed)
                                             print("Updating {0}".format(id))
                                             if app is not None:app.print_statuslog(
                                                 "Updating {0}".format(id))
@@ -566,7 +589,7 @@ class boldtag:
                 else:
                     res = [y for y in [self.char_uuid[x] for x in list(self.char_uuid)] if
                            (y["scan"] == scan or scan is None) and (
-                                       y["data_type"] == data_type or data_type is None) and y["id"] == id][0]
+                                       y["data_type"] == data_type or data_type is None) and y["id"] == id]#[0]
         except Exception as e:
             print(e)
         return res
@@ -577,30 +600,63 @@ class gatewaydb:
                "expiration_date": "", "color": "", "series": "", "read_nfc": "", "status": "", "status_code": "",
                "asset_images_file_extension": "", "x": "", "y": ""}
 
+    csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
+                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"",
+                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":""}
+
+
     def __init__(self):
         self.new_csv_row=None
+        self.new_csv_cfg_row=None
         self.mac=None
-
-    def new_row(self):
-        self.new_csv_row=self.csv_row.copy()
 
     def set_mac(self,mac):
         self.mac=mac
-    def dfupdate(self):
-        df=pd.DataFrame.from_dict(self.new_csv_row)
-        return  df
 
-    def set_csv_row_id(self, id, value):
+    def dfupdate(self,asdf=True):
+        if asdf:
+            res=pd.DataFrame.from_dict(self.new_csv_row)
+        else:
+            res=self.new_csv_row
+        return  res
+
+    def dfupdate_cfg(self, asdf=True):
+        if asdf:
+            res=pd.DataFrame.from_dict(self.new_csv_cfg_row)
+        else:
+            res=self.new_csv_cfg_row
+        return  res
+
+    def new_csv_row_id(self):
         if self.new_csv_row is None:
             self.new_csv_row=self.csv_row.copy()
             for x in self.new_csv_row.keys():
                 self.new_csv_row[x]=np.nan
 
+    def set_csv_row_id(self, id, value):
+        self.new_csv_row_id()
         res=False
         if id in self.new_csv_row.keys():
             self.new_csv_row[id] = [value]
             self.new_csv_row["mac"] = [self.mac ]
+            res = True
         return res
+
+    def new_csv_cfg_row_id(self):
+        if self.new_csv_cfg_row is None:
+            self.new_csv_cfg_row = self.csv_cfg_row.copy()
+            for x in self.new_csv_cfg_row.keys():
+                self.new_csv_cfg_row[x] = np.nan
+
+    def set_csv_cfg_row_id(self, id, value):
+        self.new_csv_cfg_row_id()
+        res=False
+        if id in self.new_csv_cfg_row.keys():
+            self.new_csv_cfg_row[id] = [value]
+            self.new_csv_cfg_row["mac"] = [self.mac ]
+            res = True
+        return res
+
 
 class boldscanner:
 
@@ -627,7 +683,7 @@ class boldscanner:
     def device_found(self,device: BLEDevice, advertisement_data: AdvertisementData):
         print(device.name,device.address)
 
-    async def scan_tags(self):
+    async def scan_tags(self,connect=False, max_retry=1):
         try:
             new_tags=[]
             existing_tags=[]
@@ -637,57 +693,71 @@ class boldscanner:
                 # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
                 if device.name is not None:
                     if device.name.startswith("BoldTag")  :
-                        if self.tags.find_tag(device.address)==-1:
-                            self.tags.new(device=device)
+                        ix=self.tags.find_tag(device.address)
+                        if ix==-1:
+                            await self.tags.new(connect=connect, device=device,max_retry=max_retry)
                             new_tags.append(device.address)
                             print("BoldTag {} Added ".format(device.address))
                         else:
+                            self.tags.set_current(ix)
+                            await self.tags.connect(max_retry=max_retry)
                             existing_tags.append(device.address)
+
         except Exception as e:
             print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
 
+    def totaltags(self):
+        return self.tags.limit
+    async def disconnect_all(self):
+        while self.tags.limit>0:
+            try:
+                await self.tags.l.dicconnect_and_remove(0)
+            except Exception as e :
+                print(e)
+
+
 async def main():
     """Scan for devices."""
 
-    bscanner=boldscanner()
-
     nmax=0
     ntags=0
-    while  nmax < 3:
-        await bscanner.scan_tags()
-        ntags=bscanner.tags.limit
-        nmax=nmax+1
-    nmax = 0
-    rest=False
-    while not rest and nmax<3:
-        nmax=nmax+1
-        for i in range(bscanner.tags.limit):
-            bscanner.tags.set_current(i)
-            res=await bscanner.tags.connect(max_retry=1)
-            if not res:
-                rest=False
 
+    bscanner=boldscanner()
+    await bscanner.scan_tags(connect=True)
+    await bscanner.scan_tags(connect=True)
+
+    # for x in bscanner.tags:
+    #     print(x)
+
+    res=None
     for i in range(bscanner.tags.limit):
         bscanner.tags.set_current(i)
         if bscanner.tags.connected:
-            res_tag=await bscanner.tags.tag_functions(action="READ",uuid_filter_id=None,uuid_data_type_filter="base")
-            print(res_tag)
-            res_tag = await bscanner.tags.tag_functions(action="READ", uuid_filter_id="status_code",uuid_data_type_filter=None)
-            print(res_tag)
-            bscanner.tags.gatewaydb.set_csv_row_id(id="asset_id", value="pepe")
-            dfupdate =bscanner.tags.gatewaydb.dfupdate()
-            res_tag = await bscanner.tags.tag_functions(action="UPDATE",uuid_data_type_filter=None,dfupdate=dfupdate)
+            # res_tag=await bscanner.tags.tag_functions(action="READ",uuid_filter_id="detail",uuid_data_type_filter="base")
+            # print(res_tag)
+            # res_tag = await bscanner.tags.tag_functions(action="READ", uuid_filter_id="status_code",uuid_data_type_filter=None)
+            # print(res_tag)
+            # res_tag = await bscanner.tags.tag_functions(action="READ", uuid_filter_id="enable_cte",uuid_data_type_filter=None)
+            # print(res_tag)
+            # bscanner.tags.gatewaydb.new_csv_row_id(id="asset_id", value="pepe")
+            # dfupdate =bscanner.tags.gatewaydb.dfupdate()
+            # res_tag = await bscanner.tags.tag_functions(action="UPDATE",uuid_data_type_filter=None,dfupdate=dfupdate)
+            # print(res_tag)
+            bscanner.tags.gatewaydb.set_csv_cfg_row_id(id="enable_cte", value=1)
+            # bscanner.tags.gatewaydb.set_csv_row_id(id="asset_id", value=np.nan)
+            dfupdate_cfg =bscanner.tags.gatewaydb.dfupdate_cfg()
+            res_tag = await bscanner.tags.tag_functions(action="UPDATE",uuid_data_type_filter="configuration",dfupdate=dfupdate_cfg)
             print(res_tag)
             res_tag = await bscanner.tags.tag_functions(action="LOCATION", uuid_data_type_filter=None)
             print(res_tag)
 
         print(res)
+    await bscanner.disconnect_all()
 
     print(res)
 
 
-
-
-asyncio.run(main())
-print('ff')
+if __name__ == "__main__":
+    asyncio.run(main())
+    print('ff')
