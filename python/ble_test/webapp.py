@@ -194,7 +194,31 @@ def canceloperation():
         webcancel = True
 
     #return render_template("editable_table.html")
-    return redirect(url_for('page_configuration'))
+    return redirect(url_for(page_selected))#'page_configuration'))
+
+@app.route("/datatype_dropdown", methods=["POST"])
+def datatype_dropdown():
+    global page_datatype
+    data = request.get_json()
+    page_datatype = data.get("selected_value")
+
+    # Process the selected value and prepare a response
+    response_message = f"You selected: {page_datatype}"
+
+    # Return a JSON response to the frontend
+
+    if (page_datatype=="Base Data"):
+        # page_configuration()
+        return page_configuration()
+    elif (page_datatype == "Detail Data"):
+        # page_configuration_detail()
+        return page_configuration_detail()
+    elif (page_datatype == "Configuration Data"):
+        # page_configuration_configuration()
+        return page_configuration_configuration()
+
+    # return jsonify({"message": response_message})
+
 
 @app.route('/api/data')
 def data_api():
@@ -458,10 +482,62 @@ def checkbox_state():
 
 @app.route('/page_configuration')
 def page_configuration():
-    return render_template('page_configuration.html')
+    global columnIds
+    global columnIds_location
+    global cloud_csv_row
+    global cloud_columnIds
+    global localpath
+    global page_selected
+    global page_datatype_selected
+    page_datatype_selected="page_configuration"
+    columnIds=columnIds_base
+    columnIds_location=columnIds_location_base
+    cloud_csv_row=cloud_csv_row_base
+    cloud_columnIds=cloud_columnIds_base
+    localpath=localpath_base
+    page_selected="page_configuration"
+    readscanfile()
+    return render_template("page_configuration.html")
 
+@app.route('/page_configuration_detail')
+def page_configuration_detail():
+    global columnIds
+    global columnIds_location
+    global cloud_csv_row
+    global cloud_columnIds
+    global localpath
+    global page_selected
+    global page_datatype_selected
+    page_datatype_selected="page_configuration_detail"
 
+    columnIds=columnIds_detail
+    columnIds_location=columnIds_location_detail
+    cloud_csv_row=cloud_csv_row_detail
+    cloud_columnIds=cloud_columnIds_detail
+    localpath=localpath_detail
+    page_selected="page_configuration_detail"
+    readscanfile()
+    return render_template("page_configuration_detail.html")
 
+@app.route('/page_configuration_configuration')
+def page_configuration_configuration():
+    global columnIds
+    global columnIds_location
+    global cloud_csv_row
+    global cloud_columnIds
+    global localpath
+    global page_selected
+    global page_datatype_selected
+    page_datatype_selected="page_configuration_configuration"
+
+    columnIds=columnIds_configuration
+    columnIds_location=columnIds_location_configuration
+    cloud_csv_row=cloud_csv_row_configuration
+    cloud_columnIds=cloud_columnIds_configuration
+    localpath=localpath_configuration
+    page_selected="page_configuration_configuration"
+    readscanfile()
+    return render_template("page_configuration_configuration.html")
 
 
 @app.route('/page_data_anchors')
@@ -608,7 +684,7 @@ def buttons_new():
 def buttons():
     print(request.method)
     interphase = request.referrer[len(request.host_url):]
-    return buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),'page_configuration' )
+    return buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),page_selected )
 
 def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location,return_page):
     global status
@@ -721,8 +797,8 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
         print(e)
         print("error at buttons")
     semaphore=False
-    if return_page=='page_configuration':
-        return redirect(url_for('page_configuration'))
+    if return_page==page_selected:
+        return redirect(url_for(page_selected))
     else:
         return redirect(url_for('editable_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
 
@@ -925,13 +1001,38 @@ semaphore=False
 dfilter_back=None
 status="Enabled"
 operation="None"
+
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
+
+page_selected="page_configuration"
+
+#initialized by poc_server.py with global directory
 localpath=""    #initialized by poc_server.py with global directory
 columnIds = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
 columnIds_location = ['tag_mac', 'out_prob']
+
+localpath_base=""    #initialized by poc_server.py with global directory
+columnIds_base = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+cloud_columnIds_base=None
+cloud_csv_row_base=None
+columnIds_location_base = ['tag_mac', 'out_prob']
+
+localpath_detail=""    #initialized by poc_server.py with global directory
+columnIds_detail = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+cloud_columnIds_detail=None
+cloud_csv_row_detail=None
+columnIds_location_detail = ['tag_mac', 'out_prob']
+
+localpath_configuration=""    #initialized by poc_server.py with global directory
+columnIds_configuration = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+cloud_columnIds_configuration=None
+cloud_csv_row_configuration=None
+columnIds_location_configuration = ['tag_mac', 'out_prob']
+
+
 
 admin_username='Admin'
 admin_password='1234'
@@ -959,41 +1060,3 @@ if __name__ == '__main__':
         print("Flask app is running in a separate thread")
         time.sleep(1)
         checkstatus()
-        # last_update_ok = True
-        # no_update = False
-        # scan_ready = False
-        # location_ready = False
-        # last_update_ok=False
-        #
-        # file_path = localpath + "scan_update.csv"
-        # if not os.path.exists(file_path):
-        #     no_update=True
-        # file_path = localpath + "scan_update_error.csv"
-        # if not os.path.exists(file_path):
-        #     last_update_ok = True
-        # file_path = localpath + "scan.csv"
-        # if os.path.exists(file_path):
-        #     scan_ready=True
-        # file_path = localpath + "scan_location.csv"
-        # if os.path.exists(file_path):
-        #     location_ready=True
-        # print("semaphore {}".format(semaphore))
-        # if scan_ready and no_update and location_ready:
-        #     if not semaphore and status == "Disabled":
-        #         status = "Enabled"
-        #         updatedix=[]
-        # else:
-        #     if not scan_ready:
-        #         if not semaphore and status == "Enabled":
-        #             status = "Disabled"
-        #             operation="Scan"
-        #     else:
-        #         if not no_update:
-        #             if not semaphore and status == "Enabled":
-        #                 status = "Disabled"
-        #                 operation="Update"
-        #         else:
-        #             if not location_ready:
-        #                 if not semaphore and status == "Enabled":
-        #                     status = "Disabled"
-        #                     operation="Location"

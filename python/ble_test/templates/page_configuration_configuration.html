@@ -33,7 +33,7 @@
      </form>
       <script>
       // Set the selected value by using the value attribute
-      document.getElementById("DataType").selectedIndex = 0;
+      document.getElementById("DataType").selectedIndex = 2;
     </script>
 
     <script>
@@ -163,14 +163,16 @@
           { id: 'mac', name: 'mac' , sort: true},
           { id: 'status', name: 'status' , sort: true},
           { id: 'name', name: 'name' , sort: false},
-          { id: 'tag_id', name: 'tag_id', sort: true ,  'attributes': editableCellAttributes},
-          { id: 'asset_id', name: 'asset_id',  'attributes': editableCellAttributes, sort: true },
-          { id: 'certificate_id', name: 'certificate_id',  'attributes': editableCellAttributes, sort: false },
-          { id: 'type', name: 'type',  'attributes': editableCellAttributes, sort: true },
-          { id: 'expiration_date', name: 'expiration_date',  'attributes': editableCellAttributes, sort: false },
-          { id: 'color', name: 'color',  'attributes': editableCellAttributes, sort: true },
-          { id: 'series', name: 'series',  'attributes': editableCellAttributes, sort: true },
-          { id: 'asset_images_file_extension', name: 'asset_images_file_extension',  'attributes': editableCellAttributes, sort: true },
+          { id: 'enable_cte', name: 'enable_cte', sort: true ,  'attributes': editableCellAttributes},
+          { id: 'tag_enabled', name: 'tag_enabled',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'tag_advertisement_period', name: 'tag_advertisement_period',  'attributes': editableCellAttributes, sort: false ,  'attributes': editableCellAttributes},
+          { id: 'ble_on_period', name: 'ble_on_period',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'ble_on_wakeup_period', name: 'ble_on_wakeup_period',  'attributes': editableCellAttributes, sort: false ,  'attributes': editableCellAttributes},
+          { id: 'ble_off_period', name: 'ble_off_period',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'tag_periodic_scan', name: 'tag_periodic_scan',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'altitude', name: 'altitude',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'moved', name: 'moved',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'battery_voltage', name: 'battery_voltage',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,
             formatter: (cell, row) => {
               return gridjs.html(`<input type="checkbox" class="checkbox_read_nfc" data-id="${row.cells[1].data}" />`);

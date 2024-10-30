@@ -82,7 +82,7 @@ class boldtag:
                      'type': "UTF-8", "length": 50, "data_type": "detail"}
     char_uuid[27] = {"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "", "scan": True,
                      'type': "UTF-8", "length": 50, "data_type": "detail"}
-    char_uuid[28] = {"id": "mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": True,
+    char_uuid[28] = {"id": "mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": False,
                      'type': "UTF-8", "length": 20, "data_type": "configuration"}
     char_uuid[29] = {"id": "enable_cte", "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "", "scan": True,
                      'type': "HEX", "length": 1, "data_type": "configuration"}
@@ -123,6 +123,8 @@ class boldtag:
 
         self.gatewaydb = gatewaydb()
         self.csv_row = self.gatewaydb.csv_row
+        self.csv_cfg_row = self.gatewaydb.csv_cfg_row
+        self.csv_det_row = self.gatewaydb.csv_det_row
 
     def __iter__(self):
         self._index=0
@@ -271,7 +273,15 @@ class boldtag:
 
 
         address=device.address
-        csv_row_new = self.csv_row.copy()
+        if uuid_data_type_filter=='base':
+            csv_row_new = self.csv_row.copy()
+        elif uuid_data_type_filter=='detail':
+            csv_row_new = self.csv_det_row.copy()
+        elif uuid_data_type_filter=='configuration':
+            csv_row_new = self.csv_cfg_row.copy()
+        else:
+            csv_row_new = self.csv_row.copy()
+
         csv_row_new["mac"] = address
         csv_row_new["name"] = device.name
 
@@ -301,7 +311,8 @@ class boldtag:
                     connected = client.is_connected
                     if not connected:
                         try:
-                            client.connect()
+                            await client.connect()
+                            connected = client.is_connected
                         except Exception as e:
                             print(e)
                 else:
@@ -597,18 +608,22 @@ class gatewaydb:
 
     csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                    "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"",
-                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":""}
+                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","status":"","x":"","y":""}
 
+    csv_det_row = {"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
+                     "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
+                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
 
     def __init__(self):
         self.new_csv_row=None
         self.new_csv_cfg_row=None
+        self.new_csv_det_row = None
         self.mac=None
 
     def set_mac(self,mac):
         self.mac=mac
 
-    def dfupdate(self,asdf=True):
+    def dfupdate(self,asdf=True, datatype='base'):
         if asdf:
             res=pd.DataFrame.from_dict(self.new_csv_row)
         else:
@@ -620,6 +635,13 @@ class gatewaydb:
             res=pd.DataFrame.from_dict(self.new_csv_cfg_row)
         else:
             res=self.new_csv_cfg_row
+        return  res
+
+    def dfupdate_det(self, asdf=True):
+        if asdf:
+            res=pd.DataFrame.from_dict(self.new_csv_det_row)
+        else:
+            res=self.new_csv_det_row
         return  res
 
     def new_csv_row_id(self):
@@ -652,6 +674,20 @@ class gatewaydb:
             res = True
         return res
 
+    def new_csv_det_row_id(self):
+        if self.new_csv_det_row is None:
+            self.new_csv_det_row = self.csv_det_row.copy()
+            for x in self.new_csv_det_row.keys():
+                self.new_csv_det_row[x] = np.nan
+
+    def set_csv_det_row_id(self, id, value):
+        self.new_csv_det_row_id()
+        res=False
+        if id in self.new_csv_det_row.keys():
+            self.new_csv_det_row[id] = [value]
+            self.new_csv_det_row["mac"] = [self.mac ]
+            res = True
+        return res
 
 class boldscanner:
 

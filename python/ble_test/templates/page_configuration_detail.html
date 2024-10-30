@@ -33,9 +33,8 @@
      </form>
       <script>
       // Set the selected value by using the value attribute
-      document.getElementById("DataType").selectedIndex = 0;
+      document.getElementById("DataType").selectedIndex = 1;
     </script>
-
     <script>
         // JavaScript function to handle dropdown changes
         function submitDataType() {
@@ -162,15 +161,24 @@
           },
           { id: 'mac', name: 'mac' , sort: true},
           { id: 'status', name: 'status' , sort: true},
-          { id: 'name', name: 'name' , sort: false},
-          { id: 'tag_id', name: 'tag_id', sort: true ,  'attributes': editableCellAttributes},
-          { id: 'asset_id', name: 'asset_id',  'attributes': editableCellAttributes, sort: true },
-          { id: 'certificate_id', name: 'certificate_id',  'attributes': editableCellAttributes, sort: false },
-          { id: 'type', name: 'type',  'attributes': editableCellAttributes, sort: true },
-          { id: 'expiration_date', name: 'expiration_date',  'attributes': editableCellAttributes, sort: false },
-          { id: 'color', name: 'color',  'attributes': editableCellAttributes, sort: true },
-          { id: 'series', name: 'series',  'attributes': editableCellAttributes, sort: true },
-          { id: 'asset_images_file_extension', name: 'asset_images_file_extension',  'attributes': editableCellAttributes, sort: true },
+          { id: 'certification_company_name', name: 'certification_company_name' , sort: false,'attributes': editableCellAttributes},
+          { id: 'certification_company_id', name: 'certification_company_id', sort: true ,  'attributes': editableCellAttributes},
+          { id: 'certification_place', name: 'certification_place',  'attributes': editableCellAttributes, sort: true ,'attributes': editableCellAttributes},
+          { id: 'certification_date', name: 'certification_date',  'attributes': editableCellAttributes, sort: false ,'attributes': editableCellAttributes},
+          { id: 'test_type', name: 'test_type',  'attributes': editableCellAttributes, sort: true ,'attributes': editableCellAttributes},
+          { id: 'asset_diameter', name: 'asset_diameter',  'attributes': editableCellAttributes, sort: false,'attributes': editableCellAttributes },
+          { id: 'batch_id', name: 'batch_id',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'batch_date', name: 'batch_date',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'machine_id', name: 'machine_id',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'ble_data_crc', name: 'ble_data_crc',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'asset_images_crc', name: 'asset_images_crc',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'logo_images_crc', name: 'logo_images_crc',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'signature_images_crc', name: 'signature_images_crc',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'owner_company_name', name: 'owner_company_name',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'owner_data', name: 'owner_data',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'altitude', name: 'altitude',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'moved', name: 'moved',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'battery_voltage', name: 'battery_voltage',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,
             formatter: (cell, row) => {
               return gridjs.html(`<input type="checkbox" class="checkbox_read_nfc" data-id="${row.cells[1].data}" />`);

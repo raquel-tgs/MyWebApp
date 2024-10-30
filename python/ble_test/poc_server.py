@@ -68,6 +68,7 @@ rssi_host_scan={}
 scanstarted=False
 devices_processed=[]
 directory = "c:/tgspoc"
+app_localpath=directory+'/'
 
 use_MQTT=False      #Set to True to start MQTT client
 
@@ -88,6 +89,7 @@ CTE_Wait_Time_prescan=55            # >5 if : Only necessary of server is not al
 actions_filter=["READ","LOCATION","UPDATE"]
 discover_rssi=True
 scan_mac_filter=[]#["0C4314F46DA1"]
+page_configuration="page_configuration"
 update_mac_filter=[]
 location_filter=True
 MaxScan=3
@@ -233,18 +235,20 @@ csv_row={"mac":"","name":"","tag_id":"","asset_id":"","certificate_id":"","type"
 scan_columnIds=["mac","name","tag_id","asset_id","certificate_id","type","expiration_date","color","series","read_nfc","status","status_code","asset_images_file_extension","x","y"]
 csv_extended_row={"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
          "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-         "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","status":""}
+         "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
 scan_extended_columnIds=["mac","certification_company_name",
                 "certification_company_id","certification_place","certification_date","test_type","asset_diameter","batch_id","batch_date",
                 "machine_id","status_code","ble_data_crc","asset_images_crc","logo_images_crc","signature_images_crc","owner_company_name",
-                "owner_data","altitude","moved","battery_voltage","status"]
-csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"","ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":""}
-scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status"]
+                "owner_data","altitude","moved","battery_voltage","status","x","y"]
+csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
+                "ble_on_period":"","ble_on_wakeup_period":"",
+                "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
+scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period",
+                       "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status","x","y"]
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","asset_comment":"","ndir_id":"","is_machine":""}
 cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","asset_comment","ndir_id","is_machine"]
 #-------------------------------------------------------------------------------
-
 
 def is_batch_file_running(batch_file_name):
     for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
@@ -1143,7 +1147,8 @@ async def main():
     global startCTE_address_filter
     global val_outliers
     global directo
-
+    global app_page_configuration
+    global app_localpath
 
     app.anchors_init = anchors_init
     app.readscanfile()
@@ -1214,6 +1219,10 @@ async def main():
         #             print(e)
 
         app.checkstatus()
+        app_page_configuration=app.page_configuration
+        app_localpath=app.localpath
+        directory=app_localpath[:-1]
+
 
         mqttsrv_status=True
         for ix in srv_antenna_anchor.keys():
@@ -1332,6 +1341,13 @@ async def main():
         time_process=time.time()
         if app.webcancel and not doscan:
             webcancelprocess = True
+
+        if app.page_selected == "page_configuration_detail":
+            uuid_data_type_filter = "detail"
+        elif app.page_selected == "page_configuration_configuration":
+            uuid_data_type_filter = "configuration"
+        else:
+            uuid_data_type_filter = "base"
 
         if doscan:
             read_nfc_done = False
@@ -1480,7 +1496,8 @@ async def main():
                                                 ix = bscanner.tags.find_tag(address)
                                                 if (ix>=0):
                                                     bscanner.tags.set_current(ix)
-                                                    res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,uuid_data_type_filter='base',
+                                                    res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,
+                                                                                uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
                                                                                 keep_connected=True,csv_read_data=csv_read_data)
                                                     ressult = res["result"]
@@ -1784,6 +1801,23 @@ app.columnIds=scan_columnIds
 app.cloud_columnIds = cloud_scan_columnIds
 app.cloud_csv_row=cloud_csv_row
 app.localpath=directory+"/"
+
+app.columnIds_base=scan_columnIds
+app.cloud_columnIds_base = cloud_scan_columnIds
+app.cloud_csv_row_base=cloud_csv_row
+app.localpath_base=directory+"/"
+
+app.columnIds_detail=csv_extended_row
+app.cloud_columnIds_detail = cloud_scan_columnIds
+app.cloud_csv_row_detail=cloud_csv_row
+app.localpath_detail=directory+"/detail/"
+
+app.columnIds_configuration=csv_config_row
+app.cloud_columnIds_configuration = cloud_scan_columnIds
+app.cloud_csv_row_configuration=cloud_csv_row
+app.localpath_configuration=directory+"/configuration/"
+
+
 
 #Run
 asyncio.run(main())
