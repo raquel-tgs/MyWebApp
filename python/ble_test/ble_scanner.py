@@ -219,25 +219,27 @@ async def main():
                 if d.name.startswith("BoldTag")  :
                     address=d.address
                     #print(d.name, address)
-                    scannaddress.append({"address": address, "client": None, "connected": True,"device":d})
-                    ix=len(scannaddress)-1
-                    if connect:
-                        conn = False
-                        ncount = 0
-                        while not conn and ncount < 3:
-                            ncount=ncount+1
-                            try:
-                                    client= BleakClient(address)
-                                    scannaddress[ix]["client"]=client
-                                    scannaddress[ix]["connected"]=True
-                                    conn=True
-                            except Exception as e:
-                                print(e)
-                                scannaddress[ix]["connected"]=False
-                    #print(scannaddress[ix])
-                    char_uuid_enable_cte="c92c584f-7b9e-473a-ad4e-d9965e0cd678"
-                    char_uuid_update_nfc="1b9bba4d-34c0-4542-8d94-0da1036bd64f"
-                    char_uuid_tag_enabled="886eb62a-2c17-4e8e-9579-1c5483973577"
+
+                    if False:
+                        scannaddress.append({"address": address, "client": None, "connected": True,"device":d})
+                        ix=len(scannaddress)-1
+                        if connect:
+                            conn = False
+                            ncount = 0
+                            while not conn and ncount < 3:
+                                ncount=ncount+1
+                                try:
+                                        client= BleakClient(address)
+                                        scannaddress[ix]["client"]=client
+                                        scannaddress[ix]["connected"]=True
+                                        conn=True
+                                except Exception as e:
+                                    print(e)
+                                    scannaddress[ix]["connected"]=False
+                        #print(scannaddress[ix])
+                        char_uuid_enable_cte="c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                        char_uuid_update_nfc="1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+                        char_uuid_tag_enabled="886eb62a-2c17-4e8e-9579-1c5483973577"
 
 
         if len(scannaddress)>0:

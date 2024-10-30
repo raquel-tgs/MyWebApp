@@ -163,7 +163,7 @@ class boldtag:
             self.items[self.index]=self.current
     def set_current(self, index):
         self.update_current()
-        if index!=self.index:
+        if index!=self.index and index>=0 and index<self.limit :
             self.index=index
             self.current = self.items[self.index]
             self.device=self.current.device
@@ -172,26 +172,18 @@ class boldtag:
             self.name = self.current.name
             self.client=self.current.client
             self.custom_service=self.current.custom_service
+            self.gatewaydb.set_mac(self.address)
 
     def get_current(self):
         return self.current
 
 
     async def new(self, device, connect=False, max_retry=3):
-        self.device=device
-        self.address=device.address
-        self.connected=False
-        self.max_retry=max_retry
-        self.client=None
-        self.custom_service=None
-        self.gatewaydb.set_mac(self.address)
-        self.name=device.name
-        item=tag(client=self.client, connected=self.connected, device=self.device, address=self.address,custom_service=self.custom_service, index=self.limit, name=self.name)
-        self.items.append(item)
+        #add new data
         self.limit = self.limit + 1
-        self.index=self.limit-1
-        self.update_current()
-        self.current=item
+        item=tag(client=None, connected=False, device=device, address=device.address,custom_service=None, index=self.index, name=device.name)
+        self.items.append(item)
+        self.set_current(self.limit-1)
         if connect:
             await self.connect(max_retry=max_retry)
 
@@ -240,14 +232,17 @@ class boldtag:
                 self.index=0
 
     def find_tag(self, address, set_current=True):
-        index=[x for x in range(len(self.items)) if self.items[x]["address"]==address]
-        if len(index)>0:
-            index=index[0]
-            if set_current:
-                self.set_current(index)
-            return index
-        else:
-            return -1
+        try:
+            res=-1
+            index=[x for x in range(len(self.items)) if self.items[x].address==address]
+            if len(index)>0:
+                index=index[0]
+                if set_current:
+                    self.set_current(index)
+                res= index
+        except Exception as e:
+            print(e)
+        return res
 
     def tag_command_update(self,uuid_id, new_value=None):
         res=None
@@ -267,14 +262,14 @@ class boldtag:
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
                             init_location=False,
-                            dfupdate=None, keep_connected=True):
+                            dfupdate=None, keep_connected=True,csv_read_data=[]):
         client = self.client
         device = self.device
         service=self.custom_service
 
         app = self.webapp
 
-        csv_read_data=[]
+
         address=device.address
         csv_row_new = self.csv_row.copy()
         csv_row_new["mac"] = address
@@ -692,17 +687,21 @@ class boldscanner:
             for device in devices:
                 # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
                 if device.name is not None:
-                    if device.name.startswith("BoldTag")  :
-                        ix=self.tags.find_tag(device.address)
-                        if ix==-1:
-                            await self.tags.new(connect=connect, device=device,max_retry=max_retry)
-                            new_tags.append(device.address)
-                            print("BoldTag {} Added ".format(device.address))
-                        else:
-                            self.tags.set_current(ix)
-                            await self.tags.connect(max_retry=max_retry)
-                            existing_tags.append(device.address)
-
+                    try:
+                        if device.name.startswith("BoldTag")  :
+                            if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
+                            ix=self.tags.find_tag(device.address)
+                            if ix==-1:
+                                await self.tags.new(connect=connect, device=device,max_retry=max_retry)
+                                new_tags.append(device.address)
+                                print("BoldTag {} Added ".format(device.address))
+                                if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
+                            else:
+                                self.tags.set_current(ix)
+                                await self.tags.connect(max_retry=max_retry)
+                                existing_tags.append(device.address)
+                    except Exception as e:
+                        print(e)
         except Exception as e:
             print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}

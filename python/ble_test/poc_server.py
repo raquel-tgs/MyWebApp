@@ -1294,6 +1294,7 @@ async def main():
             file_path_update_error= directory+"/scan_update_error.csv"
             dfupdate=None
             # Check if the file exists
+            update_mac_filter=[]
             if os.path.exists(file_path_update):
                 try:
                     # Read the CSV file using the built-in csv module
@@ -1375,6 +1376,7 @@ async def main():
                 app.print_statuslog("Scan %d" % nscan)
 
                 totaldevices_general =bscanner.tags.limit # sum([0 if d.name is None else 1 if d.name.startswith("BoldTag") else 0 for d in devices])
+                app.print_statuslog("Total devices founded and connected: {}".format(totaldevices_general))
                 dev=0
 
 
@@ -1388,10 +1390,11 @@ async def main():
                 devices_filtered=[]
                 if len(devices_filter) > 0:
                     # devices_filtered = [x for x in [x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                    devices_filtered = [x for x in[x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
+                   #devices_filtered = [x for x in[x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
+                    devices_filtered = [x for x in bscanner.tags.items if x.connected and x.address in devices_filter_mac]
                 else:
                     # devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                    devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
+                    devices_filtered = [x for x in bscanner.tags.items if x.connected] #[x for x in [x if ((x.name == "BoldTag")) else "" for x in bscanner.tags] if x != "" and x.connected]
                 totaldevices = len(devices_filtered)
                 for d in devices_filtered:
                     # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
@@ -1474,14 +1477,17 @@ async def main():
                                             try:
                                                 scannaddress.append(d.address)
                                                 devprocessed.append(address)
-
-                                                res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,uuid_data_type_filter='base',
-                                                                            init_location=init_location,dfupdate=dfupdate,keep_connected=True)
-                                                ressult = res["result"]
-                                                dfupdate_read = res["dfupdate_read"]
-                                                csv_read_data = res["csv_read_data"]
-                                                recupdate = res["recupdate"]
-                                                devices_processed_location = res["devices_processed_location"]
+                                                ix = bscanner.tags.find_tag(address)
+                                                if (ix>=0):
+                                                    bscanner.tags.set_current(ix)
+                                                    res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,uuid_data_type_filter='base',
+                                                                                init_location=init_location,dfupdate=dfupdate,
+                                                                                keep_connected=True,csv_read_data=csv_read_data)
+                                                    ressult = res["result"]
+                                                    dfupdate_read = res["dfupdate_read"]
+                                                    csv_read_data = res["csv_read_data"]
+                                                    recupdate = res["recupdate"]
+                                                    devices_processed_location = res["devices_processed_location"]
 
 
                                             except Exception as e:
@@ -1495,9 +1501,9 @@ async def main():
                     else:
                         print("..")
                         #pass
-                print("Loop {0} devices_filtered={1}".format(nscan, devices_filtered))
+                print("Loop {0} devices_filtered={1}".format(nscan, [x.address for x in devices_filtered]))
                 print("Next Loop {0} devcount={1}".format(nscan, devcount))
-                app.print_statuslog("Next Loop {0} devices_filtered={1}".format(nscan, devices_filtered))
+                app.print_statuslog("Next Loop {0} devices_filtered={1}".format(nscan, [x.address for x in devices_filtered]))
                 app.print_statuslog("Next Loop {0} devcount={1}".format(nscan, devcount))
                 scannaddress_trim=[x.replace(":", "") for x in scannaddress]
                 if app.webcancel:
