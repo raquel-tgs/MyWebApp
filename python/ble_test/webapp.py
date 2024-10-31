@@ -509,6 +509,7 @@ def page_configuration():
     global localpath
     global page_selected
     global page_datatype_selected
+
     page_datatype_selected="page_configuration"
     columnIds=columnIds_base
     columnIds_location=columnIds_location_base
@@ -516,6 +517,8 @@ def page_configuration():
     cloud_columnIds=cloud_columnIds_base
     localpath=localpath_base
     page_selected="page_configuration"
+    sync_init()
+
     readscanfile()
     return render_template("page_configuration.html")
 
@@ -528,6 +531,7 @@ def page_configuration_detail():
     global localpath
     global page_selected
     global page_datatype_selected
+
     page_datatype_selected="page_configuration_detail"
 
     columnIds=columnIds_detail
@@ -536,11 +540,15 @@ def page_configuration_detail():
     cloud_columnIds=cloud_columnIds_detail
     localpath=localpath_detail
     page_selected="page_configuration_detail"
+    sync_init()
+
     readscanfile()
     return render_template("page_configuration_detail.html")
 
 @app.route('/page_configuration_configuration')
 def page_configuration_configuration():
+
+
     global columnIds
     global columnIds_location
     global cloud_csv_row
@@ -556,6 +564,8 @@ def page_configuration_configuration():
     cloud_columnIds=cloud_columnIds_configuration
     localpath=localpath_configuration
     page_selected="page_configuration_configuration"
+    sync_init()
+
     readscanfile()
     return render_template("page_configuration_configuration.html")
 
@@ -822,6 +832,78 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     else:
         return redirect(url_for('editable_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
 
+def sync_init():
+    global start_init
+
+    if start_init is None:
+        start_init = {localpath: False}
+
+    if localpath in start_init.keys():
+        status=start_init[localpath]
+    else:
+        start_init = {localpath: False}
+        status=False
+
+    if not status:
+        start_init[localpath]=True
+        try:
+            file_path=localpath+"scan.csv"
+            file_path_copy = localpath + "scan_copylastscan.csv"
+            if not os.path.exists(file_path):
+                print(f"File '{file_path}' does not exist.")
+                try:
+                    if os.path.exists(file_path_copy):
+                        try:
+                            # Copy file and metadata, and overwrite if it already exists
+                            shutil.copy(file_path_copy,file_path)
+                            print(f"File copied successfully from {file_path_copy} to {file_path}")
+                        except Exception as e:
+                            print(f"Error occurred: {e}")
+                    else:
+                        print(f"File '{file_path}' empty.")
+                        data = pd.DataFrame(columns=columnIds)
+                        cloud = pd.DataFrame(columns=cloud_columnIds)
+                        data.to_csv(file_path)
+                        data.to_csv(file_path_copy)
+                        cloud.to_csv(localpath + "cloud.csv")
+                except Exception as e:
+                    print(f"An error occurred while creating file: {e}")
+                    # return False
+            try:
+                file_path=localpath + "scan_update.csv"
+                if os.path.exists(file_path_copy):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"An error occurred while deleting the file: {e}")
+                # return False
+
+            try:
+                file_path=localpath+"scan_location.csv"
+                file_path_copy = localpath + "scan_location_copylastlocation.csv"
+                if not os.path.exists(file_path):
+                    print(f"File '{file_path}' does not exist.")
+                    if os.path.exists(file_path_copy):
+                        try:
+                            # Copy file and metadata, and overwrite if it already exists
+                            shutil.copy(file_path_copy,file_path)
+                            print(f"File copied successfully from {file_path_copy} to {file_path}")
+                        except Exception as e:
+                            print(f"Error occurred: {e}")
+                    else:
+                        print(f"File '{file_path}' empty.")
+                        data = pd.DataFrame(columns=location_cvs_columnIds)
+                        data.to_csv(file_path)
+                        data.to_csv(file_path_copy)
+            except Exception as e:
+                print(f"An error occurred while creating the file: {e}")
+                # return False
+
+        except Exception as e:
+            print(e)
+            print("error at buttons")
+
+
+
 @app.route("/api/get_scan_data")
 def get_scan_data():
     global data
@@ -839,7 +921,12 @@ def download_image():
 
 
 def run_flask_app():
-    app.run(port=5000, threaded=True)
+    global app_host
+    global app_port
+    if app_host is None:
+        app.run(port=app_port, threaded=True)
+    else:
+        app.run(host=app_host, port=app_port, threaded=True)
 
 def checkstatus():
     global status
@@ -852,6 +939,7 @@ def checkstatus():
     global data_update
     global read_nfc_done
     global updatedix
+
 
     no_update = False
     scan_ready = False
@@ -1003,6 +1091,9 @@ global admin_username
 global admin_password
 # start_back=-1
 # length_back=-1
+app_host="0.0.0.0" #"192.168.1.196"
+app_port=5000
+
 webcancel=False
 anchors_init=None
 data = None
@@ -1021,6 +1112,8 @@ semaphore=False
 dfilter_back=None
 status="Enabled"
 operation="None"
+
+start_init=None
 
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
@@ -1052,6 +1145,8 @@ cloud_columnIds_configuration=None
 cloud_csv_row_configuration=None
 columnIds_location_configuration = ['tag_mac', 'out_prob']
 
+location_cvs_columnIds=None
+location_cvs_row=None
 
 
 admin_username='Admin'

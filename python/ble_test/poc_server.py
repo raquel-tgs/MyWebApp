@@ -248,6 +248,11 @@ scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_adver
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","asset_comment":"","ndir_id":"","is_machine":""}
 cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","asset_comment","ndir_id","is_machine"]
+
+location_cvs_row={"tag_mac","out_prob","out_prob_k","anchors","result","x","y"}
+location_cvs_columnIds={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
+
+
 #-------------------------------------------------------------------------------
 
 def is_batch_file_running(batch_file_name):
@@ -1817,7 +1822,9 @@ app.cloud_columnIds_configuration = cloud_scan_columnIds
 app.cloud_csv_row_configuration=cloud_csv_row
 app.localpath_configuration=directory+"/configuration/"
 
-
+app.location_cvs_columnIds=location_cvs_columnIds
+app.location_cvs_row=location_cvs_row
+app.sync_init()
 
 #Run
 asyncio.run(main())
