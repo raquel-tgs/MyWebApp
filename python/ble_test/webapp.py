@@ -871,7 +871,7 @@ def sync_init():
                     # return False
             try:
                 file_path=localpath + "scan_update.csv"
-                if os.path.exists(file_path_copy):
+                if os.path.exists(file_path):
                     os.remove(file_path)
             except Exception as e:
                 print(f"An error occurred while deleting the file: {e}")
@@ -903,6 +903,53 @@ def sync_init():
             print("error at buttons")
 
 
+@app.route('/page_scan_parameters')
+def page_scan_parameters():
+    return render_template('page_scan_parameters.html')
+
+# New endpoint to provide initial configuration values
+@app.route('/get_initial_config', methods=['GET'])
+def get_initial_config():
+    # Mocked initial values for demonstration
+    global scan_parameters
+
+    initial_values = {
+        "keep_data": scan_parameters["keep_data"],
+        "scan_new_tags": scan_parameters["scan_new_tags"],
+        "enable_tags": scan_parameters["enable_tags"],
+        "maximum_retries": scan_parameters["maximum_retries"]
+    }
+    return jsonify(initial_values)
+
+
+@app.route('/save_config', methods=['POST'])
+def save_config():
+    global scan_parameters
+    data = request.get_json()
+    if not data:
+        return jsonify({"status": "error", "message": "No data provided"}), 400
+    else:
+        scan_parameters = data
+    # Process data here (print for demonstration)
+    print("Received data:", data)
+
+    # Send a success response
+    return jsonify({"status": "success", "message": "Configuration saved"}), 200
+
+@app.route('/spontaneous_list', methods=['POST'])
+def receive_list():
+    # Get JSON data from the request
+    data = request.get_json()
+
+    # Check if data is a list
+    if isinstance(data, list):
+        # Process the list (e.g., print or perform operations)
+        print("Received list:", data)
+        # Return a success response
+        return jsonify({"status": "success", "message": "List received"}), 200
+    else:
+        # Return an error if the data is not a list
+        return jsonify({"status": "error", "message": "Expected a list in JSON format"}), 400
 
 @app.route("/api/get_scan_data")
 def get_scan_data():
@@ -1148,6 +1195,7 @@ columnIds_location_configuration = ['tag_mac', 'out_prob']
 location_cvs_columnIds=None
 location_cvs_row=None
 
+scan_parameters={'enable_tags': False, 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
 
 admin_username='Admin'
 admin_password='1234'

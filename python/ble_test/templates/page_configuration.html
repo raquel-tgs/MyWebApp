@@ -14,13 +14,14 @@
      <div class="dropdown">
       <button class="dropbtn">Menu</button>
       <div class="dropdown-content">
-        <a  href="{{ url_for('page_configuration') }}">Configuration</a>
+        <a  href="{{ url_for('page_scan_parameters') }}" target="_blank">Parameters</a>
         <a  href="{{ url_for('page_data_angles') }}">Data angles</a>
         <a  href="{{ url_for('page_data_scan') }}">Data scan</a>
         <a  href="{{ url_for('page_data_location') }}">Data location</a>
         <a  href="{{ url_for('page_data_anchors') }}">Data anchors</a>
       </div>
     </div>
+
 
     <form method="post" action="/api/gateway" id="formGateway">
       <hr>

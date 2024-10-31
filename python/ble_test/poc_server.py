@@ -243,14 +243,14 @@ scan_extended_columnIds=["mac","certification_company_name",
 csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                 "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"",
                 "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
-scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac,"
+scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac",
                        "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status","x","y"]
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","asset_comment":"","ndir_id":"","is_machine":""}
 cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","asset_comment","ndir_id","is_machine"]
 
-location_cvs_row={"tag_mac","out_prob","out_prob_k","anchors","result","x","y"}
-location_cvs_columnIds={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
+location_cvs_row={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
+location_cvs_columnIds=["tag_mac","out_prob","out_prob_k","anchors","result","x","y"]
 
 
 #-------------------------------------------------------------------------------
@@ -1812,12 +1812,12 @@ app.cloud_columnIds_base = cloud_scan_columnIds
 app.cloud_csv_row_base=cloud_csv_row
 app.localpath_base=directory+"/"
 
-app.columnIds_detail=csv_extended_row
+app.columnIds_detail=scan_extended_columnIds
 app.cloud_columnIds_detail = cloud_scan_columnIds
 app.cloud_csv_row_detail=cloud_csv_row
 app.localpath_detail=directory+"/detail/"
 
-app.columnIds_configuration=csv_config_row
+app.columnIds_configuration=scan_config_columnIds
 app.cloud_columnIds_configuration = cloud_scan_columnIds
 app.cloud_csv_row_configuration=cloud_csv_row
 app.localpath_configuration=directory+"/configuration/"
