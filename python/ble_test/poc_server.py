@@ -180,7 +180,7 @@ char_uuid[24]={"id": "signature_images_crc", "uuid": "028f73b8-e36b-4cd9-b99b-51
 char_uuid[25]={"id": "owner_company_name", "uuid": "5b7ef22d-72a9-490c-bdba-1bd225531e6f", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail"}
 char_uuid[26]={"id": "owner_data", "uuid": "e46f56de-7341-4231-9f29-b8ae5e470a93", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail"}
 char_uuid[27]={"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail"}
-char_uuid[28]={"id": "mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"configuration"}
+char_uuid[28]={"id": "tag_mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"configuration"}
 
 char_uuid[29]={"id": "enable_cte" , "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration"}
 char_uuid[30]={"id": "tag_enabled" , "uuid": "886eb62a-2c17-4e8e-9579-1c5483973577", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration"}
@@ -241,9 +241,9 @@ scan_extended_columnIds=["mac","certification_company_name",
                 "machine_id","status_code","ble_data_crc","asset_images_crc","logo_images_crc","signature_images_crc","owner_company_name",
                 "owner_data","altitude","moved","battery_voltage","status","x","y"]
 csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
-                "ble_on_period":"","ble_on_wakeup_period":"",
+                "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"",
                 "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
-scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period",
+scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac,"
                        "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status","x","y"]
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","asset_comment":"","ndir_id":"","is_machine":""}

@@ -82,7 +82,7 @@ class boldtag:
                      'type': "UTF-8", "length": 50, "data_type": "detail"}
     char_uuid[27] = {"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "", "scan": True,
                      'type': "UTF-8", "length": 50, "data_type": "detail"}
-    char_uuid[28] = {"id": "mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": False,
+    char_uuid[28] = {"id": "tag_mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": True,
                      'type': "UTF-8", "length": 20, "data_type": "configuration"}
     char_uuid[29] = {"id": "enable_cte", "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "", "scan": True,
                      'type': "HEX", "length": 1, "data_type": "configuration"}
@@ -607,7 +607,7 @@ class gatewaydb:
                "asset_images_file_extension": "", "x": "", "y": ""}
 
     csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
-                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"",
+                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"",
                    "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","status":"","x":"","y":""}
 
     csv_det_row = {"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
