@@ -196,29 +196,49 @@ def canceloperation():
     #return render_template("editable_table.html")
     return redirect(url_for(page_selected))#'page_configuration'))
 
-@app.route("/datatype_dropdown", methods=["POST"])
+# @app.route("/datatype_dropdown", methods=["POST"])
+# def datatype_dropdown():
+#     global page_datatype
+#     data = request.get_json()
+#     page_datatype = data.get("selected_value")
+#
+#     # Process the selected value and prepare a response
+#     response_message = f"You selected: {page_datatype}"
+#
+#     # Return a JSON response to the frontend
+#
+#     if (page_datatype=="Base Data"):
+#         # page_configuration()
+#         return page_configuration()
+#     elif (page_datatype == "Detail Data"):
+#         # page_configuration_detail()
+#         return   page_configuration_detail()
+#     elif (page_datatype == "Configuration Data"):
+#         # page_configuration_configuration()
+#         return page_configuration_configuration()
+#
+#     # return jsonify({"message": response_message})
+
+@app.route("/datatype_dropdown/page_configuration")
 def datatype_dropdown():
     global page_datatype
-    data = request.get_json()
-    page_datatype = data.get("selected_value")
-
-    # Process the selected value and prepare a response
-    response_message = f"You selected: {page_datatype}"
-
+    #data = request.get_json()
     # Return a JSON response to the frontend
+    return render_template("page_configuration.html") #page_configuration()
 
-    if (page_datatype=="Base Data"):
-        # page_configuration()
-        return page_configuration()
-    elif (page_datatype == "Detail Data"):
-        # page_configuration_detail()
-        return page_configuration_detail()
-    elif (page_datatype == "Configuration Data"):
-        # page_configuration_configuration()
-        return page_configuration_configuration()
+@app.route("/datatype_dropdown/page_configuration_configuration")
+def datatype_dropdown_configuration():
+    global page_datatype
+    #data = request.get_json()
+    # Return a JSON response to the frontend
+    return page_configuration_configuration()
 
-    # return jsonify({"message": response_message})
-
+@app.route("/datatype_dropdown/page_configuration_detail")
+def datatype_dropdown_detail():
+    global page_datatype
+    #data = request.get_json()
+    # Return a JSON response to the frontend
+    return page_configuration_detail()
 
 @app.route('/api/data')
 def data_api():

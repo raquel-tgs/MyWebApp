@@ -26,36 +26,34 @@
       <hr>
       <label for="DataType">Choose Data Type:</label>
       <select name="gateway_selection" id="DataType" class="gateway" onchange="submitDataType()">
-        <option value="Base Data">Base Data</option>
-        <option value="Detail Data">Detail Data</option>
-        <option value="Configuration Data">Configuration Data</option>
+        <option value="page_configuration">Base Data</option>
+        <option value="page_configuration_detail">Detail Data</option>
+        <option value="page_configuration_configuration">Configuration Data</option>
       </select>
      </form>
       <script>
       // Set the selected value by using the value attribute
-      document.getElementById("DataType").selectedIndex = 1;
+      document.getElementById("DataType").selectedIndex = 2;
     </script>
-    <script>
-        // JavaScript function to handle dropdown changes
-        function submitDataType() {
-            const selectedValue = document.getElementById("DataType").value;
 
-            if (selectedValue) {
-                fetch("/datatype_dropdown", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ selected_value: selectedValue })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("result").innerHTML = data.message;
-                })
-                .catch(error => console.error("Error:", error));
+    <script>
+        async function submitDataType() {
+            const selectedPage = document.getElementById("DataType").value;
+            if (selectedPage) {
+                try {
+                    // Fetch the rendered HTML for the selected page from the backend
+                    const response = await fetch(`/datatype_dropdown/${selectedPage}`);
+                    const pageContent = await response.text();
+
+                    // Set the fetched HTML content to the content container
+                    document.getElementById("contentContainer").innerHTML = pageContent;
+                } catch (error) {
+                    console.error('Error loading page:', error);
+                }
             }
         }
     </script>
+
 
     <form method="post" action="/api/buttons">
       <div id="outer">

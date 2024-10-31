@@ -361,8 +361,8 @@ class boldtag:
                                             if id in csv_row_new.keys():
                                                 csv_row_new[id] = val
                                 except Exception as e:
-                                    print("address: {0}".format(address))
-                                    print("char_uuid_id: {0}".format(char_uuid_id))
+                                    if (app is not None): app.print_statuslog("error address:{} id:{} char_uuid_id:{0}".format(address, id,char_uuid_id))
+                                    print("error address:{} id:{} char_uuid_id:{0}".format(address, id,char_uuid_id))
                                     print(e)
                                     result = False
 
@@ -521,10 +521,10 @@ class boldtag:
                                                 if app is not None:app.print_statuslog("{0} read: {1}".format(id, val))
 
                                 except Exception as e:
-                                    print("address: {0}".format(address))
-                                    print("id: {0} char_uuid_id: {1}".format(id, char_uuid_id))
+                                    if app is not None:app.print_statuslog(e)
+                                    print("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
                                     print(e)
-                                    if app is not None:app.print_statuslog("Error {0}".format(e))
+                                    if app is not None:app.print_statuslog("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
                                     error_update = True
                                     dfupdate_read.loc[index_update, "status"] = "update error"
 
