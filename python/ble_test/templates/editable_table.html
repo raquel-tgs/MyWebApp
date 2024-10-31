@@ -117,7 +117,9 @@
   
         <div class="flex justify-between items-center px-10 py-3">
           <h4 class="text-xl">Located Assets</h4>
-          <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Process Certification Batch</button>
+          {% if userRole == 'certification' %}
+            <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Process Certification Batch</button>
+          {% endif %}
         </div>
         <span class="text-xs text-indigo-600 px-5">Select All</span>
         <ul role="list" class="divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5">
@@ -126,7 +128,7 @@
             <li class="hover:bg-gray-50 px-6 py-3">
               <a class="relative flex justify-between items-center gap-x-6" href="/tag-details/{{tag.mac}}">   
               <div>
-                <input aria-describedby="comments-description" name="comments" type="checkbox" class="h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
+                <input aria-describedby="comments-description" name="comments" type="checkbox" data-id="{{tag.mac}}" class="tag-checkbox h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
               </div>
               <div class="w-40">
                 <p class="text-sm font-semibold">{{tag.mac}}</p>

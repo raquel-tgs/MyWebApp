@@ -39,6 +39,7 @@ def login():
     else:
         username = request.form['username']
         password = request.form['password']
+        user_role = request.form['role']
         if username == admin_username and password == admin_password:
             isLoggedIn = True
             return redirect(url_for('tag_table'))
@@ -58,7 +59,7 @@ def tag_table():
     last = perPage*currentPage
     totalPages = math.ceil(len(data_json)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
-    return render_template('editable_table.html', tags = data_json[first : last], totalTags = len(data_json), first = first + 1, last = last if last <= len(data_json) else len(data_json), current = currentPage, pages = pagesArr, prev = currentPage - 1 if currentPage > pagesArr[0] else pagesArr[0], next = currentPage + 1 if currentPage < pagesArr[-1] else pagesArr[-1])
+    return render_template('editable_table.html', tags = data_json[first : last], totalTags = len(data_json), first = first + 1, last = last if last <= len(data_json) else len(data_json), current = currentPage, pages = pagesArr, prev = currentPage - 1 if currentPage > pagesArr[0] else pagesArr[0], next = currentPage + 1 if currentPage < pagesArr[-1] else pagesArr[-1], userRole = user_role)
 
 @app.route('/api/image', methods=['GET', 'POST'])
 def get_set_image():
@@ -981,6 +982,7 @@ global dfilter_back
 read_nfc_done=False
 global admin_username
 global admin_password
+global user_role
 # start_back=-1
 # length_back=-1
 webcancel=False
@@ -1002,13 +1004,13 @@ dfilter_back=None
 status="Enabled"
 operation="None"
 
-#localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 
 #initialized by poc_server.py with global directory
-localpath=""    #initialized by poc_server.py with global directory
+#localpath=""    #initialized by poc_server.py with global directory
 columnIds = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
@@ -1036,6 +1038,7 @@ columnIds_location_configuration = ['tag_mac', 'out_prob']
 
 admin_username='Admin'
 admin_password='1234'
+user_role=None
 isLoggedIn=False
 
 if __name__ == '__main__':
