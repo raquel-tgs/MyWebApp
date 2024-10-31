@@ -916,7 +916,7 @@ def get_initial_config():
     initial_values = {
         "keep_data": scan_parameters["keep_data"],
         "scan_new_tags": scan_parameters["scan_new_tags"],
-        "enable_tags": scan_parameters["enable_tags"],
+        "enable_disable_tags": scan_parameters["enable_disable_tags"],
         "maximum_retries": scan_parameters["maximum_retries"]
     }
     return jsonify(initial_values)
@@ -1195,7 +1195,7 @@ columnIds_location_configuration = ['tag_mac', 'out_prob']
 location_cvs_columnIds=None
 location_cvs_row=None
 
-scan_parameters={'enable_tags': False, 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
+scan_parameters={'enable_disable_tags': "None", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
 
 admin_username='Admin'
 admin_password='1234'

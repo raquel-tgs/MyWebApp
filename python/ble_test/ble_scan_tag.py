@@ -264,7 +264,7 @@ class boldtag:
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
                             init_location=False,
-                            dfupdate=None, keep_connected=True,csv_read_data=[]):
+                            dfupdate=None, keep_connected=True,csv_read_data=[],param_enable_disable_tags=False):
         client = self.client
         device = self.device
         service=self.custom_service
@@ -367,6 +367,42 @@ class boldtag:
                                     result = False
 
                             csv_read_data.append(csv_row_new)
+
+                            if param_enable_disable_tags!='none':
+                                try:
+                                    id == "tag_enabled"
+                                    ix=[k for k in scan_list.keys() if  scan_list[k]['id']=="tag_enabled"]
+                                    if len(ix)>0:
+                                        k=ix[0]
+                                        if param_enable_disable_tags != 'enable':
+                                            newval=1
+                                        else:
+                                            newval=0
+                                            res = await client.write_gatt_char(service.get_characteristic(char_uuid_id),
+                                                        newval.to_bytes(scan_list[k]['length'], byteorder='big',
+                                                                signed=False),response=True)
+
+                                        valread_raw = await client.read_gatt_char(char_uuid_id)
+                                        if valread_raw is not None:
+                                            if type(valread_raw) is bytearray:
+                                                valread = bytes(valread_raw)
+                                            else:
+                                                pass
+                                        else:
+                                            valread = bytes(b'')
+
+                                        if valread==newval:
+                                            msg="tag enabled/diabled successful for :{} value:{} ".format(address, valread)
+                                        else:
+                                            msg = "tag enabled/diabled failed for :{} value:{} ".format(address,valread)
+                                        if (app is not None): app.print_statuslog(msg)
+                                        print(msg)
+
+                                except Exception as e:
+                                    if (app is not None): app.print_statuslog(
+                                        "error at param_enable_disable_tags address:{} ".format(address, ))
+                                    print("error at param_enable_disable_tags address:{}".format(address,))
+                                    print(e)
 
                     if (action == "LOCATION"):
                         ini_loc = False
