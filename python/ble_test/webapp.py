@@ -497,7 +497,7 @@ def page_configuration():
     cloud_columnIds=cloud_columnIds_base
     localpath=localpath_base
     page_selected="page_configuration"
-    readscanfile()
+    #readscanfile()
     return render_template("page_configuration.html")
 
 @app.route('/page_configuration_detail')
@@ -953,8 +953,13 @@ def readscanfile():
         cloud = pd.read_csv(localpath+"cloud.csv")
     else:
         cloud = pd.DataFrame(columns=cloud_columnIds)
-    data = pd.merge(data, cloud, on='mac', how="left")
-    data = data.loc[data["mac"].isna()==False]
+
+    try:
+        data = pd.merge(data, cloud, on='mac', how="left")
+        data = data.loc[data["mac"].isna()==False]
+    except Exception as e:
+        print('--------------ERROR----------------', e)
+    
     data=data.fillna("")
     if os.path.exists(localpath + "scan_angles_raw.csv"):
         scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
