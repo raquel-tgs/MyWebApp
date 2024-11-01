@@ -235,29 +235,49 @@ def canceloperation():
     #return render_template("editable_table.html")
     return redirect(url_for(page_selected))#'page_configuration'))
 
-@app.route("/datatype_dropdown", methods=["POST"])
+# @app.route("/datatype_dropdown", methods=["POST"])
+# def datatype_dropdown():
+#     global page_datatype
+#     data = request.get_json()
+#     page_datatype = data.get("selected_value")
+#
+#     # Process the selected value and prepare a response
+#     response_message = f"You selected: {page_datatype}"
+#
+#     # Return a JSON response to the frontend
+#
+#     if (page_datatype=="Base Data"):
+#         # page_configuration()
+#         return page_configuration()
+#     elif (page_datatype == "Detail Data"):
+#         # page_configuration_detail()
+#         return   page_configuration_detail()
+#     elif (page_datatype == "Configuration Data"):
+#         # page_configuration_configuration()
+#         return page_configuration_configuration()
+#
+#     # return jsonify({"message": response_message})
+
+@app.route("/datatype_dropdown/page_configuration")
 def datatype_dropdown():
     global page_datatype
-    data = request.get_json()
-    page_datatype = data.get("selected_value")
-
-    # Process the selected value and prepare a response
-    response_message = f"You selected: {page_datatype}"
-
+    #data = request.get_json()
     # Return a JSON response to the frontend
+    return render_template("page_configuration.html") #page_configuration()
 
-    if (page_datatype=="Base Data"):
-        # page_configuration()
-        return page_configuration()
-    elif (page_datatype == "Detail Data"):
-        # page_configuration_detail()
-        return page_configuration_detail()
-    elif (page_datatype == "Configuration Data"):
-        # page_configuration_configuration()
-        return page_configuration_configuration()
+@app.route("/datatype_dropdown/page_configuration_configuration")
+def datatype_dropdown_configuration():
+    global page_datatype
+    #data = request.get_json()
+    # Return a JSON response to the frontend
+    return page_configuration_configuration()
 
-    # return jsonify({"message": response_message})
-
+@app.route("/datatype_dropdown/page_configuration_detail")
+def datatype_dropdown_detail():
+    global page_datatype
+    #data = request.get_json()
+    # Return a JSON response to the frontend
+    return page_configuration_detail()
 
 @app.route('/api/data')
 def data_api():
@@ -528,6 +548,7 @@ def page_configuration():
     global localpath
     global page_selected
     global page_datatype_selected
+
     page_datatype_selected="page_configuration"
     columnIds=columnIds_base
     columnIds_location=columnIds_location_base
@@ -535,7 +556,8 @@ def page_configuration():
     cloud_columnIds=cloud_columnIds_base
     localpath=localpath_base
     page_selected="page_configuration"
-    #readscanfile()
+    sync_init()
+    readscanfile()
     return render_template("page_configuration.html")
 
 @app.route('/page_configuration_detail')
@@ -547,6 +569,7 @@ def page_configuration_detail():
     global localpath
     global page_selected
     global page_datatype_selected
+
     page_datatype_selected="page_configuration_detail"
 
     columnIds=columnIds_detail
@@ -555,11 +578,15 @@ def page_configuration_detail():
     cloud_columnIds=cloud_columnIds_detail
     localpath=localpath_detail
     page_selected="page_configuration_detail"
+    sync_init()
+
     readscanfile()
     return render_template("page_configuration_detail.html")
 
 @app.route('/page_configuration_configuration')
 def page_configuration_configuration():
+
+
     global columnIds
     global columnIds_location
     global cloud_csv_row
@@ -575,6 +602,8 @@ def page_configuration_configuration():
     cloud_columnIds=cloud_columnIds_configuration
     localpath=localpath_configuration
     page_selected="page_configuration_configuration"
+    sync_init()
+
     readscanfile()
     return render_template("page_configuration_configuration.html")
 
@@ -843,6 +872,125 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     else:
         return redirect(url_for('tag_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
 
+def sync_init():
+    global start_init
+
+    if start_init is None:
+        start_init = {localpath: False}
+
+    if localpath in start_init.keys():
+        status=start_init[localpath]
+    else:
+        start_init = {localpath: False}
+        status=False
+
+    if not status:
+        start_init[localpath]=True
+        try:
+            file_path=localpath+"scan.csv"
+            file_path_copy = localpath + "scan_copylastscan.csv"
+            if not os.path.exists(file_path):
+                print(f"File '{file_path}' does not exist.")
+                try:
+                    if os.path.exists(file_path_copy):
+                        try:
+                            # Copy file and metadata, and overwrite if it already exists
+                            shutil.copy(file_path_copy,file_path)
+                            print(f"File copied successfully from {file_path_copy} to {file_path}")
+                        except Exception as e:
+                            print(f"Error occurred: {e}")
+                    else:
+                        print(f"File '{file_path}' empty.")
+                        data = pd.DataFrame(columns=columnIds)
+                        cloud = pd.DataFrame(columns=cloud_columnIds)
+                        data.to_csv(file_path)
+                        data.to_csv(file_path_copy)
+                        cloud.to_csv(localpath + "cloud.csv")
+                except Exception as e:
+                    print(f"An error occurred while creating file: {e}")
+                    # return False
+            try:
+                file_path=localpath + "scan_update.csv"
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+            except Exception as e:
+                print(f"An error occurred while deleting the file: {e}")
+                # return False
+
+            try:
+                file_path=localpath+"scan_location.csv"
+                file_path_copy = localpath + "scan_location_copylastlocation.csv"
+                if not os.path.exists(file_path):
+                    print(f"File '{file_path}' does not exist.")
+                    if os.path.exists(file_path_copy):
+                        try:
+                            # Copy file and metadata, and overwrite if it already exists
+                            shutil.copy(file_path_copy,file_path)
+                            print(f"File copied successfully from {file_path_copy} to {file_path}")
+                        except Exception as e:
+                            print(f"Error occurred: {e}")
+                    else:
+                        print(f"File '{file_path}' empty.")
+                        data = pd.DataFrame(columns=location_cvs_columnIds)
+                        data.to_csv(file_path)
+                        data.to_csv(file_path_copy)
+            except Exception as e:
+                print(f"An error occurred while creating the file: {e}")
+                # return False
+
+        except Exception as e:
+            print(e)
+            print("error at buttons")
+
+
+@app.route('/page_scan_parameters')
+def page_scan_parameters():
+    return render_template('page_scan_parameters.html')
+
+# New endpoint to provide initial configuration values
+@app.route('/get_initial_config', methods=['GET'])
+def get_initial_config():
+    # Mocked initial values for demonstration
+    global scan_parameters
+
+    initial_values = {
+        "keep_data": scan_parameters["keep_data"],
+        "scan_new_tags": scan_parameters["scan_new_tags"],
+        "enable_disable_tags": scan_parameters["enable_disable_tags"],
+        "maximum_retries": scan_parameters["maximum_retries"]
+    }
+    return jsonify(initial_values)
+
+
+@app.route('/save_config', methods=['POST'])
+def save_config():
+    global scan_parameters
+    data = request.get_json()
+    if not data:
+        return jsonify({"status": "error", "message": "No data provided"}), 400
+    else:
+        scan_parameters = data
+    # Process data here (print for demonstration)
+    print("Received data:", data)
+
+    # Send a success response
+    return jsonify({"status": "success", "message": "Configuration saved"}), 200
+
+@app.route('/spontaneous_list', methods=['POST'])
+def receive_list():
+    # Get JSON data from the request
+    data = request.get_json()
+
+    # Check if data is a list
+    if isinstance(data, list):
+        # Process the list (e.g., print or perform operations)
+        print("Received list:", data)
+        # Return a success response
+        return jsonify({"status": "success", "message": "List received"}), 200
+    else:
+        # Return an error if the data is not a list
+        return jsonify({"status": "error", "message": "Expected a list in JSON format"}), 400
+
 @app.route("/api/get_scan_data")
 def get_scan_data():
     global data
@@ -860,7 +1008,12 @@ def download_image():
 
 
 def run_flask_app():
-    app.run(port=5000, threaded=True)
+    global app_host
+    global app_port
+    if app_host is None:
+        app.run(port=app_port, threaded=True)
+    else:
+        app.run(host=app_host, port=app_port, threaded=True)
 
 def checkstatus():
     global status
@@ -873,6 +1026,7 @@ def checkstatus():
     global data_update
     global read_nfc_done
     global updatedix
+
 
     no_update = False
     scan_ready = False
@@ -1031,6 +1185,9 @@ global admin_password
 global user_role
 # start_back=-1
 # length_back=-1
+app_host="0.0.0.0" #"192.168.1.196"
+app_port=5000
+
 webcancel=False
 anchors_init=None
 data = None
@@ -1049,6 +1206,8 @@ semaphore=False
 dfilter_back=None
 status="Enabled"
 operation="None"
+
+start_init=None
 
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
@@ -1080,7 +1239,10 @@ cloud_columnIds_configuration=None
 cloud_csv_row_configuration=None
 columnIds_location_configuration = ['tag_mac', 'out_prob']
 
+location_cvs_columnIds=None
+location_cvs_row=None
 
+scan_parameters={'enable_disable_tags': "None", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
 
 admin_username='Admin'
 admin_password='1234'

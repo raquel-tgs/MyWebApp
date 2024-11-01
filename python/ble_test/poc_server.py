@@ -243,11 +243,16 @@ scan_extended_columnIds=["mac","certification_company_name",
 csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                 "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"",
                 "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
-scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac,"
+scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac",
                        "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status","x","y"]
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","asset_comment":"","ndir_id":"","is_machine":""}
 cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","asset_comment","ndir_id","is_machine"]
+
+location_cvs_row={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
+location_cvs_columnIds=["tag_mac","out_prob","out_prob_k","anchors","result","x","y"]
+
+
 #-------------------------------------------------------------------------------
 
 def is_batch_file_running(batch_file_name):
@@ -1378,13 +1383,27 @@ async def main():
                 #await scanner.stop()
             devices_processed=[]
             scannaddress_trim=[]
+
+            scan_parameters=None
+            try:
+                scan_parameters=app.scan_parameters
+            except Exception as e:
+                print(e)
+            if scan_parameters is not None:
+                MaxScan=scan_parameters["maximum_retries"]
+                param_keep_data= scan_parameters["keep_data"]
+                param_scan_new_tags= scan_parameters["scan_new_tags"]
+                param_enable_disable_tags= scan_parameters["enable_disable_tags"]
+
+
             while (nscan < MaxScan and len(scannaddress) <MaxTags and not (sum([0 if x in scannaddress_trim else 1 for x in startCTE_address_filter])==0 and len(startCTE_address_filter)>0)
                    and not (sum([0 if x in scannaddress_trim else 1 for x in scan_mac_filter])==0 and len(scan_mac_filter)>0) #not ((len(scan_mac_filter)>0) and (len(scannaddress)==len(scan_mac_filter)))
                     and not (sum([0 if x in scannaddress_trim else 1 for x in update_mac_filter])==0 and len(update_mac_filter)>0)):  #((len(update_mac_filter)>0) and (len(scannaddress)==len(update_mac_filter)))):
                 #srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
                 #await asyncio.sleep(1.0)
 
-                await bscanner.scan_tags(connect=True)
+                if param_scan_new_tags or (not param_scan_new_tags and nscan==0):
+                    await bscanner.scan_tags(connect=True)
 
                 nscan=nscan+1
                 #devices = await scanner.discover()
@@ -1499,7 +1518,8 @@ async def main():
                                                     res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,
                                                                                 uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
-                                                                                keep_connected=True,csv_read_data=csv_read_data)
+                                                                                keep_connected=True,csv_read_data=csv_read_data,
+                                                                                          param_enable_disable_tags=param_enable_disable_tags)
                                                     ressult = res["result"]
                                                     dfupdate_read = res["dfupdate_read"]
                                                     csv_read_data = res["csv_read_data"]
@@ -1685,7 +1705,7 @@ async def main():
                     else:
                         df = pd.DataFrame(csv_read_data)
                     if df.shape[0]>0 :df["status"]="read"
-                    if len(scan_mac_filter)>0:
+                    if len(scan_mac_filter)>0 or param_keep_data:
                         if os.path.exists(file_path_lastscan):
                             df_back = pd.read_csv(file_path_lastscan)
                             if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
@@ -1695,6 +1715,7 @@ async def main():
                                     df_back.loc[ix, "status"] = \
                                     df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
                                 df=df_back[app.columnIds[:-2]]
+
                     # Check if the file exists
                     if os.path.exists(file_path):
                         # Delete the file
@@ -1807,17 +1828,19 @@ app.cloud_columnIds_base = cloud_scan_columnIds
 app.cloud_csv_row_base=cloud_csv_row
 app.localpath_base=directory+"/"
 
-app.columnIds_detail=csv_extended_row
+app.columnIds_detail=scan_extended_columnIds
 app.cloud_columnIds_detail = cloud_scan_columnIds
 app.cloud_csv_row_detail=cloud_csv_row
 app.localpath_detail=directory+"/detail/"
 
-app.columnIds_configuration=csv_config_row
+app.columnIds_configuration=scan_config_columnIds
 app.cloud_columnIds_configuration = cloud_scan_columnIds
 app.cloud_csv_row_configuration=cloud_csv_row
 app.localpath_configuration=directory+"/configuration/"
 
-
+app.location_cvs_columnIds=location_cvs_columnIds
+app.location_cvs_row=location_cvs_row
+app.sync_init()
 
 #Run
 asyncio.run(main())
