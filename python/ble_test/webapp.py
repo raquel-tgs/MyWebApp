@@ -17,6 +17,14 @@ import math
 
 import logging
 
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+
+class SearchForm(FlaskForm):
+    q = StringField('Search')
+    submit = SubmitField('Search')
+
 app = Flask(__name__)
 
 image_folder = os.path.join('static', 'images')
@@ -24,6 +32,7 @@ report_folder = os.path.join('static', 'reports')
  
 app.config['IMAGE'] = image_folder
 app.config['REPORT'] = report_folder
+app.config['SECRET_KEY'] = 'j4f894848wa4lh84who84wo'
 
 @app.route('/')
 def index():
@@ -39,6 +48,7 @@ def login():
     else:
         username = request.form['username']
         password = request.form['password']
+        user_role = request.form['role']
         if username == admin_username and password == admin_password:
             isLoggedIn = True
             return redirect(url_for('tag_table'))
@@ -50,15 +60,41 @@ def login():
 currentPage = 1
 perPage = 10
 
-@app.route('/tagtable')
+@app.route('/tagtable', methods=['GET', 'POST'])
 def tag_table():
-    currentPage = request.args.get('page', 1, type=int)
+    global modalOpen
+    global page_selected
+    global operation
+    form = SearchForm()
     data_json = json.loads(data.to_json(orient="records"))
+    query = ''
+    tags=[]
+    if form.validate_on_submit():
+        query = form.q.data
+        for tag in data_json:
+            if query.lower() in tag['mac'].lower() or query.lower() in tag['tag_id'].lower() or query.lower() in tag['name'].lower() or query.lower() in tag['color'].lower():
+                tags.append(tag)
+    else:
+        tags = data_json
+    page_selected="tag_table"
+    currentPage = request.args.get('page', 1, type=int)
     first = ((perPage*currentPage)-perPage)
     last = perPage*currentPage
-    totalPages = math.ceil(len(data_json)/perPage)
+    totalPages = math.ceil(len(tags)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
-    return render_template('editable_table.html', tags = data_json[first : last], totalTags = len(data_json), first = first + 1, last = last if last <= len(data_json) else len(data_json), current = currentPage, pages = pagesArr, prev = currentPage - 1 if currentPage > pagesArr[0] else pagesArr[0], next = currentPage + 1 if currentPage < pagesArr[-1] else pagesArr[-1])
+    return render_template('editable_table.html', 
+        tags = tags[first : last], 
+        totalTags = len(tags), 
+        first = first + 1, 
+        last = last if last <= len(tags) else len(tags), 
+        current = currentPage, 
+        pages = pagesArr, 
+        prev = (currentPage - 1 if currentPage > pagesArr[0] else pagesArr[0]) if len(tags) > 1 else 1, 
+        next = (currentPage + 1 if currentPage < pagesArr[-1] else pagesArr[-1]) if len(tags) > 1 else 1, 
+        userRole = user_role, 
+        modalOpen = modalOpen, 
+        operation = operation,
+        form = form)
 
 @app.route('/api/image', methods=['GET', 'POST'])
 def get_set_image():
@@ -124,6 +160,9 @@ def canceloperation():
     global updatedix
     global mac_filter
     global webcancel
+    global modalOpen
+    global page_selected
+    modalOpen=False
     if status=="Disabled":
 
         if operation == 'Scan':
@@ -518,7 +557,6 @@ def page_configuration():
     localpath=localpath_base
     page_selected="page_configuration"
     sync_init()
-
     readscanfile()
     return render_template("page_configuration.html")
 
@@ -726,7 +764,9 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     global updatedix
     # global request_forced
     global dfilter_back
+    global modalOpen
 
+    modalOpen=True
     semaphore=True
     # print(request.method)
     try:
@@ -830,7 +870,7 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     if return_page==page_selected:
         return redirect(url_for(page_selected))
     else:
-        return redirect(url_for('editable_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
+        return redirect(url_for('tag_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
 
 def sync_init():
     global start_init
@@ -1107,8 +1147,13 @@ def readscanfile():
         cloud = pd.read_csv(localpath+"cloud.csv")
     else:
         cloud = pd.DataFrame(columns=cloud_columnIds)
-    data = pd.merge(data, cloud, on='mac', how="left")
-    data = data.loc[data["mac"].isna()==False]
+
+    try:
+        data = pd.merge(data, cloud, on='mac', how="left")
+        data = data.loc[data["mac"].isna()==False]
+    except Exception as e:
+        print('--------------ERROR----------------', e)
+    
     data=data.fillna("")
     if os.path.exists(localpath + "scan_angles_raw.csv"):
         scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
@@ -1132,10 +1177,12 @@ global webcancel
 global anchors_init
 global read_nfc_done
 global dfilter_back
+global modalOpen
 
 read_nfc_done=False
 global admin_username
 global admin_password
+global user_role
 # start_back=-1
 # length_back=-1
 app_host="0.0.0.0" #"192.168.1.196"
@@ -1199,7 +1246,10 @@ scan_parameters={'enable_disable_tags': "None", 'keep_data': True, 'maximum_retr
 
 admin_username='Admin'
 admin_password='1234'
+user_role=None
 isLoggedIn=False
+
+modalOpen=False
 
 if __name__ == '__main__':
 
