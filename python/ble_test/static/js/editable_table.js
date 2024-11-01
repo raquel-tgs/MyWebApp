@@ -30,8 +30,10 @@ function updateCheckboxState(rowId, checkbox) {
     });
 }
 
+const grid = null
+
 if(tableDiv) {
-  const grid = new gridjs.Grid({
+  grid = new gridjs.Grid({
     columns: [
       { id: 'select', name: 'select',width: '80px;',sort: true, 'attributes': editableCellAttributes,
                 formatter: (cell, row) => {
@@ -206,6 +208,19 @@ function checkboxSelect(isChecked, rowId) {
   });
 }
 
+const opModal = document.getElementById('op-modal')
+const modalOpen = opModal.getAttribute('modalOpen');
+if(modalOpen == 'True') {
+  opModal.showModal()
+} else {
+  opModal.close()
+}
+
+const opModalBtn = document.getElementById('op-modal-btn')
+opModalBtn.addEventListener('click', () => {
+  opModal.close()
+})
+
 // Capture checkbox changes and send data to Flask
 document.addEventListener('change', function(e) {
   if (e.target && e.target.matches('input.checkbox_read_nfc')) {
@@ -257,7 +272,7 @@ function updater() {
         }
     }
 
-    if (splitData[3] === "True") {
+    if (grid && splitData[3] === "True") {
         grid.updateConfig({ search: true}).forceRender();
     }
 
