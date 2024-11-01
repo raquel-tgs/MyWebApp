@@ -549,6 +549,10 @@ def page_configuration():
     global page_selected
     global page_datatype_selected
 
+    page_reload = False
+    if page_datatype_selected!="page_configuration":
+        page_reload=True
+
     page_datatype_selected="page_configuration"
     columnIds=columnIds_base
     columnIds_location=columnIds_location_base
@@ -557,7 +561,10 @@ def page_configuration():
     localpath=localpath_base
     page_selected="page_configuration"
     sync_init()
-    readscanfile()
+
+    if page_reload:
+        readscanfile()
+
     return render_template("page_configuration.html")
 
 @app.route('/page_configuration_detail')
@@ -569,6 +576,9 @@ def page_configuration_detail():
     global localpath
     global page_selected
     global page_datatype_selected
+    page_reload = False
+    if page_datatype_selected!="page_configuration_detail":
+        page_reload=True
 
     page_datatype_selected="page_configuration_detail"
 
@@ -580,7 +590,8 @@ def page_configuration_detail():
     page_selected="page_configuration_detail"
     sync_init()
 
-    readscanfile()
+    if page_reload:
+        readscanfile()
     return render_template("page_configuration_detail.html")
 
 @app.route('/page_configuration_configuration')
@@ -594,6 +605,11 @@ def page_configuration_configuration():
     global localpath
     global page_selected
     global page_datatype_selected
+
+    page_reload=False
+    if page_datatype_selected!="page_configuration_configuration":
+        page_reload=True
+
     page_datatype_selected="page_configuration_configuration"
 
     columnIds=columnIds_configuration
@@ -604,7 +620,9 @@ def page_configuration_configuration():
     page_selected="page_configuration_configuration"
     sync_init()
 
-    readscanfile()
+    if page_reload:
+        readscanfile()
+
     return render_template("page_configuration_configuration.html")
 
 
@@ -1188,6 +1206,8 @@ global user_role
 app_host="0.0.0.0" #"192.168.1.196"
 app_port=5000
 
+app_scan_columnIds=None
+
 webcancel=False
 anchors_init=None
 data = None
@@ -1213,6 +1233,7 @@ start_init=None
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
+page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
 localpath=""    #initialized by poc_server.py with global directory
@@ -1242,7 +1263,7 @@ columnIds_location_configuration = ['tag_mac', 'out_prob']
 location_cvs_columnIds=None
 location_cvs_row=None
 
-scan_parameters={'enable_disable_tags': "None", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
+scan_parameters={'enable_disable_tags': "none", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
 
 admin_username='Admin'
 admin_password='1234'

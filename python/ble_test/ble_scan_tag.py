@@ -27,85 +27,94 @@ class tag:
 class boldtag:
     char_uuid = {}
     char_uuid[0] = {"id": "tag_id", "uuid": "c01cdf18-2465-4df6-956f-fde4867e2bc1", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 50, "data_type": "base"}
+                    'type': "UTF-8", "length": 50, "data_type": "base","NFC":False}
     char_uuid[1] = {"id": "asset_id", "uuid": "7db7b5e3-168e-48fd-aadb-94607557b832", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 150, "data_type": "base"}
+                    'type': "UTF-8", "length": 150, "data_type": "base","NFC":False}
     char_uuid[2] = {"id": "update_nfc", "uuid": "1b9bba4d-34c0-4542-8d94-0da1036bd64f", "value": "", "scan": False,
-                    'type': "HEX", "length": 1, "data_type": "configuration"}
+                    'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[3] = {"id": "ble_data_crc", "uuid": "cfdd75b8-5ed3-43cd-96cd-35129f648c5d", "value": "", "scan": False,
-                    'type': "UTF-8", "length": 8, "data_type": "base"}
+                    'type': "UTF-8", "length": 8, "data_type": "base","NFC":False}
     char_uuid[4] = {"id": "certificate_id", "uuid": "fd052ad3-b4d3-426f-be19-b6b3107ab535", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 60, "data_type": "base"}
+                    'type': "UTF-8", "length": 60, "data_type": "base","NFC":False}
     char_uuid[5] = {"id": "type", "uuid": "d1251886-0135-4757-a6a4-233ed79914f3", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 150, "data_type": "base"}
+                    'type': "UTF-8", "length": 150, "data_type": "base","NFC":False}
     char_uuid[6] = {"id": "expiration_date", "uuid": "04f7c038-5717-4da6-b0af-4441388bf938", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 10, "data_type": "base"}
+                    'type': "UTF-8", "length": 10, "data_type": "base","NFC":False}
     char_uuid[7] = {"id": "color", "uuid": "3ef6ebcc-db6e-4b65-ab42-81bedf9c95a5", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 20, "data_type": "base"}
+                    'type': "UTF-8", "length": 20, "data_type": "base","NFC":False}
     char_uuid[8] = {"id": "series", "uuid": "b68a7594-7bf0-4da5-9067-cf986fa2e91d", "value": "", "scan": True,
-                    'type': "UTF-8", "length": 32, "data_type": "base"}
+                    'type': "UTF-8", "length": 32, "data_type": "base","NFC":False}
     char_uuid[9] = {"id": "asset_images_file_extension", "uuid": "c53ff832-45ae-4a94-8bb9-26bea6b64c2c", "value": "",
-                    "scan": True, 'type': "UTF-8", "length": 3, "data_type": "base"}
+                    "scan": True, 'type': "UTF-8", "length": 3, "data_type": "base","NFC":False}
     char_uuid[10] = {"id": "read_nfc", "uuid": "d2fe9b8c-fdfa-4006-b1ef-44969591fb1b", "value": "", "scan": True,
-                     'type': "HEX", "length": 1, "data_type": "base"}
+                     'type': "HEX", "length": 1, "data_type": "base","NFC":False}
     char_uuid[11] = {"id": "certification_company_name", "uuid": "d2bcecac-383d-4224-a60b-bb35ebc4defb", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[12] = {"id": "certification_company_id", "uuid": "91cdf87d-a278-486f-942c-ab1816565dc2", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[13] = {"id": "certification_place", "uuid": "b184ba24-a2ab-460d-8cb5-d9424017d730", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[14] = {"id": "certification_date", "uuid": "5d5d87d9-eafe-4197-8893-ffa5576cf657", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 10, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 10, "data_type": "detail","NFC":False}
     char_uuid[15] = {"id": "test_type", "uuid": "183d8f3e-8276-4b6f-ac45-beb289ab4e21", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 150, "data_type": "detail"}
+                     'type': "UTF-8", "length": 150, "data_type": "detail","NFC":False}
     char_uuid[16] = {"id": "asset_diameter", "uuid": "b21f382a-9115-4236-958d-df714beee49a", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 10, "data_type": "detail"}
+                     'type': "UTF-8", "length": 10, "data_type": "detail","NFC":False}
     char_uuid[17] = {"id": "asset_comment", "uuid": "1984cab5-5f24-4e98-87d8-0559c96980d5", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 20, "data_type": "detail"}
+                     'type': "UTF-8", "length": 20, "data_type": "detail","NFC":False}
     char_uuid[18] = {"id": "batch_id", "uuid": "34992c7e-8d34-4b87-b9c8-8fbcc3641a27", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[19] = {"id": "batch_date", "uuid": "9ac91987-9da4-41b3-a60c-5c407bc7881d", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 10, "data_type": "detail"}
+                     'type': "UTF-8", "length": 10, "data_type": "detail","NFC":False}
     char_uuid[20] = {"id": "machine_id", "uuid": "ed5c5d2b-486c-46ce-9812-6fc09d0a64b8", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[21] = {"id": "status_code", "uuid": "d469aa23-63da-42c9-83ed-e2dc5601acd7", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 4, "data_type": "configuration"}
+                     'type': "UTF-8", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[22] = {"id": "asset_images_crc", "uuid": "4bdbf8ed-53a9-4518-a907-c4376e43b62d", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 4, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 4, "data_type": "detail","NFC":False}
     char_uuid[23] = {"id": "logo_images_crc", "uuid": "30dd3370-65e7-48ec-871d-1994bc9cc2fc", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 4, "data_type": "detail"}
+                     'type': "UTF-8", "length": 4, "data_type": "detail","NFC":False}
     char_uuid[24] = {"id": "signature_images_crc", "uuid": "028f73b8-e36b-4cd9-b99b-51f946e8888b", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 4, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 4, "data_type": "detail","NFC":False}
     char_uuid[25] = {"id": "owner_company_name", "uuid": "5b7ef22d-72a9-490c-bdba-1bd225531e6f", "value": "",
-                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     "scan": True, 'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[26] = {"id": "owner_data", "uuid": "e46f56de-7341-4231-9f29-b8ae5e470a93", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[27] = {"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 50, "data_type": "detail"}
+                     'type': "UTF-8", "length": 50, "data_type": "detail","NFC":False}
     char_uuid[28] = {"id": "tag_mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "", "scan": True,
-                     'type': "UTF-8", "length": 20, "data_type": "configuration"}
+                     'type': "UTF-8", "length": 20, "data_type": "configuration","NFC":False}
     char_uuid[29] = {"id": "enable_cte", "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "", "scan": True,
-                     'type': "HEX", "length": 1, "data_type": "configuration"}
+                     'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[30] = {"id": "tag_enabled", "uuid": "886eb62a-2c17-4e8e-9579-1c5483973577", "value": "", "scan": True,
-                     'type': "HEX", "length": 1, "data_type": "configuration"}
+                     'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[31] = {"id": "tag_advertisement_period", "uuid": "4f9c97c2-41c2-4215-ab22-8c0a9d3ba777", "value": "",
-                     "scan": True, 'type': "HEX", "length": 4, "data_type": "configuration"}
+                     "scan": True, 'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[32] = {"id": "ble_on_period", "uuid": "b13603ed-2ac4-4ee1-9b4d-21ee264543a4", "value": "", "scan": True,
-                     'type': "HEX", "length": 4, "data_type": "configuration"}
+                     'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[33] = {"id": "ble_on_wakeup_period", "uuid": "41af4710-5494-4793-860f-31031c3148bd", "value": "",
-                     "scan": True, 'type': "HEX", "length": 4, "data_type": "configuration"}
+                     "scan": True, 'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[34] = {"id": "ble_off_period", "uuid": "ed407a07-5109-4525-894a-6182aacf8237", "value": "", "scan": True,
-                     'type': "HEX", "length": 4, "data_type": "configuration"}
+                     'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[35] = {"id": "tag_periodic_scan", "uuid": "f178d4ee-af0a-418f-b302-47c051578047", "value": "",
-                     "scan": True, 'type': "HEX", "length": 1, "data_type": "configuration"}
+                     "scan": True, 'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[36] = {"id": "battery_voltage", "uuid": "9b9dcb7a-b2f5-4a3d-8e59-b96a9b88b6ef", "value": "", "scan": True,
-                     'type': "HEX", "length": 4, "data_type": "configuration"}
+                     'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[37] = {"id": "read_battery_voltage", "uuid": "914254cd-dafe-4bb8-8517-048adb4e08ab", "value": "",
-                     "scan": True, 'type': "HEX", "length": 1, "data_type": "configuration"}
+                     "scan": True, 'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[38] = {"id": "altitude", "uuid": "6d139387-9f68-4827-8442-641956a94979", "value": "", "scan": True,
-                     'type': "HEX", "length": 4, "data_type": "configuration"}
+                     'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[39] = {"id": "moved", "uuid": "e410f434-a1f1-4088-9578-19d08830a489", "value": "", "scan": True,
-                     'type': "HEX", "length": 1, "data_type": "configuration"}
+                     'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
+
+    char_uuid_nfc = ["certification_company_name", "certification_company_id", "certification_place",
+                     "certification_date",
+                     "certificate_id", "expiration_date", "test_type", "asset_id",
+                     "tag_id", "type", "color", "series",
+                     "asset_diameter", "asset_comment", "batch_id", "batch_date",
+                     "machine_id", "status_code", "ble_data_crc", "asset_images_crc",
+                     "logo_images_crc", "signature_images_crc", "owner_company_name", "owner_data",
+                     "ndir_id", "asset_images_file_extension", "tag_mac", "gattdb_tag_periodic_scan"]
 
     def __init__(self,scanner_param, webapp=None, csv_row=None):
         self.scanner_param=scanner_param
@@ -125,6 +134,12 @@ class boldtag:
         self.csv_row = self.gatewaydb.csv_row
         self.csv_cfg_row = self.gatewaydb.csv_cfg_row
         self.csv_det_row = self.gatewaydb.csv_det_row
+        try:
+            for ix in self.char_uuid.keys():
+                if self.char_uuid[ix]["id"] in self.char_uuid_nfc:
+                    self.char_uuid[ix]["NFC"]=True
+        except Exception as e:
+            print(e)
 
     def __iter__(self):
         self._index=0
@@ -261,6 +276,43 @@ class boldtag:
 
         return result,dfupdate
 
+    async def check_disconnect(self,client,address):
+        try:
+            connected=False
+            if client is None:
+                try:
+                    client = BleakClient(address)
+                    connected = client.is_connected
+                except Exception as e:
+                    print(e)
+                    connected = False
+
+            if client is not None:
+                connected = client.is_connected
+                if not connected:
+                    try:
+                        await client.connect()
+                        connected = client.is_connected
+                    except Exception as e:
+                        print(e)
+                        connected=False
+                try:
+                    char_uuid = self.filter_db(id="tag_mac")[0]["uuid"]
+                    char_uuid_val = bytes(await client.read_gatt_char(char_uuid))
+                    connected = True
+                except Exception as e:
+                    print(e)
+                    connected = False
+
+
+        except Exception as e:
+            print(e)
+
+            self.connected = connected
+            self.update_current()
+
+        return connected
+
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
                             init_location=False,
@@ -307,21 +359,23 @@ class boldtag:
                 char_uuid_enable_cte = self.filter_db(id="enable_cte")[0]["uuid"]
                 char_uuid_update_nfc = self.filter_db(id="update_nfc")[0]["uuid"]
                 nconerr = -1
-                if client is not None:
-                    connected = client.is_connected
-                    if not connected:
-                        try:
-                            await client.connect()
-                            connected = client.is_connected
-                        except Exception as e:
-                            print(e)
-                else:
-                    try:
-                        connected = False
-                        client = BleakClient(address)
-                        connected = client.is_connected
-                    except Exception as e:
-                        print(e)
+                # if client is not None:
+                #     connected = client.is_connected
+                #     if not connected:
+                #         try:
+                #             await client.connect()
+                #             connected = client.is_connected
+                #         except Exception as e:
+                #             print(e)
+                # else:
+                #     try:
+                #         connected = False
+                #         client = BleakClient(address)
+                #         connected = client.is_connected
+                #     except Exception as e:
+                #         print(e)
+                connected=await self.check_disconnect( client, address)
+
                 if connected:
                     print("Connected to Device")
                     print("Performing action {}".format(action))
@@ -361,31 +415,44 @@ class boldtag:
                                             if id in csv_row_new.keys():
                                                 csv_row_new[id] = val
                                 except Exception as e:
-                                    if (app is not None): app.print_statuslog("error address:{} id:{} char_uuid_id:{0}".format(address, id,char_uuid_id))
-                                    print("error address:{} id:{} char_uuid_id:{0}".format(address, id,char_uuid_id))
-                                    print(e)
+                                    if e.errno==22: #THE_OBJECT_HAS_BEEN_CLOSED = 22
+                                        msg="Connection closed for address:{} id:{} char_uuid_id:{}".format(address, id, char_uuid_id)
+                                        if (app is not None): app.print_statuslog(msg)
+                                        print(msg)
+                                        print(e)
+                                        self.connected = False
+                                        self.update_current()
+                                        break
+                                    else:
+                                        msg="error address:{} id:{} char_uuid_id:{}".format(address, id, char_uuid_id)
+                                        if (app is not None): app.print_statuslog(msg)
+                                        print(msg)
+                                        print(e)
+
                                     result = False
+
 
                             csv_read_data.append(csv_row_new)
 
                             if param_enable_disable_tags!='none':
                                 try:
                                     id == "tag_enabled"
-                                    ix=[k for k in scan_list.keys() if  scan_list[k]['id']=="tag_enabled"]
-                                    if len(ix)>0:
-                                        k=ix[0]
-                                        if param_enable_disable_tags != 'enable':
+                                    char_uuid=self.filter_db(id='tag_enabled', data_type=None, scan=True)
+                                    if len(char_uuid)>0:
+                                        char_uuid=char_uuid[0]
+                                        char_uuid_id=char_uuid["uuid"]
+                                        if param_enable_disable_tags == 'enable':
                                             newval=1
                                         else:
                                             newval=0
-                                            res = await client.write_gatt_char(service.get_characteristic(char_uuid_id),
-                                                        newval.to_bytes(scan_list[k]['length'], byteorder='big',
+                                        res = await client.write_gatt_char(service.get_characteristic(char_uuid_id),
+                                                        newval.to_bytes(char_uuid['length'], byteorder='big',
                                                                 signed=False),response=True)
 
                                         valread_raw = await client.read_gatt_char(char_uuid_id)
                                         if valread_raw is not None:
                                             if type(valread_raw) is bytearray:
-                                                valread = bytes(valread_raw)
+                                                valread = int.from_bytes(bytes(valread_raw))
                                             else:
                                                 pass
                                         else:
@@ -515,8 +582,9 @@ class boldtag:
                                                 char_uuid_id_read_nfc = char_uuid_id
                                                 k_read_nfc = k
 
-                                            if scan_list[k]["id"] != "read_nfc":
-                                                fupdate = True
+                                            if scan_list[k]["id"] != "read_nfc" :
+                                                if scan_list[k]['NFC'] == True:
+                                                    fupdate = True
 
                                                 if (scan_list[k]['type'] == 'HEX'):
                                                     res = await client.write_gatt_char(
@@ -643,7 +711,7 @@ class gatewaydb:
                "asset_images_file_extension": "", "x": "", "y": ""}
 
     csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
-                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"",
+                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
                    "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","status":"","x":"","y":""}
 
     csv_det_row = {"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
