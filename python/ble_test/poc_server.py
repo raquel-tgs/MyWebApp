@@ -70,7 +70,7 @@ devices_processed=[]
 directory = "c:/tgspoc"
 app_localpath=directory+'/'
 
-use_MQTT=False      #Set to True to start MQTT client
+use_MQTT=True      #Set to True to start MQTT client
 
 Stop_collecting=True
 keep_mqtt_on=True
@@ -142,82 +142,81 @@ def quadratic_error(x, values):
 
 #----------------------------------------------------------------------#
 srv_antenna_anchor={}
-srv_antenna_anchor["219"]={"enabled":False, "status":None,"process":None,"monitor_thread":None, "bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#1D_192_168_1_219.bat","cmdline":""}
-srv_antenna_anchor["220"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#3D_192_168_1_220.bat","cmdline":""}
-srv_antenna_anchor["221"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#F2_192_168_1_221.bat","cmdline":""}
-srv_antenna_anchor["222"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#C0_192_168_1_222.bat","cmdline":""}
-srv_antenna_anchor["srv"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\start_mqtt_position.bat","cmdline":""}
+srv_antenna_anchor["219"]={"enabled":True, "status":None,"process":None,"monitor_thread":None, "bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#1D_192_168_1_219.bat","cmdline":""}
+srv_antenna_anchor["220"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#3D_192_168_1_220.bat","cmdline":""}
+srv_antenna_anchor["221"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#F2_192_168_1_221.bat","cmdline":""}
+srv_antenna_anchor["222"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#C0_192_168_1_222.bat","cmdline":""}
+srv_antenna_anchor["srv"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\start_mqtt_position.bat","cmdline":""}
 
 #------------------------------- BLE CONSTANTS ----------------------------
 #Gatt database
 #--------------------
-char_uuid = {}
-char_uuid[0]={"id": "tag_id", "uuid": "c01cdf18-2465-4df6-956f-fde4867e2bc1", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"base","NFC":False}
-char_uuid[1]={"id": "asset_id", "uuid": "7db7b5e3-168e-48fd-aadb-94607557b832", "value": "", "scan": True, 'type': "UTF-8","length":150, "data_type":"base","NFC":False}
-char_uuid[2]={"id": "update_nfc", "uuid": "1b9bba4d-34c0-4542-8d94-0da1036bd64f", "value": "","scan":False,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[3]={"id": "ble_data_crc", "uuid": "cfdd75b8-5ed3-43cd-96cd-35129f648c5d", "value": "","scan":False,'type':"UTF-8","length":8, "data_type":"base","NFC":False}
-char_uuid[4]={"id": "certificate_id", "uuid": "fd052ad3-b4d3-426f-be19-b6b3107ab535", "value": "","scan":True,'type':"UTF-8","length":60, "data_type":"base","NFC":False}
-char_uuid[5]={"id": "type", "uuid": "d1251886-0135-4757-a6a4-233ed79914f3", "value": "","scan":True,'type':"UTF-8","length":150, "data_type":"base","NFC":False}
-char_uuid[6]={"id": "expiration_date", "uuid": "04f7c038-5717-4da6-b0af-4441388bf938", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"base","NFC":False}
-char_uuid[7]={"id": "color", "uuid": "3ef6ebcc-db6e-4b65-ab42-81bedf9c95a5", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"base","NFC":False}
-char_uuid[8]={"id": "series", "uuid": "b68a7594-7bf0-4da5-9067-cf986fa2e91d", "value": "","scan":True,'type':"UTF-8","length":32, "data_type":"base","NFC":False}
-char_uuid[9]={"id": "asset_images_file_extension", "uuid": "c53ff832-45ae-4a94-8bb9-26bea6b64c2c", "value": "","scan":True,'type':"UTF-8","length":3, "data_type":"base","NFC":False}
-char_uuid[10]={"id": "read_nfc", "uuid": "d2fe9b8c-fdfa-4006-b1ef-44969591fb1b", "value": "","scan":True,'type':"HEX","length":1, "data_type":"base","NFC":False}
-char_uuid[11]={"id": "certification_company_name", "uuid": "d2bcecac-383d-4224-a60b-bb35ebc4defb", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[12]={"id": "certification_company_id", "uuid": "91cdf87d-a278-486f-942c-ab1816565dc2", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[13]={"id": "certification_place", "uuid": "b184ba24-a2ab-460d-8cb5-d9424017d730", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[14]={"id": "certification_date", "uuid": "5d5d87d9-eafe-4197-8893-ffa5576cf657", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail","NFC":False}
-char_uuid[15]={"id": "test_type", "uuid": "183d8f3e-8276-4b6f-ac45-beb289ab4e21", "value": "","scan":True,'type':"UTF-8","length":150, "data_type":"detail","NFC":False}
-char_uuid[16]={"id": "asset_diameter", "uuid": "b21f382a-9115-4236-958d-df714beee49a", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail"}
-char_uuid[17]={"id": "asset_comment", "uuid": "1984cab5-5f24-4e98-87d8-0559c96980d5", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"detail","NFC":False}
-char_uuid[18]={"id": "batch_id", "uuid": "34992c7e-8d34-4b87-b9c8-8fbcc3641a27", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[19]={"id": "batch_date", "uuid": "9ac91987-9da4-41b3-a60c-5c407bc7881d", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail","NFC":False}
-char_uuid[20]={"id": "machine_id", "uuid": "ed5c5d2b-486c-46ce-9812-6fc09d0a64b8", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[21]={"id": "status_code", "uuid": "d469aa23-63da-42c9-83ed-e2dc5601acd7", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"configuration","NFC":False}
-char_uuid[22]={"id": "asset_images_crc", "uuid": "4bdbf8ed-53a9-4518-a907-c4376e43b62d", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
-char_uuid[23]={"id": "logo_images_crc", "uuid": "30dd3370-65e7-48ec-871d-1994bc9cc2fc", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
-char_uuid[24]={"id": "signature_images_crc", "uuid": "028f73b8-e36b-4cd9-b99b-51f946e8888b", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
-char_uuid[25]={"id": "owner_company_name", "uuid": "5b7ef22d-72a9-490c-bdba-1bd225531e6f", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[26]={"id": "owner_data", "uuid": "e46f56de-7341-4231-9f29-b8ae5e470a93", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[27]={"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
-char_uuid[28]={"id": "tag_mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"configuration","NFC":False}
+# char_uuid = {}
+# char_uuid[0]={"id": "tag_id", "uuid": "c01cdf18-2465-4df6-956f-fde4867e2bc1", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"base","NFC":False}
+# char_uuid[1]={"id": "asset_id", "uuid": "7db7b5e3-168e-48fd-aadb-94607557b832", "value": "", "scan": True, 'type': "UTF-8","length":150, "data_type":"base","NFC":False}
+# char_uuid[2]={"id": "update_nfc", "uuid": "1b9bba4d-34c0-4542-8d94-0da1036bd64f", "value": "","scan":False,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[3]={"id": "ble_data_crc", "uuid": "cfdd75b8-5ed3-43cd-96cd-35129f648c5d", "value": "","scan":False,'type':"UTF-8","length":8, "data_type":"base","NFC":False}
+# char_uuid[4]={"id": "certificate_id", "uuid": "fd052ad3-b4d3-426f-be19-b6b3107ab535", "value": "","scan":True,'type':"UTF-8","length":60, "data_type":"base","NFC":False}
+# char_uuid[5]={"id": "type", "uuid": "d1251886-0135-4757-a6a4-233ed79914f3", "value": "","scan":True,'type':"UTF-8","length":150, "data_type":"base","NFC":False}
+# char_uuid[6]={"id": "expiration_date", "uuid": "04f7c038-5717-4da6-b0af-4441388bf938", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"base","NFC":False}
+# char_uuid[7]={"id": "color", "uuid": "3ef6ebcc-db6e-4b65-ab42-81bedf9c95a5", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"base","NFC":False}
+# char_uuid[8]={"id": "series", "uuid": "b68a7594-7bf0-4da5-9067-cf986fa2e91d", "value": "","scan":True,'type':"UTF-8","length":32, "data_type":"base","NFC":False}
+# char_uuid[9]={"id": "asset_images_file_extension", "uuid": "c53ff832-45ae-4a94-8bb9-26bea6b64c2c", "value": "","scan":True,'type':"UTF-8","length":3, "data_type":"base","NFC":False}
+# char_uuid[10]={"id": "read_nfc", "uuid": "d2fe9b8c-fdfa-4006-b1ef-44969591fb1b", "value": "","scan":True,'type':"HEX","length":1, "data_type":"base","NFC":False}
+# char_uuid[11]={"id": "certification_company_name", "uuid": "d2bcecac-383d-4224-a60b-bb35ebc4defb", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[12]={"id": "certification_company_id", "uuid": "91cdf87d-a278-486f-942c-ab1816565dc2", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[13]={"id": "certification_place", "uuid": "b184ba24-a2ab-460d-8cb5-d9424017d730", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[14]={"id": "certification_date", "uuid": "5d5d87d9-eafe-4197-8893-ffa5576cf657", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail","NFC":False}
+# char_uuid[15]={"id": "test_type", "uuid": "183d8f3e-8276-4b6f-ac45-beb289ab4e21", "value": "","scan":True,'type':"UTF-8","length":150, "data_type":"detail","NFC":False}
+# char_uuid[16]={"id": "asset_diameter", "uuid": "b21f382a-9115-4236-958d-df714beee49a", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail"}
+# char_uuid[17]={"id": "asset_comment", "uuid": "1984cab5-5f24-4e98-87d8-0559c96980d5", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"detail","NFC":False}
+# char_uuid[18]={"id": "batch_id", "uuid": "34992c7e-8d34-4b87-b9c8-8fbcc3641a27", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[19]={"id": "batch_date", "uuid": "9ac91987-9da4-41b3-a60c-5c407bc7881d", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"detail","NFC":False}
+# char_uuid[20]={"id": "machine_id", "uuid": "ed5c5d2b-486c-46ce-9812-6fc09d0a64b8", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[21]={"id": "status_code", "uuid": "d469aa23-63da-42c9-83ed-e2dc5601acd7", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[22]={"id": "asset_images_crc", "uuid": "4bdbf8ed-53a9-4518-a907-c4376e43b62d", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
+# char_uuid[23]={"id": "logo_images_crc", "uuid": "30dd3370-65e7-48ec-871d-1994bc9cc2fc", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
+# char_uuid[24]={"id": "signature_images_crc", "uuid": "028f73b8-e36b-4cd9-b99b-51f946e8888b", "value": "","scan":True,'type':"UTF-8","length":4, "data_type":"detail","NFC":False}
+# char_uuid[25]={"id": "owner_company_name", "uuid": "5b7ef22d-72a9-490c-bdba-1bd225531e6f", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[26]={"id": "owner_data", "uuid": "e46f56de-7341-4231-9f29-b8ae5e470a93", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[27]={"id": "ndir_id", "uuid": "8024d4a4-f212-497b-8499-4b1ebb467b48", "value": "","scan":True,'type':"UTF-8","length":50, "data_type":"detail","NFC":False}
+# char_uuid[28]={"id": "tag_mac", "uuid": "6a103778-d584-4ce6-b3e2-94f417673cfc", "value": "","scan":True,'type':"UTF-8","length":20, "data_type":"configuration","NFC":False}
+#
+# char_uuid[29]={"id": "enable_cte" , "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[30]={"id": "tag_enabled" , "uuid": "886eb62a-2c17-4e8e-9579-1c5483973577", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[31]={"id": "tag_advertisement_period", "uuid": "4f9c97c2-41c2-4215-ab22-8c0a9d3ba777", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[32]={"id": "ble_on_period", "uuid": "b13603ed-2ac4-4ee1-9b4d-21ee264543a4", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[33]={"id": "ble_on_wakeup_period", "uuid": "41af4710-5494-4793-860f-31031c3148bd", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[34]={"id": "ble_off_period", "uuid": "ed407a07-5109-4525-894a-6182aacf8237", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[35]={"id": "tag_periodic_scan", "uuid": "f178d4ee-af0a-418f-b302-47c051578047", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[36]={"id": "battery_voltage", "uuid": "9b9dcb7a-b2f5-4a3d-8e59-b96a9b88b6ef", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[37]={"id": "read_battery_voltage", "uuid": "914254cd-dafe-4bb8-8517-048adb4e08ab", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[38]={"id": "altitude", "uuid": "6d139387-9f68-4827-8442-641956a94979", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
+# char_uuid[39]={"id": "moved", "uuid": "e410f434-a1f1-4088-9578-19d08830a489", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
+# char_uuid[40]={"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"configuration","NFC":False}
 
-char_uuid[29]={"id": "enable_cte" , "uuid": "c92c584f-7b9e-473a-ad4e-d9965e0cd678", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[30]={"id": "tag_enabled" , "uuid": "886eb62a-2c17-4e8e-9579-1c5483973577", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[31]={"id": "tag_advertisement_period", "uuid": "4f9c97c2-41c2-4215-ab22-8c0a9d3ba777", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[32]={"id": "ble_on_period", "uuid": "b13603ed-2ac4-4ee1-9b4d-21ee264543a4", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[33]={"id": "ble_on_wakeup_period", "uuid": "41af4710-5494-4793-860f-31031c3148bd", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[34]={"id": "ble_off_period", "uuid": "ed407a07-5109-4525-894a-6182aacf8237", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[35]={"id": "tag_periodic_scan", "uuid": "f178d4ee-af0a-418f-b302-47c051578047", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[36]={"id": "battery_voltage", "uuid": "9b9dcb7a-b2f5-4a3d-8e59-b96a9b88b6ef", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[37]={"id": "read_battery_voltage", "uuid": "914254cd-dafe-4bb8-8517-048adb4e08ab", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[38]={"id": "altitude", "uuid": "6d139387-9f68-4827-8442-641956a94979", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
-char_uuid[39]={"id": "moved", "uuid": "e410f434-a1f1-4088-9578-19d08830a489", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-char_uuid[40]={"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"configuration","NFC":False}
-
-def filter_db(id, data_type=None, scan=None):
-    try:
-        res=None
-        if id is None:
-            res = [y for y in [char_uuid[x] for x in list(char_uuid)] if   (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None)]
-        else:
-            if type(id) is list:
-                res = [y for y in [char_uuid[x] for x in list(char_uuid)] if (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None) and y["id"] in id]
-            else:
-                res=[y for y in [char_uuid[x] for x in list(char_uuid)] if (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None) and y["id"] == id][0]
-    except Exception as e:
-        print(e)
-    return res
+# def filter_db(id, data_type=None, scan=None):
+#     try:
+#         res=None
+#         if id is None:
+#             res = [y for y in [char_uuid[x] for x in list(char_uuid)] if   (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None)]
+#         else:
+#             if type(id) is list:
+#                 res = [y for y in [char_uuid[x] for x in list(char_uuid)] if (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None) and y["id"] in id]
+#             else:
+#                 res=[y for y in [char_uuid[x] for x in list(char_uuid)] if (y["scan"] == scan or scan is None) and (y["data_type"] == data_type or data_type is None) and y["id"] == id][0]
+#     except Exception as e:
+#         print(e)
+#     return res
 
 #cahracteristics
-char_uuid_update_nfc=filter_db("update_nfc")["uuid"] #"1b9bba4d-34c0-4542-8d94-0da1036bd64f"
-#char_uuid_constant_tone_extension_enable ="00002bad-0000-1000-8000-00805f9b34fb"
-char_uuid_enable_cte =filter_db("enable_cte")["uuid"] #"c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+# char_uuid_update_nfc=filter_db("update_nfc")["uuid"] #"1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+# char_uuid_enable_cte =filter_db("enable_cte")["uuid"] #"c92c584f-7b9e-473a-ad4e-d9965e0cd678"
 
 
-serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
-serv_uuid_Generic_Service = "00001800-0000-1000-8000-00805f9b34fb"
-serv_uuid_Constant_Tone_Service="0000184a-0000-1000-8000-00805f9b34fb"
+# serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
+# serv_uuid_Generic_Service = "00001800-0000-1000-8000-00805f9b34fb"
+# serv_uuid_Constant_Tone_Service="0000184a-0000-1000-8000-00805f9b34fb"
 
 
 charfile_uuid=[]
@@ -233,37 +232,37 @@ serv_uuid_Custom_File_Transfer_Service = "4c209b89-3330-4f18-b26e-d90f8653306e"
 # scan_columnIds = ['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series', 'asset_images_file_extension','read_nfc',  'x', 'y'];
 
 #base
-csv_row={"mac":"","name":"","tag_id":"","asset_id":"","certificate_id":"","type":"","expiration_date":"","color":"","series":"","read_nfc":"","status":"","status_code":"","asset_images_file_extension":"","x":"","y":""}
-scan_columnIds=["mac","name","tag_id","asset_id","certificate_id","type","expiration_date","color","series","read_nfc","status","status_code","asset_images_file_extension","x","y"]
+# csv_row={"mac":"","name":"","tag_id":"","asset_id":"","certificate_id":"","type":"","expiration_date":"","color":"","series":"","read_nfc":"","status":"","status_code":"","asset_images_file_extension":"","x":"","y":""}
+# scan_columnIds=["mac","name","tag_id","asset_id","certificate_id","type","expiration_date","color","series","read_nfc","status","status_code","asset_images_file_extension","x","y"]
 
 #detail
-csv_extended_row={"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
-         "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-         "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","ndir_id":"","status":"","x":"","y":""}
-scan_extended_columnIds=["mac","certification_company_name",
-                "certification_company_id","certification_place","certification_date","test_type","asset_diameter","batch_id","batch_date",
-                "machine_id","status_code","ble_data_crc","asset_images_crc","logo_images_crc","signature_images_crc","owner_company_name",
-                "owner_data","altitude","moved","battery_voltage","asset_comment","ndir_id","status","x","y"]
+# csv_extended_row={"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
+#          "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
+#          "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","ndir_id":"","status":"","x":"","y":""}
+# scan_extended_columnIds=["mac","certification_company_name",
+#                 "certification_company_id","certification_place","certification_date","test_type","asset_diameter","batch_id","batch_date",
+#                 "machine_id","status_code","ble_data_crc","asset_images_crc","logo_images_crc","signature_images_crc","owner_company_name",
+#                 "owner_data","altitude","moved","battery_voltage","asset_comment","ndir_id","status","x","y"]
 #onfiguration
-csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
-                "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"","read_battery_voltage":"",
-                "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","tag_firmware":"","status":"","x":"","y":""}
-scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac","read_battery_voltage",
-                       "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","tag_firmware","status","x","y"]
+# csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
+#                 "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"","read_battery_voltage":"",
+#                 "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","tag_firmware":"","status":"","x":"","y":""}
+# scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac","read_battery_voltage",
+#                        "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","tag_firmware","status","x","y"]
+#
+# cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","is_machine":""}
+# cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","is_machine"]
 
-cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","is_machine":""}
-cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","is_machine"]
+# location_cvs_row={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
+# location_cvs_columnIds=["tag_mac","out_prob","out_prob_k","anchors","result","x","y"]
 
-location_cvs_row={"tag_mac":"","out_prob":"","out_prob_k":"","anchors":"","result":"","x":"","y":""}
-location_cvs_columnIds=["tag_mac","out_prob","out_prob_k","anchors","result","x","y"]
-
-char_uuid_nfc=["certification_company_name","certification_company_id","certification_place","certification_date",
-               "certificate_id","expiration_date","test_type","asset_id",
-               "tag_id","type","color","series",
-               "asset_diameter","asset_comment","batch_id","batch_date",
-               "machine_id","status_code","ble_data_crc","asset_images_crc",
-               "logo_images_crc","signature_images_crc","owner_company_name","owner_data",
-               "ndir_id","asset_images_file_extension","tag_mac","gattdb_tag_periodic_scan"]
+# char_uuid_nfc=["certification_company_name","certification_company_id","certification_place","certification_date",
+#                "certificate_id","expiration_date","test_type","asset_id",
+#                "tag_id","type","color","series",
+#                "asset_diameter","asset_comment","batch_id","batch_date",
+#                "machine_id","status_code","ble_data_crc","asset_images_crc",
+#                "logo_images_crc","signature_images_crc","owner_company_name","owner_data",
+#                "ndir_id","asset_images_file_extension","tag_mac","gattdb_tag_periodic_scan"]
 
 
 #-------------------------------------------------------------------------------
@@ -345,7 +344,10 @@ def device_found(device: BLEDevice, advertisement_data: AdvertisementData):
                 rssi=advertisement_data.rssi
                 if address in startCTE_address_filter or len(startCTE_address_filter)==0:
                     #print("RSSI {0}:{1}".format(address,rssi))
-                    rssi_host_scan[len(rssi_host_scan)]={"address":address,"rssi_host":rssi}
+                    tag_data_crc="0000000000000000"
+                    if len(advertisement_data.manufacturer_data.items())>0:
+                       tag_data_crc=[x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
+                    rssi_host_scan[len(rssi_host_scan)]={"address":address,"rssi_host":rssi,"tag_data_crc":tag_data_crc}
 
     except Exception as e:
         print(f'error in device_found {e}')
@@ -1091,48 +1093,54 @@ def mergelocation(resdf,df_res, scan_columnIds, filter=False):
     try:
         if resdf is not None:
             if not filter:
-                if "x" in list(df_res.columns) or "y" in list(df_res.columns):
-                    cols = [x for x in list(df_res.columns) if x not in ['x', 'y']]
-                    df_res=df_res[cols]
-                if "x" in list(resdf.columns) and "y" in list(resdf.columns):
-                    resdf['tag_mac_strip'] = [
-                        x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
-                        resdf['tag_mac'].values]
-                    df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y"]],  left_on="mac", right_on="tag_mac_strip", how="left")
-                    df_res = df_res[scan_columnIds]
-                        #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color',
-                        # 'series', 'asset_images_file_extension', 'read_nfc', 'x', 'y']]
+                try:
+                    if "x" in list(df_res.columns) or "y" in list(df_res.columns):
+                        cols = [x for x in list(df_res.columns) if x not in ['x', 'y']]
+                        df_res=df_res[cols]
+                    if "x" in list(resdf.columns) and "y" in list(resdf.columns):
+                        resdf['tag_mac_strip'] = [
+                            x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
+                            resdf['tag_mac'].values]
+                        df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y"]],  left_on="mac", right_on="tag_mac_strip", how="left")
+                        df_res = df_res[scan_columnIds]
+                            #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color',
+                            # 'series', 'asset_images_file_extension', 'read_nfc', 'x', 'y']]
 
-                    # df_res.rename(columns={"x_y": "x", "y_y": "y"}, inplace=True)
-                    df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
-                    df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
-                else:
-                    df_res["x"] = np.nan
-                    df_res["y"] = np.nan
+                        # df_res.rename(columns={"x_y": "x", "y_y": "y"}, inplace=True)
+                        df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
+                        df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
+                    else:
+                        df_res["x"] = np.nan
+                        df_res["y"] = np.nan
+                except Exception as e:
+                    print(e)
             else:
                 #priority to current values
-                if "x" in list(resdf.columns) and "y" in list(resdf.columns):
-                    resdf['tag_mac_strip'] = [
-                        x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
-                        resdf['tag_mac'].values]
-                    df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y"]], left_on="mac", right_on="tag_mac_strip", how="left")
-                    df_res.loc[
-                        df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "x_x"] = \
-                    df_res.loc[
-                        df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "x_y"]
-                    df_res.loc[
-                        df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "y_x"] = \
-                    df_res.loc[
-                        df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "y_y"]
-                    df_res.rename(columns={"x_x": "x", "y_x": "y"}, inplace=True)
-                    df_res = df_res[
-                        ['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color',
-                         'series', 'asset_images_file_extension', 'read_nfc', 'x', 'y']]
-                    df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
-                    df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
-                else:
-                    df_res["x"] = np.nan
-                    df_res["y"] = np.nan
+                try:
+                    if "x" in list(resdf.columns) and "y" in list(resdf.columns):
+                        resdf['tag_mac_strip'] = [
+                            x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
+                            resdf['tag_mac'].values]
+                        df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y"]], left_on="mac", right_on="tag_mac_strip", how="left")
+                        df_res.loc[
+                            df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "x_x"] = \
+                        df_res.loc[
+                            df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "x_y"]
+                        df_res.loc[
+                            df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "y_x"] = \
+                        df_res.loc[
+                            df_res[(np.isnan(df_res["x_y"]) == False) | (np.isnan(df_res["y_y"]) == False)].index, "y_y"]
+                        df_res.rename(columns={"x_x": "x", "y_x": "y"}, inplace=True)
+                        df_res = df_res[
+                            ['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color',
+                             'series', 'asset_images_file_extension', 'read_nfc', 'x', 'y']]
+                        df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
+                        df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
+                    else:
+                        df_res["x"] = np.nan
+                        df_res["y"] = np.nan
+                except Exception as e:
+                    print(e)
         else:
             df_res["x"] = np.nan
             df_res["y"] = np.nan
@@ -1167,21 +1175,22 @@ async def main():
     global directo
     global app_page_configuration
     global app_localpath
+    global directory
 
-    app.anchors_init = anchors_init
-    app.readscanfile()
-    # app.columnIds=scan_columnIds
-    # app.cloud_columnIds = cloud_scan_columnIds
-    # app.cloud_csv_row=cloud_csv_row
+
+
+
     # app.run()
     # Run Flask app in a separate thread
-    flask_thread = Thread(target=app.run_flask_app)
-    flask_thread.start()
-    app.print_statuslog("Starting...")
 
-    for ix in char_uuid.keys():
-        if char_uuid[ix]["id"] in char_uuid_nfc:
-            char_uuid[ix]["NFC"] = True
+
+    # flask_thread = Thread(target=app.run_flask_app)
+    # flask_thread.start()
+    # app.print_statuslog("Starting...")
+
+    # for ix in char_uuid.keys():
+    #     if char_uuid[ix]["id"] in char_uuid_nfc:
+    #         char_uuid[ix]["NFC"] = True
 
     #scan_location()
     if use_MQTT:
@@ -1193,6 +1202,8 @@ async def main():
     time_process=None
     scanner = BleakScanner()
     scanner.register_detection_callback(device_found)
+
+
     mqttclient=None
     time.sleep(5)
     print("MQTT paused")
@@ -1204,44 +1215,63 @@ async def main():
     scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan":False, "scan_loop":0}
     action=""
 
-    bscanner = bldtag.boldscanner(serv_uuid_Custom_Service = serv_uuid_Custom_Service,
-                                  disableCTE_duringlocation=disableCTE_duringlocation,
+    bscanner = bldtag.boldscanner(disableCTE_duringlocation=disableCTE_duringlocation,
                                   keepactive_all_CTE_during_location=keepactive_all_CTE_during_location,
                                     use_MQTT =use_MQTT, mqttclient = mqttclient, keep_mqtt_on = keep_mqtt_on,
                                     wait_for_mqtt_angles = wait_for_mqtt_angles, CTE_Wait_Time_prescan = CTE_Wait_Time_prescan, CTE_Wait_Time = CTE_Wait_Time,webapp=app)
 
-    while True:
-        srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
-        # #chck servers
-        # for ix in srv_antenna_anchor.keys():
-        #     cmdline=srv_antenna_anchor[ix]["cmdline"]
-        #     if srv_antenna_anchor[ix]["status"] is None or srv_antenna_anchor[ix]["status"] is True:
-        #         if cmdline=="":
-        #             bat_file = srv_antenna_anchor[ix]["bat_file"]
-        #             cmdline=['start', 'cmd', '/c', bat_file]
-        #         if is_batch_file_running(cmdline):
-        #             # print(f"{bat_file} is currently running.")
-        #             srv_antenna_anchor[ix]["status"] = True
-        #         else:
-        #             print(f"{bat_file} is not running.")
-        #             srv_antenna_anchor[ix]["status"] = False
-        #
-        #     if not srv_antenna_anchor[ix]["status"]:
-        #         try:
-        #             srv_antenna_anchor[ix]["status"]=True
-        #             print(f"Restarting {ix}")
-        #             bat_file=srv_antenna_anchor[ix]["bat_file"]
-        #             process, monitor_thread,cmdline = run_bat_file(bat_file,ix,srv_antenna_anchor)
-        #             srv_antenna_anchor[ix]["process"]=process
-        #             srv_antenna_anchor[ix]["monitor_thread"]=monitor_thread
-        #             srv_antenna_anchor[ix]["cmdline"]=cmdline
-        #         except Exception as e:
-        #             srv_antenna_anchor[ix]["status"] = False
-        #             print(e)
+    # webapp initialization
+    app.columnIds =bscanner.tags.gatewaydb.scan_columnIds
+    app.cloud_columnIds = bscanner.tags.gatewaydb.cloud_scan_columnIds
+    app.cloud_csv_row =bscanner.tags.gatewaydb.cloud_csv_row
+    app.localpath = directory + "/"
 
+    app.columnIds_base = bscanner.tags.gatewaydb.scan_columnIds
+    app.cloud_columnIds_base = bscanner.tags.gatewaydb.cloud_scan_columnIds
+    app.cloud_csv_row_base = bscanner.tags.gatewaydb.cloud_csv_row
+    app.localpath_base = directory + "/"
+
+    app.columnIds_detail = bscanner.tags.gatewaydb.scan_det_columnIds
+    app.cloud_columnIds_detail = bscanner.tags.gatewaydb.cloud_scan_columnIds
+    app.cloud_csv_row_detail = bscanner.tags.gatewaydb.cloud_csv_row
+    app.localpath_detail = directory + "/detail/"
+
+    app.columnIds_configuration = bscanner.tags.gatewaydb.scan_cfg_columnIds
+    app.cloud_columnIds_configuration = bscanner.tags.gatewaydb.cloud_scan_columnIds
+    app.cloud_csv_row_configuration = bscanner.tags.gatewaydb.cloud_csv_row
+    app.localpath_configuration = directory + "/configuration/"
+
+    app.location_cvs_columnIds = bscanner.tags.gatewaydb.location_cvs_columnIds
+    app.location_cvs_row = bscanner.tags.gatewaydb.location_cvs_row
+    app.sync_init()
+
+    app.anchors_init = anchors_init
+    app.readscanfile()
+
+    flask_thread = Thread(target=app.run_flask_app)
+    flask_thread.start()
+
+    app.print_statuslog("Starting...")
+    app.print_statuslog("Scanning BoldTags\n")
+    await bscanner.discover_rssi_start()
+    n=0
+    while (n<20):
+        n=n+1
+        app.print_statuslog(".",addLFCR=False if n>1 else True)
+        time.sleep(1)
+    app.print_statuslog("\nFinished Scanning BoldTags...")
+    await bscanner.discover_rssi_stop()
+    rssi_host_scan=bscanner.get_rssi_host_scan()
+
+    while True:
+        #check if MQTTT locators and server are running. If not start them
+        srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
+
+        #check status of the web API - Update type of data selected by API (page_configuration)
         app.checkstatus()
         app_page_configuration=app.page_configuration
         app_localpath=app.localpath
+        #adjust working directory and data columns base on page_configuration
         directory=app_localpath[:-1]
         app_scan_columnIds=app.columnIds
 
@@ -1256,6 +1286,7 @@ async def main():
                 if srv_antenna_anchor[ix]["enabled"]:
                     print("Anchor {0} is disabled".format(srv_antenna_anchor[ix]["bat_file"]))
         if action == "LOCATION" and len(scan_control["tag_re_scan"])>0  and scan_control["redo_scan"]:
+            #in case the loop is for a LOCATION redo
             scannaddress = []
             devprocessed = []
             idupdate = []
@@ -1263,6 +1294,7 @@ async def main():
             doscan=True
             startCTE_address_filter = scan_control["tag_re_scan"]
         else:
+            #Start normal operation requestd by API
             scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan":False, "scan_loop":0}
 
             csv_read_data = []
@@ -1371,6 +1403,7 @@ async def main():
             uuid_data_type_filter = "base"
 
         if doscan:
+            #start tag scanning for requstd operation
             read_nfc_done = False
             scan_mac_filter=app.mac_filter
             #update_mac_filter=app.mac_filter
@@ -1396,6 +1429,9 @@ async def main():
             if discover_rssi:
                 await scanner.start()
                 time.sleep(1)  #5
+
+                await bscanner.discover_rssi_start()
+
                 #await scanner.stop()
             devices_processed=[]
             scannaddress_trim=[]
@@ -1418,7 +1454,7 @@ async def main():
                 #srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
                 #await asyncio.sleep(1.0)
 
-                if param_scan_new_tags or (not param_scan_new_tags and nscan==0):
+                if param_scan_new_tags:# or (not param_scan_new_tags and nscan==0):
                     await bscanner.scan_tags(connect=True)
 
                 nscan=nscan+1
@@ -1542,7 +1578,6 @@ async def main():
                                                     recupdate = res["recupdate"]
                                                     devices_processed_location = res["devices_processed_location"]
 
-
                                             except Exception as e:
                                                 print(e)
                                                 app.print_statuslog("Error {0}".format(e))
@@ -1567,7 +1602,7 @@ async def main():
 
         else:
             scanstarted=False
-            time.sleep(5)
+            time.sleep(1)
 
         Stop_collecting = True
         if (action == "UPDATE"):
@@ -1724,13 +1759,29 @@ async def main():
                     if len(scan_mac_filter)>0 or param_keep_data:
                         if os.path.exists(file_path_lastscan):
                             df_back = pd.read_csv(file_path_lastscan)
+
+                            #in cas change in file format
+                            for x in app.columnIds:
+                                if x not in list(df_back.columns):
+                                    df_back[x]=None
+
+                            #update existing records with new data
+                            df_back["status"]="not read"
                             if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
                                 for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
                                     for k in app.columnIds[1:-2]:
                                         df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
                                     df_back.loc[ix, "status"] = \
                                     df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
-                                df=df_back[app.columnIds[:-2]]
+                                df_back=df_back[app.columnIds[:-2]]
+
+                            #add new records
+                            ix=[x  for x in df["mac"].values if x not in df_back["mac"].values ]
+                            if len(ix)>0:
+                                ixr=df["mac"].isin(ix)
+                                df_back=pd.concat([df_back,df.loc[ixr,app.columnIds[:-2]]], ignore_index=True)
+
+                            df=df_back
 
                     # Check if the file exists
                     if os.path.exists(file_path):
@@ -1764,25 +1815,8 @@ async def main():
                     else:
                         df_res = df
                     df_res_1=mergelocation(resdf, df_res, app_scan_columnIds)
-                    # if resdf is not None:
-                    #     if "x" in list(resdf.columns) and "y" in list(resdf.columns):
-                    #         df_res=df_res.set_index("tag_id").reset_index().merge(resdf.set_index("tag_mac")[["x","y"]], left_on="tag_id",right_on="tag_mac", how="left")
-                    #         df_res=df_res[['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series', 'asset_images_file_extension','read_nfc', 'x', 'y']]
-                    #         df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
-                    #         df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
-                    #     else:
-                    #         df_res["x"] = np.nan
-                    #         df_res["y"] = np.nan
-                    # else:
-                    #     df_res["x"]=np.nan
-                    #     df_res["y"] = np.nan
-
                     df_res_1.to_csv(file_path,index=False)
-                    # if d.name=="Blinky ExampleC":
-                    #     print('Found it')
-                    #     myDevice = d
-                    #     break
-                    # if d.name=="BoldTag":
+
                 except Exception as e:
                     print("UPDATE file error")
                     app.print_statuslog("UPDATE file error")
@@ -1808,7 +1842,15 @@ async def main():
                             # return False
                     else:
                         print(f"File '{file_path_lastscan}' does not exist.")
-                        pd.DataFrame(columns=scan_columnIds).to_csv(file_path, index=False)
+                        # pd.DataFrame(columns=scan_columnIds).to_csv(file_path, index=False)
+                        pd.DataFrame(columns=app.scan_columnIds).to_csv(file_path, index=False)
+
+                    #mark as not read
+                    if os.path.exists(file_path):
+                        df = pd.read_csv(file_path)
+                        if df.shape[0]>0:
+                            df["status"]="not read"
+                            df.to_csv(file_path, index=False)
 
         if webcancelprocess or app.webcancel :
             app.webcancel=False
@@ -1833,30 +1875,7 @@ async def main():
 
 
 
-#webapp initialization
-app.columnIds=scan_columnIds
-app.cloud_columnIds = cloud_scan_columnIds
-app.cloud_csv_row=cloud_csv_row
-app.localpath=directory+"/"
 
-app.columnIds_base=scan_columnIds
-app.cloud_columnIds_base = cloud_scan_columnIds
-app.cloud_csv_row_base=cloud_csv_row
-app.localpath_base=directory+"/"
-
-app.columnIds_detail=scan_extended_columnIds
-app.cloud_columnIds_detail = cloud_scan_columnIds
-app.cloud_csv_row_detail=cloud_csv_row
-app.localpath_detail=directory+"/detail/"
-
-app.columnIds_configuration=scan_config_columnIds
-app.cloud_columnIds_configuration = cloud_scan_columnIds
-app.cloud_csv_row_configuration=cloud_csv_row
-app.localpath_configuration=directory+"/configuration/"
-
-app.location_cvs_columnIds=location_cvs_columnIds
-app.location_cvs_row=location_cvs_row
-app.sync_init()
 
 #Run
 asyncio.run(main())

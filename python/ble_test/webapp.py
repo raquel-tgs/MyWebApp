@@ -841,6 +841,11 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
                     # data.loc[list(set(updatedix)),columnIds[:-2]].to_csv(file_path,index=False)
                     dfilter_back = [x.replace(":", "") for x in
                                     list(set(list(data.loc[list(set(updatedix)), "mac"].values)))]
+                    #check updatd conig
+                    for x in columnIds:
+                        if x not in list(data_update.columns):
+                            data_update[x]=None
+
                     data_update.loc[list(set(updatedix)),columnIds[:-2]].to_csv(file_path,index=False)
                 else:
                     print("nothing to update")
@@ -1082,7 +1087,7 @@ def checkstatus():
                     if os.path.exists(localpath + "scan_update_read.csv"):
                         dfupdate_read = pd.read_csv(localpath + "scan_update_read.csv")
                         for ix in dfupdate_read.index:
-                            for k in list(dfupdate_read.columns)[1:-2]:
+                            for k in list(dfupdate_read.columns):
                                 if not dfupdate_read[dfupdate_read.index==ix][k].isna().values[0]:
                                     data.loc[data[data['mac']==dfupdate_read.loc[ix,'mac']].index,k]=dfupdate_read.loc[ix,k]
                     data["read_nfc"] = 0  #clear flag
@@ -1162,6 +1167,10 @@ def readscanfile():
     global scan_location
     if os.path.exists(localpath+"scan.csv"):
         data = pd.read_csv(localpath+"scan.csv")
+        for x in columnIds:
+            if x not in list(data.columns):
+                data[x]=None
+
         data_update=data.copy()
         for k in list(data_update.columns)[1:]:
             data_update[k]=None

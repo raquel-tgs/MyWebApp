@@ -169,6 +169,9 @@
           { id: 'moved', name: 'moved',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'read_battery_voltage', name: 'read_battery_voltage',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'battery_voltage', name: 'battery_voltage',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'tag_firmware', name: 'tag_firmware',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'manufacturer_data', name: 'manufacturer_data',  'attributes': editableCellAttributes, sort: true },
+          { id: 'rssi_host', name: 'rssi_host',  'attributes': editableCellAttributes, sort: true },
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,
             formatter: (cell, row) => {
               return gridjs.html(`<input type="checkbox" class="checkbox_read_nfc" data-id="${row.cells[1].data}" />`);

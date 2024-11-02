@@ -1,5 +1,6 @@
 
 import asyncio
+from tarfile import TruncatedHeaderError
 
 import bleak
 import pandas as pd
@@ -23,6 +24,7 @@ class tag:
         self.custom_service=custom_service
         self.index=index
         self.name=name
+        self.rssi_host_scan=None
 
 class boldtag:
     char_uuid = {}
@@ -119,6 +121,8 @@ class boldtag:
                      "logo_images_crc", "signature_images_crc", "owner_company_name", "owner_data",
                      "ndir_id", "asset_images_file_extension", "tag_mac", "gattdb_tag_periodic_scan"]
 
+    serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
+
     def __init__(self,scanner_param, webapp=None, csv_row=None):
         self.scanner_param=scanner_param
         self.webapp=webapp
@@ -132,11 +136,13 @@ class boldtag:
         self.connected=False
         self.client=None
         self.custom_service=None
+        self.rssi_host_scan=None
 
         self.gatewaydb = gatewaydb()
         self.csv_row = self.gatewaydb.csv_row
         self.csv_cfg_row = self.gatewaydb.csv_cfg_row
         self.csv_det_row = self.gatewaydb.csv_det_row
+
         try:
             for ix in self.char_uuid.keys():
                 if self.char_uuid[ix]["id"] in self.char_uuid_nfc:
@@ -180,7 +186,9 @@ class boldtag:
             self.current.name = self.name
             self.current.custom_service = self.custom_service
             self.current.index= self.index
+            self.current.rssi_host_scan= self.rssi_host_scan
             self.items[self.index]=self.current
+
     def set_current(self, index):
         self.update_current()
         if index!=self.index and index>=0 and index<self.limit :
@@ -192,6 +200,7 @@ class boldtag:
             self.name = self.current.name
             self.client=self.current.client
             self.custom_service=self.current.custom_service
+            self.rssi_host_scan==self.current.rssi_host_scan
             self.gatewaydb.set_mac(self.address)
 
     def get_current(self):
@@ -250,6 +259,16 @@ class boldtag:
                 self.index = self.index + 1
             else:
                 self.index=0
+
+    def update_rssi_host_scan(self,address,rssi_host_scan):
+        try:
+            index = [x for x in range(len(self.items)) if self.items[x].address == address]
+            if len(index) > 0:
+                tag=self.items[index]
+                tag.rssi_host_scan=rssi_host_scan
+                self.items[index]=tag
+        except Exception as e:
+            print(e)
 
     def find_tag(self, address, set_current=True):
         try:
@@ -339,6 +358,13 @@ class boldtag:
 
         csv_row_new["mac"] = address
         csv_row_new["name"] = device.name
+        manufacturer_data="0000000000000000"
+        try:
+            manufacturer_data=device.metadata["manufacturer_data"][767].hex()
+        except Exception as e:
+            print(e)
+        csv_row_new["manufacturer_data"] =manufacturer_data
+        csv_row_new["rssi_host"]=device.rssi
 
         #serv_uuid_Custom_Service=self.scanner_param["serv_uuid_Custom_Service"]
         disableCTE_duringlocation=self.scanner_param["disableCTE_duringlocation"]
@@ -418,7 +444,7 @@ class boldtag:
                                             if id in csv_row_new.keys():
                                                 csv_row_new[id] = val
                                 except Exception as e:
-                                    if e.errno==22: #THE_OBJECT_HAS_BEEN_CLOSED = 22
+                                    if type(e) is  bleak.exc.BleakDeviceNotFoundError: #THE_OBJECT_HAS_BEEN_CLOSED = 22
                                         msg="Connection closed for address:{} id:{} char_uuid_id:{}".format(address, id, char_uuid_id)
                                         if (app is not None): app.print_statuslog(msg)
                                         print(msg)
@@ -434,6 +460,16 @@ class boldtag:
 
                                     result = False
 
+                            # try:
+                            #     self.csv_read_data["rssi"] = None
+                            #     if len(list(rssi_host_scan.keys())) > 0:
+                            #         ix = max([ix for ix in list(rssi_host_scan.keys()) if
+                            #                   rssi_host_scan[ix]["address"] == d.address.replace(":", "")])
+                            #         if rssi_host_scan[ix]["address"] == d.address.replace(":", ""):
+                            #             if csv_read_data is not None:
+                            #                 rssi_host = rssi_host_scan[ix]["rssi_host"]
+                            # except Exception as e:
+                            #     print(e)
 
                             csv_read_data.append(csv_row_new)
 
@@ -711,15 +747,35 @@ class boldtag:
 class gatewaydb:
     csv_row = {"mac": "", "name": "", "tag_id": "", "asset_id": "", "certificate_id": "", "type": "",
                "expiration_date": "", "color": "", "series": "", "read_nfc": "", "status": "", "status_code": "",
-               "asset_images_file_extension": "", "x": "", "y": ""}
+               "asset_images_file_extension": "","manufacturer_data":"","rssi_host":"", "x": "", "y": ""}
+    scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
+                      "series", "read_nfc", "status", "status_code", "asset_images_file_extension", "x", "y"]
 
-    csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
+    csv_cfg_row = {"mac":"", "name": "","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                    "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
-                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","tag_firmware":"","status":"","x":"","y":""}
+                   "battery_voltage":"","altitude":"","moved":"","tag_firmware":"","manufacturer_data":"","rssi_host":"","status":"","x":"","y":""}
+    scan_cfg_columnIds = ["mac", "status_code", "enable_cte", "tag_enabled", "tag_advertisement_period",
+                             "ble_on_period", "tag_mac", "read_battery_voltage",
+                             "ble_on_wakeup_period", "ble_off_period", "tag_periodic_scan", "altitude", "moved",
+                             "battery_voltage", "tag_firmware","manufacturer_data","rssi_host", "status", "x", "y"]
 
-    csv_det_row = {"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
+    csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
                      "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
+                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","manufacturer_data":"","rssi_host":"","status":"","x":"","y":""}
+    scan_det_columnIds = ["mac", "certification_company_name",
+                               "certification_company_id", "certification_place", "certification_date", "test_type",
+                               "asset_diameter", "batch_id", "batch_date",
+                               "machine_id", "status_code", "ble_data_crc", "asset_images_crc", "logo_images_crc",
+                               "signature_images_crc", "owner_company_name",
+                               "owner_data", "altitude", "moved", "battery_voltage", "asset_comment", "ndir_id",
+                               "status", "x", "y"]
+
+    location_cvs_row = {"tag_mac": "", "out_prob": "", "out_prob_k": "", "anchors": "", "result": "", "x": "", "y": ""}
+    location_cvs_columnIds = ["tag_mac", "out_prob", "out_prob_k", "anchors", "result", "x", "y"]
+
+    cloud_csv_row = {"mac": "", "logo_file_extension": "", "signature_image_file_extension": "", "is_machine": ""}
+    cloud_scan_columnIds = ["mac", "logo_file_extension", "signature_image_file_extension", "is_machine"]
+
 
     def __init__(self):
         self.new_csv_row=None
@@ -797,12 +853,13 @@ class gatewaydb:
         return res
 
 class boldscanner:
+    DEVICE_NAME = "BoldTag"
 
-    def __init__(self, serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da",disableCTE_duringlocation=True,keepactive_all_CTE_during_location=False,
+    def __init__(self, disableCTE_duringlocation=True,keepactive_all_CTE_during_location=False,
                                 use_MQTT = False, mqttclient = None, keep_mqtt_on = False,
                                 wait_for_mqtt_angles = True, CTE_Wait_Time_prescan = 55, CTE_Wait_Time = 20,webapp=None):
         self.scanner_param={}
-        self.scanner_param["serv_uuid_Custom_Service"] = serv_uuid_Custom_Service
+        self.scanner_param["serv_uuid_Custom_Service"] = ""#serv_uuid_Custom_Service
         self.scanner_param["disableCTE_duringlocation"] =disableCTE_duringlocation
         self.scanner_param["keepactive_all_CTE_during_location"] =keepactive_all_CTE_during_location
         self.scanner_param["use_MQTT"] =use_MQTT
@@ -812,21 +869,83 @@ class boldscanner:
         self.scanner_param["CTE_Wait_Time_prescan"] =CTE_Wait_Time_prescan
         self.scanner_param["CTE_Wait_Time"] =CTE_Wait_Time
 
-        # self.scanner.register_detection_callback(self.device_found)
+        self.scanner = BleakScanner()
+        self.scanner.register_detection_callback(self.device_found)
+        self.discover_rssi =False
+
         self.webapp = webapp
 
         self.tags=boldtag(self.scanner_param,self.webapp)
 
+        self.scanner_param["serv_uuid_Custom_Service"] =  self.tags.serv_uuid_Custom_Service
 
-    def device_found(self,device: BLEDevice, advertisement_data: AdvertisementData):
-        print(device.name,device.address)
+        self.startCTE_address_filter=[]
+        self.rssi_host_scan={}
+        self.rssi_host_scan_reset = False
+        self.rssi_host_scan_disable=False
+
+        self.rssi_tag_scan={}
+
+
+    def get_rssi_host_scan(self):
+        self.rssi_host_scan_disable = True
+        rssi_host_scan=self.rssi_host_scan.copy()
+        self.rssi_host_scan_disable = False
+        return rssi_host_scan
+
+
+    def reset_rssi_host_scan(self):
+        self.rssi_host_scan_reset=True
+
+    async def discover_rssi_start(self):
+        if self.discover_rssi == False:
+            await self.scanner.start()
+            time.sleep(1)
+            self.discover_rssi = True
+
+    async def discover_rssi_stop(self):
+        if self.discover_rssi == True:
+            await self.scanner.stop()
+            self.discover_rssi = False
+
+            # ---------------------------------------------------------------------#
+    # Call back advertisement
+    #
+    # ---------------------------------------------------------------------#
+    async def device_found(self, device: BLEDevice, advertisement_data: AdvertisementData):
+        """Decode iBeacon."""
+        try:
+            bres = False
+            if device.name is not None and not self.rssi_host_scan_disable:
+                if device.name.startswith(self.DEVICE_NAME):
+                    address = device.address.replace(":", "")
+                    rssi = advertisement_data.rssi
+                    if address in self.startCTE_address_filter or len(self.startCTE_address_filter) == 0:
+                        # print("RSSI {0}:{1}".format(address,rssi))
+                        tag_data_crc = "0000000000000000"
+                        try:
+                            if len(advertisement_data.manufacturer_data.items()) > 0:
+                                tag_data_crc = [x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
+                        except Exception as e:
+                            print(e)
+                        rssi_host_scan={"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
+                        if self.rssi_host_scan_reset==True:
+                            self.rssi_host_scan={}
+                            self.rssi_host_scan_reset=False
+
+                        self.rssi_tag_scan[address]={"time": time.time().strftime("%m%d%Y-%H%M%S"), "rssi_host": rssi, "tag_data_crc": tag_data_crc}
+                        self.rssi_host_scan[len(self.rssi_host_scan)] =rssi_host_scan# {"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
+                        self.tags.update_rssi_host_scan(address,rssi_host_scan)
+
+        except Exception as e:
+            print(f'error in device_found {e}')
 
     async def scan_tags(self,connect=False, max_retry=1):
         try:
             new_tags=[]
             existing_tags=[]
-            scanner = BleakScanner()
-            devices = await scanner.discover()
+            #scanner = BleakScanner()
+            devices = await self.scanner.discover()
             for device in devices:
                 # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
                 if device.name is not None:
