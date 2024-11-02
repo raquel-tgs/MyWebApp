@@ -106,6 +106,9 @@ class boldtag:
                      'type': "HEX", "length": 4, "data_type": "configuration","NFC":False}
     char_uuid[39] = {"id": "moved", "uuid": "e410f434-a1f1-4088-9578-19d08830a489", "value": "", "scan": True,
                      'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
+    char_uuid[40] = {"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "", "scan": True,
+                     'type': "UTF-8", "length": 10, "data_type": "configuration", "NFC": False}
+
 
     char_uuid_nfc = ["certification_company_name", "certification_company_id", "certification_place",
                      "certification_date",
@@ -712,7 +715,7 @@ class gatewaydb:
 
     csv_cfg_row = {"mac":"","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                    "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
-                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","status":"","x":"","y":""}
+                   "battery_voltage":"","read_battery_voltage":"","altitude":"","moved":"","tag_firmware":"","status":"","x":"","y":""}
 
     csv_det_row = {"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
                      "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",

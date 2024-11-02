@@ -193,7 +193,7 @@ char_uuid[36]={"id": "battery_voltage", "uuid": "9b9dcb7a-b2f5-4a3d-8e59-b96a9b8
 char_uuid[37]={"id": "read_battery_voltage", "uuid": "914254cd-dafe-4bb8-8517-048adb4e08ab", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
 char_uuid[38]={"id": "altitude", "uuid": "6d139387-9f68-4827-8442-641956a94979", "value": "","scan":True,'type':"HEX","length":4, "data_type":"configuration","NFC":False}
 char_uuid[39]={"id": "moved", "uuid": "e410f434-a1f1-4088-9578-19d08830a489", "value": "","scan":True,'type':"HEX","length":1, "data_type":"configuration","NFC":False}
-
+char_uuid[40]={"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "","scan":True,'type':"UTF-8","length":10, "data_type":"configuration","NFC":False}
 
 def filter_db(id, data_type=None, scan=None):
     try:
@@ -231,8 +231,12 @@ serv_uuid_Custom_File_Transfer_Service = "4c209b89-3330-4f18-b26e-d90f8653306e"
 #x,y must be the last in the row defintion as they are not part of the scan
 # csv_row={'mac':"","name":"",'tag_id':"",'asset_id':"",'certificate_id':"",'type':"",'expiration_date':"",'color':"",'series':"",'asset_images_file_extension':"","read_nfc":""}
 # scan_columnIds = ['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series', 'asset_images_file_extension','read_nfc',  'x', 'y'];
+
+#base
 csv_row={"mac":"","name":"","tag_id":"","asset_id":"","certificate_id":"","type":"","expiration_date":"","color":"","series":"","read_nfc":"","status":"","status_code":"","asset_images_file_extension":"","x":"","y":""}
 scan_columnIds=["mac","name","tag_id","asset_id","certificate_id","type","expiration_date","color","series","read_nfc","status","status_code","asset_images_file_extension","x","y"]
+
+#detail
 csv_extended_row={"mac":"","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
          "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
          "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","ndir_id":"","status":"","x":"","y":""}
@@ -240,11 +244,12 @@ scan_extended_columnIds=["mac","certification_company_name",
                 "certification_company_id","certification_place","certification_date","test_type","asset_diameter","batch_id","batch_date",
                 "machine_id","status_code","ble_data_crc","asset_images_crc","logo_images_crc","signature_images_crc","owner_company_name",
                 "owner_data","altitude","moved","battery_voltage","asset_comment","ndir_id","status","x","y"]
+#onfiguration
 csv_config_row={"mac":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                 "ble_on_period":"","ble_on_wakeup_period":"","tag_mac":"","read_battery_voltage":"",
-                "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","status":"","x":"","y":""}
+                "ble_off_period":"","tag_periodic_scan":"","altitude":"","moved":"","battery_voltage":"","tag_firmware":"","status":"","x":"","y":""}
 scan_config_columnIds=["mac","status_code","enable_cte","tag_enabled","tag_advertisement_period","ble_on_period","tag_mac","read_battery_voltage",
-                       "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","status","x","y"]
+                       "ble_on_wakeup_period","ble_off_period","tag_periodic_scan","altitude","moved","battery_voltage","tag_firmware","status","x","y"]
 
 cloud_csv_row={"mac":"","logo_file_extension":"","signature_image_file_extension":"","is_machine":""}
 cloud_scan_columnIds=["mac","logo_file_extension","signature_image_file_extension","is_machine"]

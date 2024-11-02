@@ -258,26 +258,26 @@ def canceloperation():
 #
 #     # return jsonify({"message": response_message})
 
-@app.route("/datatype_dropdown/page_configuration")
-def datatype_dropdown():
-    global page_datatype
-    #data = request.get_json()
-    # Return a JSON response to the frontend
-    return render_template("page_configuration.html") #page_configuration()
-
-@app.route("/datatype_dropdown/page_configuration_configuration")
-def datatype_dropdown_configuration():
-    global page_datatype
-    #data = request.get_json()
-    # Return a JSON response to the frontend
-    return page_configuration_configuration()
-
-@app.route("/datatype_dropdown/page_configuration_detail")
-def datatype_dropdown_detail():
-    global page_datatype
-    #data = request.get_json()
-    # Return a JSON response to the frontend
-    return page_configuration_detail()
+# @app.route("/datatype_dropdown/page_configuration")
+# def datatype_dropdown():
+#     global page_datatype
+#     #data = request.get_json()
+#     # Return a JSON response to the frontend
+#     return page_configuration()
+#
+# @app.route("/datatype_dropdown/page_configuration_configuration")
+# def datatype_dropdown_configuration():
+#     global page_datatype
+#     #data = request.get_json()
+#     # Return a JSON response to the frontend
+#     return page_configuration_configuration()
+#
+# @app.route("/datatype_dropdown/page_configuration_detail")
+# def datatype_dropdown_detail():
+#     global page_datatype
+#     #data = request.get_json()
+#     # Return a JSON response to the frontend
+#     return page_configuration_detail()
 
 @app.route('/api/data')
 def data_api():
@@ -596,8 +596,6 @@ def page_configuration_detail():
 
 @app.route('/page_configuration_configuration')
 def page_configuration_configuration():
-
-
     global columnIds
     global columnIds_location
     global cloud_csv_row
@@ -1023,6 +1021,15 @@ def download_image():
         return send_file(IMAGE_PATH, as_attachment=True, download_name='rodpump.jpg')
     except Exception as e:
         return str(e)
+
+
+@app.route('/get_backend_status', methods=['GET'])
+def get_variables():
+    global status
+    global operation
+
+    # Return the variables as a JSON response
+    return jsonify(status=status, operation=operation)
 
 
 def run_flask_app():

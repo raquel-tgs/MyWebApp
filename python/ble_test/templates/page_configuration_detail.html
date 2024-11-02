@@ -33,7 +33,7 @@
      </form>
       <script>
       // Set the selected value by using the value attribute
-      document.getElementById("DataType").selectedIndex = 2;
+      document.getElementById("DataType").selectedIndex = 1;
     </script>
 
     <script>
@@ -41,12 +41,10 @@
             const selectedPage = document.getElementById("DataType").value;
             if (selectedPage) {
                 try {
-                    // Fetch the rendered HTML for the selected page from the backend
-                    const response = await fetch(`/datatype_dropdown/${selectedPage}`);
-                    const pageContent = await response.text();
+                      if (selectedPage) {
+                            window.location.href = selectedPage;  // Redirects to the selected page endpoint
+                        }
 
-                    // Set the fetched HTML content to the content container
-                    document.getElementById("contentContainer").innerHTML = pageContent;
                 } catch (error) {
                     console.error('Error loading page:', error);
                 }
