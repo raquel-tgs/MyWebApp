@@ -1,6 +1,6 @@
 
 import asyncio
-from tarfile import TruncatedHeaderError
+#from tarfile import TruncatedHeaderError
 
 import bleak
 import pandas as pd
@@ -16,7 +16,7 @@ import numpy as np
 import time
 
 class tag:
-    def __init__(self,device,address,connected,client,custom_service,index,name):
+    def __init__(self,device,address,connected,client,custom_service,index,name,rssi_host_scan,last_seen,ble_data_crc,asset_images_crc,rssi_tag_scan):
         self.device=device
         self.address=address
         self.connected=connected
@@ -24,8 +24,11 @@ class tag:
         self.custom_service=custom_service
         self.index=index
         self.name=name
-        self.rssi_host_scan=None
-
+        self.rssi_host_scan = rssi_host_scan
+        self.last_seen=last_seen
+        self.ble_data_crc=ble_data_crc
+        self.asset_images_crc=asset_images_crc
+        self.rssi_tag_scan=rssi_tag_scan
 class boldtag:
     char_uuid = {}
     char_uuid[0] = {"id": "tag_id", "uuid": "c01cdf18-2465-4df6-956f-fde4867e2bc1", "value": "", "scan": True,
@@ -110,6 +113,8 @@ class boldtag:
                      'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[40] = {"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "", "scan": True,
                      'type': "UTF-8", "length": 10, "data_type": "configuration", "NFC": False}
+    char_uuid[41] = {"id": "end_transac", "uuid": "4535350a-0794-43e5-89f6-74eae561a6aa", "value": "", "scan": True,
+                     'type': "HEX", "length": 1, "data_type": "configuration", "NFC": False}
 
 
     char_uuid_nfc = ["certification_company_name", "certification_company_id", "certification_place",
@@ -123,7 +128,7 @@ class boldtag:
 
     serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
 
-    def __init__(self,scanner_param, webapp=None, csv_row=None):
+    def __init__(self,scanner_param, webapp=None,rssi_tag_scan=None):
         self.scanner_param=scanner_param
         self.webapp=webapp
         self.limit = 0
@@ -137,6 +142,12 @@ class boldtag:
         self.client=None
         self.custom_service=None
         self.rssi_host_scan=None
+        self.last_seen=None
+        self.ble_data_crc=None
+        self.asset_images_crc=None
+
+        self.rssi_tag_scan=rssi_tag_scan
+
 
         self.gatewaydb = gatewaydb()
         self.csv_row = self.gatewaydb.csv_row
@@ -177,31 +188,64 @@ class boldtag:
         # Returns the length of the list
         return self.limit
 
+    def get_ble_data_crc(self):
+        res="00000000"
+        try:
+            if self.rssi_tag_scan is not None:
+                if self.address.replace(":","") in list( self.rssi_tag_scan.keys()):
+                    res=self.rssi_tag_scan[self.address]["ble_data_crc"]
+        except Exception as e:
+            print(e)
+        return  res
+    def get_asset_images_crc(self):
+        res="00000000"
+        try:
+            if self.rssi_tag_scan is not None:
+                if self.address.replace(":","") in list( self.rssi_tag_scan.keys()):
+                    res=self.rssi_tag_scan[self.address]["asset_images_crc"]
+        except Exception as e:
+            print(e)
+        return  res
     def update_current(self):
-        if self.index>=0 and self.index<self.limit and self.current is not None:
-            self.current.device=self.device
-            self.current.address=self.address
-            self.current.connected=self.connected
-            self.current.client=self.client
-            self.current.name = self.name
-            self.current.custom_service = self.custom_service
-            self.current.index= self.index
-            self.current.rssi_host_scan= self.rssi_host_scan
-            self.items[self.index]=self.current
+        try:
+            if self.index>=0 and self.index<self.limit and self.current is not None:
+                self.current.device=self.device
+                self.current.address=self.address
+                self.current.connected=self.connected
+                self.current.client=self.client
+                self.current.name = self.name
+                self.current.custom_service = self.custom_service
+                self.current.index= self.index
+                self.current.rssi_host_scan= self.rssi_host_scan
+                self.current.last_seen = self.last_seen
+                self.current.ble_data_crc = self.ble_data_crc
+                self.current.asset_images_crc=self.asset_images_crc
+
+                self.items[self.index]=self.current
+        except Exception as e:
+            print(e)
 
     def set_current(self, index):
-        self.update_current()
-        if index!=self.index and index>=0 and index<self.limit :
-            self.index=index
-            self.current = self.items[self.index]
-            self.device=self.current.device
-            self.address=self.current.address
-            self.connected=self.current.connected
-            self.name = self.current.name
-            self.client=self.current.client
-            self.custom_service=self.current.custom_service
-            self.rssi_host_scan==self.current.rssi_host_scan
-            self.gatewaydb.set_mac(self.address)
+        try:
+            self.update_current()
+            if index>=0 and index<self.limit :
+                self.index=index
+                self.current = self.items[self.index]
+                self.device=self.current.device
+                self.address=self.current.address
+                self.connected=self.current.connected
+                self.name = self.current.name
+                self.client=self.current.client
+                self.custom_service=self.current.custom_service
+                self.rssi_host_scan=self.current.rssi_host_scan
+                self.last_seen =self.current.last_seen
+                self.ble_data_crc=self.current.ble_data_crc
+                self.asset_images_crc=self.current.asset_images_crc
+
+                self.gatewaydb.set_mac(self.address)
+        except Exception as e:
+            print(e)
+
 
     def get_current(self):
         return self.current
@@ -209,12 +253,16 @@ class boldtag:
 
     async def new(self, device, connect=False, max_retry=3):
         #add new data
-        self.limit = self.limit + 1
-        item=tag(client=None, connected=False, device=device, address=device.address,custom_service=None, index=self.index, name=device.name)
-        self.items.append(item)
-        self.set_current(self.limit-1)
-        if connect:
-            await self.connect(max_retry=max_retry)
+        try:
+            self.limit = self.limit + 1
+            item=tag(device=device, address=device.address,connected=False, client=None, custom_service=None, index=self.index,
+                     name=device.name,rssi_host_scan=None,last_seen=None,ble_data_crc=None,asset_images_crc=None,rssi_tag_scan=self.rssi_tag_scan)
+            self.items.append(item)
+            self.set_current(self.limit-1)
+            if connect:
+                await self.connect(max_retry=max_retry)
+        except Exception as e:
+            print(e)
 
     async def connect(self,max_retry=3):
         ncount = 0
@@ -366,6 +414,10 @@ class boldtag:
         csv_row_new["manufacturer_data"] =manufacturer_data
         csv_row_new["rssi_host"]=device.rssi
 
+        csv_row_new["asset_images_crc"] =self.get_asset_images_crc() #manufacturer_data[:8] #
+        csv_row_new["ble_data_crc"] =self.get_ble_data_crc() #manufacturer_data[8:]#
+
+
         #serv_uuid_Custom_Service=self.scanner_param["serv_uuid_Custom_Service"]
         disableCTE_duringlocation=self.scanner_param["disableCTE_duringlocation"]
         keepactive_all_CTE_during_location =self.scanner_param["keepactive_all_CTE_during_location"]
@@ -383,10 +435,16 @@ class boldtag:
         if service is not None:
             # try to connect
             try:
+
+                last_seen=time.strftime("%m/%d/%Y %H:%M:%S")
+                csv_row_new["last_seen"] = last_seen
                 result = True
+                self.last_seen=last_seen
                 myDevice_1_address = device.address
                 char_uuid_enable_cte = self.filter_db(id="enable_cte")[0]["uuid"]
                 char_uuid_update_nfc = self.filter_db(id="update_nfc")[0]["uuid"]
+                char_uuid_ble_data_crc= self.filter_db(id="ble_data_crc")[0]["uuid"]
+
                 nconerr = -1
                 # if client is not None:
                 #     connected = client.is_connected
@@ -436,7 +494,10 @@ class boldtag:
                                             val = int.from_bytes(char_uuid_val, byteorder='big')
                                         else:
                                             if type(char_uuid_val) is bytes:
-                                                val = char_uuid_val.decode('utf-8')
+                                                if len( char_uuid_val.split(b'\x00')[0])>0:
+                                                    val = char_uuid_val.split(b'\x00')[0].decode("Utf-8") #char_uuid_val.decode('utf-8')
+                                                else:
+                                                    val = ""
                                             else:
                                                 val = str(char_uuid_val)
                                         scan_list[k]['value'] = val
@@ -496,7 +557,7 @@ class boldtag:
                                                 pass
                                         else:
                                             valread = bytes(b'')
-
+                                        csv_row_new[id] = valread
                                         if valread==newval:
                                             msg="tag enabled/diabled successful for :{} value:{} ".format(address, valread)
                                         else:
@@ -579,6 +640,7 @@ class boldtag:
 
                     if (action == "UPDATE"):
                         scan_list = self.filter_db(id=None, data_type=uuid_data_type_filter, scan=True)
+                        # scan_list.extend(self.filter_db(id="end_transac"))
                         dfupdate_read = dfupdate.copy()
                         recupdate = dfupdate.copy()
                         if service is not None:
@@ -591,6 +653,7 @@ class boldtag:
                             tag_updated = False
                             error_update = False
                             read_nfc = False
+
                             index_update = rec.index
                             for k in range(len(scan_list)):
                                 try:
@@ -598,8 +661,7 @@ class boldtag:
                                     if scan:
                                         char_uuid_id = scan_list[k]['uuid']
                                         id = scan_list[k]['id']
-                                        if not rec[id].isna().values[
-                                            0] and scan_list[k]["id"] !="mac":  # only update what is not None (value has changed)
+                                        if not rec[id].isna().values[0] and scan_list[k]["id"] !="mac":  # only update what is not None (value has changed)
                                             print("Updating {0}".format(id))
                                             if app is not None:app.print_statuslog(
                                                 "Updating {0}".format(id))
@@ -621,7 +683,13 @@ class boldtag:
                                                 char_uuid_id_read_nfc = char_uuid_id
                                                 k_read_nfc = k
 
-                                            if scan_list[k]["id"] != "read_nfc" :
+                                            # if not end_transac and (scan_list[k]["id"] == "end_transac"):
+                                            #     end_transac = (newval == 1)
+                                            #     k_end_transac = k
+                                            #     id_end_transac = id
+
+
+                                            if scan_list[k]["id"] != "read_nfc":# and scan_list[k]["id"] != "end_transac" :
                                                 if scan_list[k]['NFC'] == True:
                                                     fupdate = True
 
@@ -705,6 +773,41 @@ class boldtag:
                                     print(e)
                                     if app is not None:  app.print_statuslog("Error {0}".format(e))
                                     dfupdate_read.loc[index_update, "status"] = "update error"
+
+                            if fupdate:
+                                try:
+                                    end_transac_done = True
+                                    char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
+                                    char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
+                                    newval = newval.to_bytes(char_uuid_end_transac_length, byteorder='big', signed=False)
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_end_transac), newval,response=True)
+                                    #dfupdate_read.loc[index_update, id_end_transac] = 0  # clear flag
+
+                                    if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
+
+                                    #update crc
+                                    id="ble_data_crc"
+                                    valread_raw = await client.read_gatt_char(char_uuid_ble_data_crc)
+                                    if valread_raw is not None:
+                                        if type(valread_raw) is bytearray:
+                                            valread = bytes(valread_raw)
+                                        else:
+                                            pass
+                                    else:
+                                        valread = bytes(b'')
+
+                                    if type(valread) is bytes:
+                                        val = valread.decode('utf-8')
+                                    else:
+                                        val = str(valread)
+                                    #if id in list(dfupdate_read.columns): dfupdate_read.loc[index_update, id] = val
+                                    #dfupdate_read.loc[index_update, "end_transac"] = 0
+                                    self.ble_data_crc=val
+
+                                except Exception as e:
+                                    print(e)
+                                    if app is not None:  app.print_statuslog("Error {0}".format(e))
+                                    dfupdate_read.loc[index_update, "status"] = "update error"
                         else:
                             pass
 
@@ -747,27 +850,27 @@ class boldtag:
 class gatewaydb:
     csv_row = {"mac": "", "name": "", "tag_id": "", "asset_id": "", "certificate_id": "", "type": "",
                "expiration_date": "", "color": "", "series": "", "read_nfc": "", "status": "", "status_code": "",
-               "asset_images_file_extension": "","manufacturer_data":"","rssi_host":"", "x": "", "y": ""}
+               "asset_images_file_extension": "","manufacturer_data":"","rssi_host":"","last_seen":"", "asset_images_crc":"","ble_data_crc":"", "x": "", "y": ""}
     scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
-                      "series", "read_nfc", "status", "status_code", "asset_images_file_extension", "x", "y"]
+                      "series", "read_nfc", "status", "status_code", "asset_images_file_extension","last_seen","asset_images_crc","ble_data_crc", "x", "y"]
 
     csv_cfg_row = {"mac":"", "name": "","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
                    "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
-                   "battery_voltage":"","altitude":"","moved":"","tag_firmware":"","manufacturer_data":"","rssi_host":"","status":"","x":"","y":""}
+                   "battery_voltage":"","altitude":"","moved":"","tag_firmware":"","manufacturer_data":"","rssi_host":"","last_seen":"","asset_images_crc":"","status":"","x":"","y":""}
     scan_cfg_columnIds = ["mac", "status_code", "enable_cte", "tag_enabled", "tag_advertisement_period",
                              "ble_on_period", "tag_mac", "read_battery_voltage",
                              "ble_on_wakeup_period", "ble_off_period", "tag_periodic_scan", "altitude", "moved",
-                             "battery_voltage", "tag_firmware","manufacturer_data","rssi_host", "status", "x", "y"]
+                             "battery_voltage", "tag_firmware","manufacturer_data","rssi_host","last_seen","asset_images_crc","ble_data_crc", "status", "x", "y"]
 
     csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
                      "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","manufacturer_data":"","rssi_host":"","status":"","x":"","y":""}
+                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","manufacturer_data":"","rssi_host":"","last_seen":"","status":"","x":"","y":""}
     scan_det_columnIds = ["mac", "certification_company_name",
                                "certification_company_id", "certification_place", "certification_date", "test_type",
                                "asset_diameter", "batch_id", "batch_date",
                                "machine_id", "status_code", "ble_data_crc", "asset_images_crc", "logo_images_crc",
                                "signature_images_crc", "owner_company_name",
-                               "owner_data", "altitude", "moved", "battery_voltage", "asset_comment", "ndir_id",
+                               "owner_data", "altitude", "moved", "battery_voltage", "asset_comment", "ndir_id","last_seen",
                                "status", "x", "y"]
 
     location_cvs_row = {"tag_mac": "", "out_prob": "", "out_prob_k": "", "anchors": "", "result": "", "x": "", "y": ""}
@@ -875,16 +978,18 @@ class boldscanner:
 
         self.webapp = webapp
 
-        self.tags=boldtag(self.scanner_param,self.webapp)
 
-        self.scanner_param["serv_uuid_Custom_Service"] =  self.tags.serv_uuid_Custom_Service
 
         self.startCTE_address_filter=[]
         self.rssi_host_scan={}
         self.rssi_host_scan_reset = False
         self.rssi_host_scan_disable=False
 
-        self.rssi_tag_scan={}
+        self.rssi_tag_scan = {}
+
+        self.tags = boldtag(self.scanner_param, self.webapp, self.rssi_tag_scan)
+
+        self.scanner_param["serv_uuid_Custom_Service"] = self.tags.serv_uuid_Custom_Service
 
 
     def get_rssi_host_scan(self):
@@ -933,7 +1038,10 @@ class boldscanner:
                             self.rssi_host_scan={}
                             self.rssi_host_scan_reset=False
 
-                        self.rssi_tag_scan[address]={"time": time.time().strftime("%m%d%Y-%H%M%S"), "rssi_host": rssi, "tag_data_crc": tag_data_crc}
+                        ble_data_crc = tag_data_crc[8:]
+                        asset_image_crc = tag_data_crc[0:8]
+                        if tag_data_crc!='0000000000000000':
+                            self.rssi_tag_scan[address]={"time": time.strftime("%m/%d/%Y %H:%M:%S") , "rssi_host": rssi,"ble_data_crc":ble_data_crc,"asset_image_crc":asset_image_crc,"tag_data_crc":tag_data_crc}
                         self.rssi_host_scan[len(self.rssi_host_scan)] =rssi_host_scan# {"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
                         self.tags.update_rssi_host_scan(address,rssi_host_scan)
 

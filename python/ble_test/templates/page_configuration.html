@@ -166,6 +166,8 @@
           { id: 'color', name: 'color',  'attributes': editableCellAttributes, sort: true },
           { id: 'series', name: 'series',  'attributes': editableCellAttributes, sort: true },
           { id: 'asset_images_file_extension', name: 'asset_images_file_extension',  'attributes': editableCellAttributes, sort: true },
+          { id: 'end_transac', name: 'end_transac',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'last_seen', name: 'last_seen',  'attributes': editableCellAttributes, sort: true },
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,
             formatter: (cell, row) => {
               return gridjs.html(`<input type="checkbox" class="checkbox_read_nfc" data-id="${row.cells[1].data}" />`);

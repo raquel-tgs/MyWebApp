@@ -1159,18 +1159,41 @@ def run_wepapp():
         time.sleep(1)
         checkstatus()
 
+def set_rssi_tag_scan(set_rssi_tag_scan):
+    global rssi_tag_scan
+    global status
+    rssi_tag_scan=set_rssi_tag_scan
+    status="Enabled"
+    readscanfile()
+
 def readscanfile():
     global localpath
     global data
     global data_update
     global scan_angles_raw
     global scan_location
+    global rssi_tag_scan
+
     if os.path.exists(localpath+"scan.csv"):
         data = pd.read_csv(localpath+"scan.csv")
         for x in columnIds:
             if x not in list(data.columns):
                 data[x]=None
-
+        data["status"]="Unkown"
+        if rssi_tag_scan is not None:
+            try:
+                for ix,rec in data.iterrows():
+                    mac=rec["mac"]
+                    if mac is not None:
+                        mac=mac.replace(":","")
+                        if rssi_tag_scan is not None:
+                            if mac in list(rssi_tag_scan.keys()):
+                                if "ble_data_crc" in list(data.columns):
+                                    if mac in list(rssi_tag_scan.keys()):
+                                        if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
+                                            data.loc[ix, "status"]="read"
+            except Exception as e:
+                print(e)
         data_update=data.copy()
         for k in list(data_update.columns)[1:]:
             data_update[k]=None
@@ -1240,9 +1263,9 @@ barprogress = 0
 updatedix=[]
 semaphore=False
 dfilter_back=None
-status="Enabled"
+status="Strting"
 operation="None"
-
+rssi_tag_scan=None
 start_init=None
 
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
