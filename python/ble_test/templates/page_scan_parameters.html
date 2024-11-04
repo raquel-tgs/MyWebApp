@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuration Page</title>
+</head>
+<body>
+  <h2>Configuration Settings</h2>
+
+  <form id="configForm">
+
+    <!-- Checkboxes for options -->
+    <label>
+      <input type="checkbox" id="keep_data"> Keep Data
+    </label><br>
+
+    <label>
+      <input type="checkbox" id="scan_new_tags"> Scan New Tags
+    </label><br><br>
+
+    <form>
+       <h3>Select Tag Status on Read:</h3>
+      <label>
+        <input type="radio" name="enable_disable_tags" value="enable" id="enabled">
+        Enabled
+      </label>
+
+      <label>
+        <input type="radio" name="enable_disable_tags" value="disable" id="disabled">
+        Disabled
+      </label>
+
+      <label>
+        <input type="radio" name="enable_disable_tags" value="none" id="none" >
+        None
+      </label><br><br>
+    </form>
+    <!-- Integer input for max retries -->
+    <label>
+      Maximum Retries:
+      <input type="number" id="maximum_retries" min="0">
+    </label><br><br>
+
+    <!-- Save button to submit data -->
+    <button type="button" onclick="saveConfig()">Save</button>
+    <button class="closebtn" onclick="window.close()">Close Window</button>
+
+  </form>
+
+  <script>
+    // Fetch initial values from Flask endpoint
+    document.addEventListener("DOMContentLoaded", function() {
+      fetch('/get_initial_config')
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById("keep_data").checked = data.keep_data;
+          document.getElementById("scan_new_tags").checked = data.scan_new_tags;
+          document.getElementById("maximum_retries").value = data.maximum_retries;
+          // Set radio buttons based on the enabled tags value
+                if (data.enable_disable_tags === 'enable') {
+                    document.getElementById('enabled').checked = true;
+                } else if (data.enable_disable_tags === 'disable') {
+                    document.getElementById('disabled').checked = true;
+                } else {
+                    document.getElementById('none').checked = true;
+                }
+        })
+        .catch((error) => console.error('Error loading initial configuration:', error));
+    });
+
+    function saveConfig() {
+      // Get the values from form fields
+      const keepData = document.getElementById("keep_data").checked;
+      const scanNewTags = document.getElementById("scan_new_tags").checked;
+      const enable_disable_tags = document.querySelector('input[name="enable_disable_tags"]:checked').value;
+      const maximumRetries = parseInt(document.getElementById("maximum_retries").value, 10);
+
+      // Prepare data as JSON
+      const data = {
+        keep_data: keepData,
+        scan_new_tags: scanNewTags,
+        enable_disable_tags: enable_disable_tags,
+        maximum_retries: maximumRetries
+      };
+
+      // Send data to the Flask endpoint
+      fetch('/save_config', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          alert("Configuration saved successfully!");
+        } else {
+          alert("Error saving configuration: " + data.message);
+        }
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        alert("Failed to save configuration.");
+      });
+    }
+  </script>
+</body>
+</html>

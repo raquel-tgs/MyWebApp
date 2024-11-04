@@ -3,6 +3,7 @@
     <title>Detected Tags</title>
     <!-- <link href="{{ url_for('static', filename='css/mermaid_min.css') }}" type="text/css" rel="stylesheet" /> -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/editable_table.css') }}">
     <style>
       body {
         font-family: Sans-Serif;
@@ -92,45 +93,59 @@
 
       <div class="container m-8 border border-dashed border-gray-400 rounded-xl h-fit">
         <div class="flex justify-between items-center p-3 border-b border-gray-200">
-          <div class="flex items-center gap-2">
+          <form class="flex items-center gap-2" method="POST" action="/api/gateway" id="formGateway">
             <select class="m-0 block w-52 rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"  name="gateway_selection" id="gateway" onchange="submitFormGateway()">
               <option value="Zone A">Certification Area 1</option>
               <option value="Zone B">Certification Area 2</option>
               <option value="Zone C">Warehouse</option>
               <option value="Zone D">Loading Area</option>
             </select>
-            <span class="text-xs text-indigo-600">Rescan Zone</span>
-          </div>
-  
-          <div class="flex items-center gap-10">
-            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
-              <button class="border-0" value="Scan" name="Scan" id="Scan">Scan Tags</button>
-            </form>
-            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
-              <button class="border-0" value="Update" name="Update" id="Update">Update</button>
-            </form>
-            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
-              <button class="text-indigo-700 border-0 rounded-md bg-indigo-100 px-3 py-2" value="Location" name="Location" id="Location">View Locations</button>
-            </form>
-          </div>
+            <button class="text-xs text-indigo-600">Rescan Zone</button>
+          </form>
         </div>
   
         <div class="flex justify-between items-center px-10 py-3">
-          <h4 class="text-xl">Located Assets</h4>
-          <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Process Certification Batch</button>
+          <div class="flex items-center gap-10">
+            <h4 class="text-xl">Located Assets</h4>
+            <form id="search-form" class="m-0" method="POST" action="{{ url_for('tag_table') }}">
+              {{ form.csrf_token }}
+              {{ form.q }}
+              {{ form.submit }}
+            </form>
+          </div>
+          <div class="flex items-center gap-10">
+            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+              <button id="tag-scan" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Scan" name="Scan" id="Scan">Scan Tags</button>
+            </form>
+            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+              <button id="tag-update" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Update" name="Update" id="Update">Update</button>
+            </form>
+            <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+              <button id="tag-location" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Location" name="Location" id="Location">View Locations</button>
+            </form>
+            {% if userRole == 'certification' %}
+              <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Process Certification Batch</button>
+            {% endif %}
+          </div>
         </div>
-        <span class="text-xs text-indigo-600 px-5">Select All</span>
+        <!-- <form method="POST" action="{{ url_for('tag_table') }}">
+          {{ form.csrf_token }}
+          {{ form.q }}
+          {{ form.submit }}
+        </form> -->
+        <button id="select-all" class="text-xs text-indigo-600 px-5">Select All</button>
         <ul role="list" class="divide-y divide-gray-100 overflow-hidden bg-white shadow-sm ring-1 ring-gray-900/5">
   
           {% for tag in tags %}    
             <li class="hover:bg-gray-50 px-6 py-3">
               <a class="relative flex justify-between items-center gap-x-6" href="/tag-details/{{tag.mac}}">   
               <div>
-                <input aria-describedby="comments-description" name="comments" type="checkbox" class="h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
+                <input aria-describedby="comments-description" name="comments" type="checkbox" data-id="{{tag.mac}}" class="tag-checkbox h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
               </div>
               <div class="w-40">
                 <p class="text-sm font-semibold">{{tag.mac}}</p>
-                <p class="text-xs font-normal">{{tag.tag_id}}</p>
+                <p class="text-xs font-normal">{{tag.name}}</p>
+                <!-- <p class="text-xs font-normal">{{tag.tag_id}}</p> -->
               </div>
               <div class="w-40">
                 <p class="text-xs font-normal"><span class="font-semibold">Batch </span>{{tag.batch_id}}</p>
@@ -196,6 +211,39 @@
         </div>
       </div>
     </div>
+
+    <dialog id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+            <div>
+              <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
+                {% if operation == 'Scan' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Scanning...</h3>
+                {% elif operation == 'Update' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Updating...</h3>
+                {% elif operation == 'Location' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Locating...</h3>
+                {% else %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">{{operation}}</h3>
+                {% endif %}
+                <div id="Progress_Status" class="w-full">
+                  <div id="myprogressBar" class="h-5 w-0 bg-indigo-600"></div>
+                </div>
+                <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="3" readonly id="statuslog"></textarea>
+              </div>
+            </div>
+            <div class="flex gap-3 justify-between mt-5 sm:mt-6">
+              <button id="op-modal-btn" type="button" class="border-0 outline-none">Close</button>
+              <form class="m-0" method="post" action="/api/canceloperation">
+                <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </dialog>
 
       <!-- Dropdown Menu -->
      <!-- <div class="dropdown">

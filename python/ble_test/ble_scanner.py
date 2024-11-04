@@ -60,9 +60,12 @@ def device_found(device: BLEDevice, advertisement_data: AdvertisementData):
         if device.name is not None:
             if device.name.startswith("BoldTag"):
                 btag=True
-                print("{} {} {}".format( time.strftime("%H:%M:%S"),device.name, device.address))
                 if len(advertisement_data.manufacturer_data.items()) > 0:
-                    pass
+                    for x in advertisement_data.manufacturer_data.items():
+                        # print(x)
+                        print("{} {} {} {}".format(time.strftime("%H:%M:%S"), device.name, device.address,x))
+                else:
+                    print("{} {} {}".format(time.strftime("%H:%M:%S"), device.name, device.address))
 
         # if device.name.startswith("Tag"):
         #     print(device.name)
@@ -208,146 +211,148 @@ async def main():
         except:
             break
 
-        devices = await scanner.discover()
-        myDevice = None
-        myDevice_1 = None
-        scannaddress=[]
-        connect=True
-        for d in devices:
-            # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
-            if d.name is not None:
-                if d.name.startswith("BoldTag")  :
-                    address=d.address
-                    #print(d.name, address)
-
-                    if False:
-                        scannaddress.append({"address": address, "client": None, "connected": True,"device":d})
-                        ix=len(scannaddress)-1
-                        if connect:
-                            conn = False
-                            ncount = 0
-                            while not conn and ncount < 3:
-                                ncount=ncount+1
-                                try:
-                                        client= BleakClient(address)
-                                        scannaddress[ix]["client"]=client
-                                        scannaddress[ix]["connected"]=True
-                                        conn=True
-                                except Exception as e:
-                                    print(e)
-                                    scannaddress[ix]["connected"]=False
-                        #print(scannaddress[ix])
-                        char_uuid_enable_cte="c92c584f-7b9e-473a-ad4e-d9965e0cd678"
-                        char_uuid_update_nfc="1b9bba4d-34c0-4542-8d94-0da1036bd64f"
-                        char_uuid_tag_enabled="886eb62a-2c17-4e8e-9579-1c5483973577"
-
-
-        if len(scannaddress)>0:
-            for i in range(len(scannaddress)):
-                tags=scannaddress[i]
-                result,dfupdate=tag_command_update(tags, "enable_cte", new_value=1)
-                result, dfupdate = tag_command_update(tags, "enable_cte", new_value=0)
-
-            else:
-                #print("..")
-                pass
-            # if d.name=="Blinky ExampleC":
-            #     print('Found it')
-            #     myDevice = d
-            #     break
-            # if d.name=="BoldTag":
-            #     print('Found it')
-            #     myDevice_1 = d
-            #     # myDevice = d
-            #     break
         if False:
-            if myDevice_1 is not None:
-                address = str(myDevice_1.address)  # details.adv.bluetooth_address)
-                async with BleakClient(address) as client:
-                    try:
-                        connected =  client.is_connected
-                        if connected:
-                            print("Connected to Device")
-                            char_uuid_asset_id="7db7b5e3-168e-48fd-aadb-94607557b832"
-                            char_uuid_tag_id ="c01cdf18-2465-4df6-956f-fde4867e2bc1"
-                            serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
-                            char_uuid_update_nfc = "1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+            devices = await scanner.discover()
+            myDevice = None
+            myDevice_1 = None
+            scannaddress=[]
+            connect=True
 
-                            asset_id = bytes( await client.read_gatt_char(char_uuid_asset_id))
-                            print("asset_id: {0}".format(asset_id))
+            for d in devices:
+                # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
+                if d.name is not None:
+                    if d.name.startswith("BoldTag")  :
+                        address=d.address
+                        #print(d.name, address)
 
-                            tag_id =bytes( await client.read_gatt_char(char_uuid_tag_id))
-                            print("tag_id: {0}".format( tag_id))
+                        if False:
+                            scannaddress.append({"address": address, "client": None, "connected": True,"device":d})
+                            ix=len(scannaddress)-1
+                            if connect:
+                                conn = False
+                                ncount = 0
+                                while not conn and ncount < 3:
+                                    ncount=ncount+1
+                                    try:
+                                            client= BleakClient(address)
+                                            scannaddress[ix]["client"]=client
+                                            scannaddress[ix]["connected"]=True
+                                            conn=True
+                                    except Exception as e:
+                                        print(e)
+                                        scannaddress[ix]["connected"]=False
+                            #print(scannaddress[ix])
+                            char_uuid_enable_cte="c92c584f-7b9e-473a-ad4e-d9965e0cd678"
+                            char_uuid_update_nfc="1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+                            char_uuid_tag_enabled="886eb62a-2c17-4e8e-9579-1c5483973577"
 
-                            svcs = await client.get_services()
-                            print("Services:")
-                            service=None
-                            for service_1 in svcs:
-                                # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
-                                if service_1.uuid == serv_uuid_Custom_Service:
-                                    service=service_1
-                                    break
-                            if service is not None:
 
-                                #char_uuid_Custom_Characteristic
-                                res = await client.write_gatt_char(service.get_characteristic(char_uuid_asset_id),bytearray("0888dfhfghdfghdfgh8888888", 'utf-8'),response=True)
-                                print(res)
+            if len(scannaddress)>0:
+                for i in range(len(scannaddress)):
+                    tags=scannaddress[i]
+                    result,dfupdate=tag_command_update(tags, "enable_cte", new_value=1)
+                    result, dfupdate = tag_command_update(tags, "enable_cte", new_value=0)
+
+                else:
+                    #print("..")
+                    pass
+                # if d.name=="Blinky ExampleC":
+                #     print('Found it')
+                #     myDevice = d
+                #     break
+                # if d.name=="BoldTag":
+                #     print('Found it')
+                #     myDevice_1 = d
+                #     # myDevice = d
+                #     break
+            if False:
+                if myDevice_1 is not None:
+                    address = str(myDevice_1.address)  # details.adv.bluetooth_address)
+                    async with BleakClient(address) as client:
+                        try:
+                            connected =  client.is_connected
+                            if connected:
+                                print("Connected to Device")
+                                char_uuid_asset_id="7db7b5e3-168e-48fd-aadb-94607557b832"
+                                char_uuid_tag_id ="c01cdf18-2465-4df6-956f-fde4867e2bc1"
+                                serv_uuid_Custom_Service = "87e29466-8be6-4ede-9ffb-04a7121938da"
+                                char_uuid_update_nfc = "1b9bba4d-34c0-4542-8d94-0da1036bd64f"
+
                                 asset_id = bytes( await client.read_gatt_char(char_uuid_asset_id))
                                 print("asset_id: {0}".format(asset_id))
 
-                                res = await client.write_gatt_char(service.get_characteristic(char_uuid_tag_id),bytearray("AAA008", 'utf-8'),response=True)
-                                print(res)
-                                tag_id = bytes( await client.read_gatt_char(char_uuid_tag_id))
-                                print("tag_id: {0}".format(tag_id))
+                                tag_id =bytes( await client.read_gatt_char(char_uuid_tag_id))
+                                print("tag_id: {0}".format( tag_id))
 
-                                res = await client.write_gatt_char(service.get_characteristic(char_uuid_update_nfc),bytearray("1", 'utf-8'),response=True)
-                                print(res)
-                                update_nfc = bytes( await client.read_gatt_char(char_uuid_tag_id))
-                                print("char_uuid_update_nfc: {0}".format(update_nfc))
+                                svcs = await client.get_services()
+                                print("Services:")
+                                service=None
+                                for service_1 in svcs:
+                                    # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                                    if service_1.uuid == serv_uuid_Custom_Service:
+                                        service=service_1
+                                        break
+                                if service is not None:
 
-                                pass
-
-                            while True:
-                                if not connected:
-                                    break
-                                await asyncio.sleep(1.0)
-                                # transmission_on = bytes( await client.read_gatt_char(char_uuid_Transmission_ON))
-                                # print("transmission_on: {0}".format(transmission_on))
-                                # Throughput_result = bytes( await client.read_gatt_char(char_uuid_Throughput_result))
-                                # print("Throughput_result: {0}".format(Throughput_result))
-
-
-
-                        else:
-                            print(f"Failed to connect to Device")
-                    except Exception as e:
-                        print(e)
-            if myDevice is not None:
-                # address = str(myDevice.details.identifier)
-                address= str(myDevice.address)# details.adv.bluetooth_address)
-                async with BleakClient(address) as client:
-                    svcs = await client.get_services()
-                    print("Services:")
-                    for service in svcs:
-                        print("")
-                        print("uuid:%s description:%s"%(service.uuid,service.description))
-                        characteristics = service.characteristics
-                        if characteristics  is not None:
-                            print("characteristics:")
-                            for characteristic in characteristics:
-                                print("uuid:%s description:%s"%(characteristic.uuid,characteristic.description))
-                                if characteristic.uuid=="be6b6be1-cd8a-4106-9181-5ffe2bc67718":
-                                    print("d")
-                                if characteristic.uuid=="efe221d3-2f75-4e8e-9e42-1e2e968b3628":
-                                    print("ff")
-                                    # client.read_gatt_char(service.get_characteristic(characteristic.uuid))
-                                    # client.write_gatt_char(service.get_characteristic(characteristic.uuid),b'HHHH',response=True)
-                                    model_number = await client.read_gatt_char(characteristic.uuid)
-                                    print("Model Number: {0}".format("".join(map(chr, model_number))))
-                                    res = await client.write_gatt_char(service.get_characteristic(characteristic.uuid), b'HHasdfasdfasdfHH',
-                                                           response=True)
+                                    #char_uuid_Custom_Characteristic
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_asset_id),bytearray("0888dfhfghdfghdfgh8888888", 'utf-8'),response=True)
                                     print(res)
+                                    asset_id = bytes( await client.read_gatt_char(char_uuid_asset_id))
+                                    print("asset_id: {0}".format(asset_id))
 
-            print("-----------------------------------------")
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_tag_id),bytearray("AAA008", 'utf-8'),response=True)
+                                    print(res)
+                                    tag_id = bytes( await client.read_gatt_char(char_uuid_tag_id))
+                                    print("tag_id: {0}".format(tag_id))
+
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_update_nfc),bytearray("1", 'utf-8'),response=True)
+                                    print(res)
+                                    update_nfc = bytes( await client.read_gatt_char(char_uuid_tag_id))
+                                    print("char_uuid_update_nfc: {0}".format(update_nfc))
+
+                                    pass
+
+                                while True:
+                                    if not connected:
+                                        break
+                                    await asyncio.sleep(1.0)
+                                    # transmission_on = bytes( await client.read_gatt_char(char_uuid_Transmission_ON))
+                                    # print("transmission_on: {0}".format(transmission_on))
+                                    # Throughput_result = bytes( await client.read_gatt_char(char_uuid_Throughput_result))
+                                    # print("Throughput_result: {0}".format(Throughput_result))
+
+
+
+                            else:
+                                print(f"Failed to connect to Device")
+                        except Exception as e:
+                            print(e)
+                if myDevice is not None:
+                    # address = str(myDevice.details.identifier)
+                    address= str(myDevice.address)# details.adv.bluetooth_address)
+                    async with BleakClient(address) as client:
+                        svcs = await client.get_services()
+                        print("Services:")
+                        for service in svcs:
+                            print("")
+                            print("uuid:%s description:%s"%(service.uuid,service.description))
+                            characteristics = service.characteristics
+                            if characteristics  is not None:
+                                print("characteristics:")
+                                for characteristic in characteristics:
+                                    print("uuid:%s description:%s"%(characteristic.uuid,characteristic.description))
+                                    if characteristic.uuid=="be6b6be1-cd8a-4106-9181-5ffe2bc67718":
+                                        print("d")
+                                    if characteristic.uuid=="efe221d3-2f75-4e8e-9e42-1e2e968b3628":
+                                        print("ff")
+                                        # client.read_gatt_char(service.get_characteristic(characteristic.uuid))
+                                        # client.write_gatt_char(service.get_characteristic(characteristic.uuid),b'HHHH',response=True)
+                                        model_number = await client.read_gatt_char(characteristic.uuid)
+                                        print("Model Number: {0}".format("".join(map(chr, model_number))))
+                                        res = await client.write_gatt_char(service.get_characteristic(characteristic.uuid), b'HHasdfasdfasdfHH',
+                                                               response=True)
+                                        print(res)
+
+                print("-----------------------------------------")
 asyncio.run(main())
 print('ff')

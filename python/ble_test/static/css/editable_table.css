@@ -1,0 +1,14 @@
+#search-form {
+
+  input[type=text] {
+    border-width: 1px;
+    --tw-border-opacity: 1;
+    border-color: rgb(107 114 128 / var(--tw-border-opacity));
+    border-radius: 0.375rem;
+    padding: 0.5rem;
+  }
+
+  input[type=submit] {
+    cursor: pointer;
+  }
+}
