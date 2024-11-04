@@ -12,3 +12,13 @@
     cursor: pointer;
   }
 }
+
+.show-block {
+  visibility: unset;
+  width: unset;
+}
+
+.hide-block {
+  visibility: hidden;
+  width: 0;
+}
