@@ -14,7 +14,7 @@
      <div class="dropdown">
       <button class="dropbtn">Menu</button>
       <div class="dropdown-content">
-        <a  href="{{ url_for('page_configuration') }}">Configuration</a>
+        <a  href="{{ url_for('page_scan_parameters') }}" target="_blank">Parameters</a>
         <a  href="{{ url_for('page_data_angles') }}">Data angles</a>
         <a  href="{{ url_for('page_data_scan') }}">Data scan</a>
         <a  href="{{ url_for('page_data_location') }}">Data location</a>
@@ -26,9 +26,9 @@
       <hr>
       <label for="DataType">Choose Data Type:</label>
       <select name="gateway_selection" id="DataType" class="gateway" onchange="submitDataType()">
-        <option value="Base Data">Base Data</option>
-        <option value="Detail Data">Detail Data</option>
-        <option value="Configuration Data">Configuration Data</option>
+        <option value="page_configuration">Base Data</option>
+        <option value="page_configuration_detail">Detail Data</option>
+        <option value="page_configuration_configuration">Configuration Data</option>
       </select>
      </form>
       <script>
@@ -37,25 +37,43 @@
     </script>
 
     <script>
-        // JavaScript function to handle dropdown changes
-        function submitDataType() {
-            const selectedValue = document.getElementById("DataType").value;
+        async function submitDataType() {
+            const selectedPage = document.getElementById("DataType").value;
+            if (selectedPage) {
+                try {
+                      if (selectedPage) {
+                            window.location.href = selectedPage;  // Redirects to the selected page endpoint
+                        }
 
-            if (selectedValue) {
-                fetch("/datatype_dropdown", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ selected_value: selectedValue })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById("result").innerHTML = data.message;
-                })
-                .catch(error => console.error("Error:", error));
+                } catch (error) {
+                    console.error('Error loading page:', error);
+                }
             }
         }
+    </script>
+    <script>
+        // Function to check the current page URL with the server
+        function checkPage() {
+            fetch('/get_current_page')  // Flask endpoint that returns the current page URL
+                .then(response => response.json())
+                .then(data => {
+                    const serverPage = data.page_url; // Assume server returns {"page_url": "/current-page"}
+                    const currentPage = window.location.pathname;
+
+                    // If the server's page URL is different from the current page URL, reload the page
+                    if (serverPage !== currentPage) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error fetching page URL:', error));
+        }
+
+        // Call the checkPage function every 10 seconds
+        setInterval(checkPage, 10000); // Adjust interval as needed
+
+      // Add event listener to call checkPage when the tab gets focus
+      window.addEventListener("focus", checkPage);
+
     </script>
 
     <form method="post" action="/api/buttons">
@@ -163,6 +181,7 @@
           { id: 'mac', name: 'mac' , sort: true},
           { id: 'status', name: 'status' , sort: true},
           { id: 'name', name: 'name' , sort: false},
+          { id: 'tag_mac', name: 'tag_mac' , sort: false},
           { id: 'enable_cte', name: 'enable_cte', sort: true ,  'attributes': editableCellAttributes},
           { id: 'tag_enabled', name: 'tag_enabled',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'tag_advertisement_period', name: 'tag_advertisement_period',  'attributes': editableCellAttributes, sort: false ,  'attributes': editableCellAttributes},
@@ -172,7 +191,13 @@
           { id: 'tag_periodic_scan', name: 'tag_periodic_scan',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'altitude', name: 'altitude',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'moved', name: 'moved',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'read_battery_voltage', name: 'read_battery_voltage',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
           { id: 'battery_voltage', name: 'battery_voltage',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'tag_firmware', name: 'tag_firmware',  'attributes': editableCellAttributes, sort: true ,  'attributes': editableCellAttributes},
+          { id: 'manufacturer_data', name: 'manufacturer_data',  'attributes': editableCellAttributes, sort: true },
+          { id: 'rssi_host', name: 'rssi_host',  'attributes': editableCellAttributes, sort: true },
+          { id: 'end_transac', name: 'end_transac',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'last_seen', name: 'last_seen',  'attributes': editableCellAttributes, sort: true },
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,
             formatter: (cell, row) => {
               return gridjs.html(`<input type="checkbox" class="checkbox_read_nfc" data-id="${row.cells[1].data}" />`);
