@@ -1300,14 +1300,14 @@ operation="None"
 rssi_tag_scan=None
 start_init=None
 
-localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+#localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
-#localpath=""    #initialized by poc_server.py with global directory
+localpath=""    #initialized by poc_server.py with global directory
 columnIds=[] #None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
