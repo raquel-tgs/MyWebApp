@@ -155,6 +155,7 @@ def upload_file():
 @app.route('/api/canceloperation_web', methods=['POST'])
 def canceloperation_web():
     canceloperation_back()
+    checkstatus()
     #do your logic ___
 
 @app.route('/api/canceloperation', methods=['POST'])
