@@ -70,7 +70,7 @@ devices_processed=[]
 directory = "c:/tgspoc"
 app_localpath=directory+'/'
 
-use_MQTT = False      #Set to True to start MQTT client
+use_MQTT = True      #Set to True to start MQTT client
 
 Stop_collecting = True
 keep_mqtt_on = True
@@ -142,11 +142,11 @@ def quadratic_error(x, values):
 
 #----------------------------------------------------------------------#
 srv_antenna_anchor={}
-srv_antenna_anchor["219"]={"enabled":False, "status":None,"process":None,"monitor_thread":None, "bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#1D_192_168_1_219.bat","cmdline":""}
-srv_antenna_anchor["220"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#3D_192_168_1_220.bat","cmdline":""}
-srv_antenna_anchor["221"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#F2_192_168_1_221.bat","cmdline":""}
-srv_antenna_anchor["222"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#C0_192_168_1_222.bat","cmdline":""}
-srv_antenna_anchor["srv"]={"enabled":False, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\start_mqtt_position.bat","cmdline":""}
+srv_antenna_anchor["219"]={"enabled":True, "status":None,"process":None,"monitor_thread":None, "bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#1D_192_168_1_219.bat","cmdline":""}
+srv_antenna_anchor["220"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#3D_192_168_1_220.bat","cmdline":""}
+srv_antenna_anchor["221"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#F2_192_168_1_221.bat","cmdline":""}
+srv_antenna_anchor["222"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\mqtt_server_#C0_192_168_1_222.bat","cmdline":""}
+srv_antenna_anchor["srv"]={"enabled":True, "status":None,"process":None,"monitor_thread":None,"bat_file": "C:\\tgspoc\\mqtt\\start_mqtt_position.bat","cmdline":""}
 
 #------------------------------- BLE CONSTANTS ----------------------------
 #Gatt database
@@ -1263,9 +1263,12 @@ async def main():
     await bscanner.discover_rssi_stop()
     rssi_host_scan=bscanner.get_rssi_host_scan()
     app.print_statuslog("BoldTag detected {}".format(bscanner.rssi_tag_scan))
-    app.set_rssi_tag_scan(bscanner.rssi_tag_scan)
+    app.set_rssi_tag_scan(bscanner.rssi_tag_scan,True)
 
     while True:
+        app.set_rssi_tag_scan(bscanner.rssi_tag_scan,False)
+
+
         #check if MQTTT locators and server are running. If not start them
         srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
 
@@ -1457,7 +1460,7 @@ async def main():
                 #await asyncio.sleep(1.0)
 
                 if param_scan_new_tags:# or (not param_scan_new_tags and nscan==0):
-                    await bscanner.scan_tags(connect=True,max_retry=5)
+                    await bscanner.scan_tags(connect=True,max_retry=1)
 
                 tag_found=[x for x in bscanner.tags.items]
                 if (len(tag_found)>0):
@@ -1571,7 +1574,7 @@ async def main():
                                         if (location_fx and action=="LOCATION" ) or action!="LOCATION":
                                             #try:
                                             #try to connect
-                                            #async with BleakClient(address) as client:
+                                            if action=="LOCATION" : srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
                                             try:
                                                 scannaddress.append(d.address)
                                                 devprocessed.append(address)

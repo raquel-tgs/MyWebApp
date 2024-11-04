@@ -389,6 +389,7 @@ def checkbox_read_nfc():
     print(f"Row {row_id} checkbox is {'checked' if checked else 'unchecked'}")
     return jsonify(success=True)
 
+
 @app.route('/api/data', methods=['POST'])
 def update():
     # data = pd.read_csv("scan.csv")
@@ -397,34 +398,37 @@ def update():
     global reloadpage
     # global mac_filter
     #flag=False
+    try:
+        data_page = request.get_json()
+        if 'id' not in data_page:
+            abort(400)
+        # user = User.query.get(data['id'])
 
-    data_page = request.get_json()
-    if 'id' not in data_page:
-        abort(400)
-    # user = User.query.get(data['id'])
+        field=list(data_page.items())[1][0]
+        # if field=="select":
+        #     if data_page["id"] not in mac_filter:
+        #         mac_filter.append(data_page["id"])
 
-    field=list(data_page.items())[1][0]
-    # if field=="select":
-    #     if data_page["id"] not in mac_filter:
-    #         mac_filter.append(data_page["id"])
+        if field in ["certificate_id","expiration_date"]:
+            ix = data.index
+            flag=True
+        else:
+            ix = data[data["mac"] == data_page["id"]].index
+        for i in ix:
+            if data.loc[i,field]!=data_page[field]:
+                data.loc[i,field]=data_page[field]
+                data_update.loc[i,field]=data_page[field]
+                updatedix.append(i)
+                data.loc[i, "status"] = "changed"
+        # for field in ['name', 'age', 'address', 'phone', 'email']:
+        #     if field in data:
+        #         setattr(user, field, data[field])
+        # db.session.commit()
+        #if flag:
+        reloadpage = "True"
+    except Exception as e:
+        print(e)
 
-    if field in ["certificate_id","expiration_date"]:
-        ix = data.index
-        flag=True
-    else:
-        ix = data[data["mac"] == data_page["id"]].index
-    for i in ix:
-        if data.loc[i,field]!=data_page[field]:
-            data.loc[i,field]=data_page[field]
-            data_update.loc[i,field]=data_page[field]
-            updatedix.append(i)
-            data.loc[i, "status"] = "changed"
-    # for field in ['name', 'age', 'address', 'phone', 'email']:
-    #     if field in data:
-    #         setattr(user, field, data[field])
-    # db.session.commit()
-    #if flag:
-    reloadpage = "True"
     return '', 204
     # return render_template("editable_table.html"), 204
 
@@ -566,6 +570,14 @@ def page_configuration():
         readscanfile()
 
     return render_template("page_configuration.html")
+
+
+
+@app.route('/get_current_page')
+def get_current_page():
+    global page_selected
+    return jsonify({"page_url": "/"+page_selected})  # Return the current page path as JSON
+
 
 @app.route('/page_configuration_detail')
 def page_configuration_detail():
@@ -1159,14 +1171,15 @@ def run_wepapp():
         time.sleep(1)
         checkstatus()
 
-def set_rssi_tag_scan(set_rssi_tag_scan):
+def set_rssi_tag_scan(set_rssi_tag_scan,init_loading=False):
     global rssi_tag_scan
     global status
+
     rssi_tag_scan=set_rssi_tag_scan
     status="Enabled"
-    readscanfile()
+    if init_loading: readscanfile(True)
 
-def readscanfile():
+def readscanfile(load_init=False ):
     global localpath
     global data
     global data_update
@@ -1179,21 +1192,25 @@ def readscanfile():
         for x in columnIds:
             if x not in list(data.columns):
                 data[x]=None
-        data["status"]="Unkown"
-        if rssi_tag_scan is not None:
-            try:
-                for ix,rec in data.iterrows():
-                    mac=rec["mac"]
-                    if mac is not None:
-                        mac=mac.replace(":","")
-                        if rssi_tag_scan is not None:
-                            if mac in list(rssi_tag_scan.keys()):
-                                if "ble_data_crc" in list(data.columns):
-                                    if mac in list(rssi_tag_scan.keys()):
-                                        if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
-                                            data.loc[ix, "status"]="read"
-            except Exception as e:
-                print(e)
+        if load_init and len(rssi_tag_scan.keys())>0:
+            data["status"]="Unkown"
+            if rssi_tag_scan is not None:
+                try:
+                    for ix,rec in data.iterrows():
+                        mac=rec["mac"]
+                        if mac is not None:
+                            mac=mac.replace(":","")
+                            if rssi_tag_scan is not None:
+                                if mac in list(rssi_tag_scan.keys()):
+                                    if "ble_data_crc" in list(data.columns):
+                                        if mac in list(rssi_tag_scan.keys()):
+                                            if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
+                                                data.loc[ix, "status"]="read"
+
+                except Exception as e:
+                    print(e)
+            data.to_csv(localpath + "scan.csv")
+
         data_update=data.copy()
         for k in list(data_update.columns)[1:]:
             data_update[k]=None

@@ -51,7 +51,30 @@
             }
         }
     </script>
+    <script>
+        // Function to check the current page URL with the server
+        function checkPage() {
+            fetch('/get_current_page')  // Flask endpoint that returns the current page URL
+                .then(response => response.json())
+                .then(data => {
+                    const serverPage = data.page_url; // Assume server returns {"page_url": "/current-page"}
+                    const currentPage = window.location.pathname;
 
+                    // If the server's page URL is different from the current page URL, reload the page
+                    if (serverPage !== currentPage) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error fetching page URL:', error));
+        }
+
+        // Call the checkPage function every 10 seconds
+        setInterval(checkPage, 10000); // Adjust interval as needed
+
+      // Add event listener to call checkPage when the tab gets focus
+      window.addEventListener("focus", checkPage);
+
+    </script>
 
     <form method="post" action="/api/buttons">
       <div id="outer">
@@ -176,6 +199,7 @@
           { id: 'altitude', name: 'altitude',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
           { id: 'moved', name: 'moved',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
           { id: 'battery_voltage', name: 'battery_voltage',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
+          { id: 'asset_comment', name: 'asset_comment',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
           { id: 'end_transac', name: 'end_transac',  'attributes': editableCellAttributes, sort: true,'attributes': editableCellAttributes },
           { id: 'last_seen', name: 'last_seen',  'attributes': editableCellAttributes, sort: true },
           { id: 'read_nfc', name: 'read_nfc',  'attributes': editableCellAttributes, sort: true ,

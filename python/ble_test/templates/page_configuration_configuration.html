@@ -51,6 +51,30 @@
             }
         }
     </script>
+    <script>
+        // Function to check the current page URL with the server
+        function checkPage() {
+            fetch('/get_current_page')  // Flask endpoint that returns the current page URL
+                .then(response => response.json())
+                .then(data => {
+                    const serverPage = data.page_url; // Assume server returns {"page_url": "/current-page"}
+                    const currentPage = window.location.pathname;
+
+                    // If the server's page URL is different from the current page URL, reload the page
+                    if (serverPage !== currentPage) {
+                        location.reload();
+                    }
+                })
+                .catch(error => console.error('Error fetching page URL:', error));
+        }
+
+        // Call the checkPage function every 10 seconds
+        setInterval(checkPage, 10000); // Adjust interval as needed
+
+      // Add event listener to call checkPage when the tab gets focus
+      window.addEventListener("focus", checkPage);
+
+    </script>
 
     <form method="post" action="/api/buttons">
       <div id="outer">

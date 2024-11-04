@@ -113,7 +113,7 @@ class boldtag:
                      'type': "HEX", "length": 1, "data_type": "configuration","NFC":False}
     char_uuid[40] = {"id": "tag_firmware", "uuid": "ae795504-8f02-4d4c-bd37-b46935193fd2", "value": "", "scan": True,
                      'type': "UTF-8", "length": 10, "data_type": "configuration", "NFC": False}
-    char_uuid[41] = {"id": "end_transac", "uuid": "4535350a-0794-43e5-89f6-74eae561a6aa", "value": "", "scan": True,
+    char_uuid[41] = {"id": "end_transac", "uuid": "4535350a-0794-43e5-89f6-74eae561a6aa", "value": "", "scan": False,
                      'type': "HEX", "length": 1, "data_type": "configuration", "NFC": False}
 
 
@@ -646,7 +646,7 @@ class boldtag:
                         if service is not None:
                             rec = dfupdate[dfupdate["mac"] == myDevice_1_address]
                             fupdate = False
-                            # # Sart advertisement
+
                             # #char_uuid_enable_cte = "c92c584f-7b9e-473a-ad4e-d9965e0cd678"
                             # res = await client.write_gatt_char(
                             #     service.get_characteristic(char_uuid_enable_cte),
@@ -774,7 +774,7 @@ class boldtag:
                                     if app is not None:  app.print_statuslog("Error {0}".format(e))
                                     dfupdate_read.loc[index_update, "status"] = "update error"
 
-                            if fupdate:
+                            if tag_updated:
                                 try:
                                     end_transac_done = True
                                     char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
@@ -864,7 +864,7 @@ class gatewaydb:
 
     csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
                      "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","manufacturer_data":"","rssi_host":"","last_seen":"","status":"","x":"","y":""}
+                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","manufacturer_data":"","rssi_host":"","last_seen":"","status":"","x":"","y":""}
     scan_det_columnIds = ["mac", "certification_company_name",
                                "certification_company_id", "certification_place", "certification_date", "test_type",
                                "asset_diameter", "batch_id", "batch_date",
@@ -972,8 +972,8 @@ class boldscanner:
         self.scanner_param["CTE_Wait_Time_prescan"] =CTE_Wait_Time_prescan
         self.scanner_param["CTE_Wait_Time"] =CTE_Wait_Time
 
-        self.scanner = BleakScanner()
-        self.scanner.register_detection_callback(self.device_found)
+        self.scanner = BleakScanner(detection_callback=self.device_found)
+        # self.scanner.register_detection_callback(self.device_found)
         self.discover_rssi =False
 
         self.webapp = webapp
