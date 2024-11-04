@@ -43,6 +43,8 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    global user_role
+    global isLoggedIn
     if request.method == 'GET':
         return render_template('landing_page.html')
     else:
@@ -156,7 +158,7 @@ def upload_file():
 def canceloperation_web():
     canceloperation_back()
     checkstatus()
-    #do your logic ___
+    return redirect(url_for('tag_table'))
 
 @app.route('/api/canceloperation', methods=['POST'])
 def canceloperation():
@@ -1306,7 +1308,7 @@ page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
 localpath=""    #initialized by poc_server.py with global directory
-columnIds = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+columnIds=[] #None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
 columnIds_location = ['tag_mac', 'out_prob']
