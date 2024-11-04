@@ -386,7 +386,7 @@ class boldtag:
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
                             init_location=False,
-                            dfupdate=None, keep_connected=True,csv_read_data=[],param_enable_disable_tags=False):
+                            dfupdate=None, keep_connected=True,csv_read_data=[],param_enable_disable_tags=False,janhors_processed=[],start_mqtt=False):
         client = self.client
         device = self.device
         service=self.custom_service
@@ -577,13 +577,6 @@ class boldtag:
                             init_location = True
                             start_mqtt = True
                             try:
-                                Stop_collecting = False
-                                datadf = {}
-                                janhors_processed = []
-                                datadf_pos = {}
-                                datadf_corr = {}
-                                jmpos_processed = []
-                                jang_corr_processed = []
                                 ini_loc = True
                                 print("Starting MQTT server")
                                 if (app is not None): app.print_statuslog("Starting MQTT server")
@@ -824,7 +817,7 @@ class boldtag:
                 result = False
 
         res={"result":result, "dfupdate_read":dfupdate_read, "csv_read_data":csv_read_data,
-             "recupdate":recupdate, "devices_processed_location":devices_processed_location}
+             "recupdate":recupdate, "devices_processed_location":devices_processed_location,"init_location":init_location,"start_mqtt":start_mqtt}
         return res
 
     def filter_db(self,id, data_type=None, scan=None):

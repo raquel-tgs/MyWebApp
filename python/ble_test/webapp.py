@@ -152,8 +152,19 @@ def upload_file():
     file.save(os.path.join(app.root_path, app.config['REPORT'], file.filename))
     return '', 204
 
+@app.route('/api/canceloperation_web', methods=['POST'])
+def canceloperation_web():
+    canceloperation_back()
+    checkstatus()
+    #do your logic ___
+
 @app.route('/api/canceloperation', methods=['POST'])
 def canceloperation():
+    canceloperation_back()
+    checkstatus()
+    return redirect(url_for(page_selected))  # 'page_configuration'))
+
+def canceloperation_back():
     # data = pd.read_csv("scan.csv")
     global status
     global  operation
@@ -233,7 +244,7 @@ def canceloperation():
         webcancel = True
 
     #return render_template("editable_table.html")
-    return redirect(url_for(page_selected))#'page_configuration'))
+    #return redirect(url_for(page_selected))#'page_configuration'))
 
 # @app.route("/datatype_dropdown", methods=["POST"])
 # def datatype_dropdown():
@@ -770,19 +781,21 @@ def page_data_scan():
 
 
 @app.route("/api/buttons/new", methods=[ 'POST'])
-def buttons_new():
+def buttons_web():
     print(request.method)
     interphase=request.referrer[len(request.host_url):]
-    return buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),'editable_table')
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
+    return redirect(url_for('tag_table'))
 
 
 @app.route("/api/buttons", methods=[ 'POST'])
 def buttons():
     print(request.method)
     interphase = request.referrer[len(request.host_url):]
-    return buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),page_selected )
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location') )
+    return redirect(url_for(page_selected))
 
-def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location,return_page):
+def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location):
     global status
     global operation
     global semaphore
@@ -900,10 +913,10 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
         print(e)
         print("error at buttons")
     semaphore=False
-    if return_page==page_selected:
-        return redirect(url_for(page_selected))
-    else:
-        return redirect(url_for('tag_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
+    # if return_page==page_selected:
+    #     return redirect(url_for(page_selected))
+    # else:
+    #     return redirect(url_for('tag_table')) #rredirect(url_for('page_configuration'))ender_template("editable_table.html")
 
 def sync_init():
     global start_init

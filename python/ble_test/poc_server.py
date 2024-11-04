@@ -1177,8 +1177,12 @@ async def main():
     global app_localpath
     global directory
 
-
-
+    datadf = {}
+    janhors_processed = []
+    datadf_pos = {}
+    jmpos_processed = []
+    datadf_corr = {}
+    jang_corr_processed = []
 
     # app.run()
     # Run Flask app in a separate thread
@@ -1191,7 +1195,7 @@ async def main():
     # for ix in char_uuid.keys():
     #     if char_uuid[ix]["id"] in char_uuid_nfc:
     #         char_uuid[ix]["NFC"] = True
-
+    mqttclient = None
     #scan_location()
     if use_MQTT:
         mqttclient=run_mqtt()
@@ -1204,7 +1208,7 @@ async def main():
     scanner.register_detection_callback(device_found)
 
 
-    mqttclient=None
+
     time.sleep(5)
     print("MQTT paused")
     if use_MQTT:
@@ -1458,18 +1462,34 @@ async def main():
                     and not (sum([0 if x in scannaddress_trim else 1 for x in update_mac_filter])==0 and len(update_mac_filter)>0)):  #((len(update_mac_filter)>0) and (len(scannaddress)==len(update_mac_filter)))):
                 #srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
                 #await asyncio.sleep(1.0)
+                if app.webcancel:
+                    webcancelprocess = True
+                    break
 
                 if param_scan_new_tags:# or (not param_scan_new_tags and nscan==0):
                     await bscanner.scan_tags(connect=True,max_retry=1)
+
+                if app.webcancel:
+                    webcancelprocess = True
+                    break
+
 
                 tag_found=[x for x in bscanner.tags.items]
                 if (len(tag_found)>0):
                     try:
                         for x in tag_found:
                             bscanner.tags.set_current(x.index)
-                            await bscanner.tags.connect()
+                            await bscanner.tags.connect(max_retry=1)
+                            if app.webcancel:
+                                webcancelprocess = True
+                                break
+
                     except Exception as e:
                         print(e)
+
+                if app.webcancel:
+                    webcancelprocess = True
+                    break
 
                 nscan=nscan+1
                 #devices = await scanner.discover()
@@ -1477,7 +1497,7 @@ async def main():
                 app.print_statuslog("Scan %d" % nscan)
 
                 totaldevices_general =bscanner.tags.limit # sum([0 if d.name is None else 1 if d.name.startswith("BoldTag") else 0 for d in devices])
-                app.print_statuslog("Total devices founded and connected: {}".format(totaldevices_general))
+                app.print_statuslog("Total devices found and connected: {}".format(totaldevices_general))
                 dev=0
 
 
@@ -1541,6 +1561,9 @@ async def main():
 
                             while nconerr>=0 and nconerr<MaxErrorLoops:
                                 #print(d.address)
+                                if app.webcancel:
+                                    webcancelprocess = True
+                                    break
                                 address_trim=d.address.replace(":","")
                                 if (action is not None and (d.address not in scannaddress ) and
                                         ( ((action=="LOCATION") and  (d.address not in devprocessed)) or
@@ -1585,12 +1608,14 @@ async def main():
                                                                                 uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
                                                                                 keep_connected=True,csv_read_data=csv_read_data,
-                                                                                          param_enable_disable_tags=param_enable_disable_tags)
+                                                                                          param_enable_disable_tags=param_enable_disable_tags,janhors_processed=janhors_processed,start_mqtt=start_mqtt)
                                                     ressult = res["result"]
                                                     dfupdate_read = res["dfupdate_read"]
                                                     csv_read_data = res["csv_read_data"]
                                                     recupdate = res["recupdate"]
                                                     devices_processed_location = res["devices_processed_location"]
+                                                    init_location=res["init_location"]
+                                                    start_mqtt=res["start_mqtt"]
 
                                             except Exception as e:
                                                 print(e)
