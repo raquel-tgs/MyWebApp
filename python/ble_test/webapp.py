@@ -69,7 +69,6 @@ def tag_table():
     global operation
     form = SearchForm()
     data_json = json.loads(data.to_json(orient="records"))
-    print('---------------------------------------------------', data_json)
     query = ''
     tags=[]
     if form.validate_on_submit():
@@ -136,8 +135,13 @@ def tag_details(tag_mac):
 
 @app.route('/view/report/<tag_mac>')
 def view_tag_report(tag_mac):
-    report = 'ADDF-23.pdf'
+    report = 'reports/ADDF-23.pdf'
     return render_template('view_report.html', report = report, mac = tag_mac)
+
+@app.route('/view/cert/<tag_mac>')
+def view_tag_cert(tag_mac):
+    cert = 'certs/certification.pdf'
+    return render_template('view_cert.html', cert = cert, mac = tag_mac)
 
 @app.route('/tag-details/edit/<tag_mac>')
 def edit_tag_details(tag_mac):
