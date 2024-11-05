@@ -14,6 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
+import certgen_py
 
 import logging
 
@@ -141,7 +142,23 @@ def view_tag_report(tag_mac):
 @app.route('/view/cert/<tag_mac>')
 def view_tag_cert(tag_mac):
     cert = 'certs/certification.pdf'
+    #generate_pdf()
     return render_template('view_cert.html', cert = cert, mac = tag_mac)
+
+def generate_pdf():
+    asset = certgen_py.Asset(
+        company_name="Vandelay Industries",
+        company_id="12345",
+        certificate_id="cert-67890",
+        expiration_date="2023-12-31",
+        test_type="Quality Inspection",
+        asset_id="asset-112233",
+        asset_type="Widget",
+        logo="./static/images/logo.jpg",
+        asset_image="./static/images/rodpump.jpg",
+        signature="./static/images/signature.jpg"
+    )
+    asset.gen_cert("foo.pdf")
 
 @app.route('/tag-details/edit/<tag_mac>')
 def edit_tag_details(tag_mac):

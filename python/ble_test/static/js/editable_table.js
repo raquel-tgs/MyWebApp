@@ -251,11 +251,11 @@ function updater() {
     $('#time').html(splitData[0]);  // update page with new data
 
     if (splitData[1] === "Enabled") {
-      // $('#op-modal-btn-close').removeClass("hide-block")
-      // $('#op-modal-btn-cancel').removeClass("show-block")
+      $('#op-modal-btn-close').removeClass("hide-block")
+      $('#op-modal-btn-cancel').removeClass("show-block")
 
-      // $('#op-modal-btn-close').addClass("show-block")
-      // $('#op-modal-btn-cancel').addClass("hide-block")
+      $('#op-modal-btn-close').addClass("show-block")
+      $('#op-modal-btn-cancel').addClass("hide-block")
 
 
         // $('#Scan').removeClass("disabled");
@@ -265,11 +265,11 @@ function updater() {
         // $('#Update').removeClass("bold-border");
         // $('#Location').removeClass("bold-border");
     } else {
-      // $('#op-modal-btn-close').removeClass("show-block")
-      // $('#op-modal-btn-cancel').removeClass("hide-block")
+      $('#op-modal-btn-close').removeClass("show-block")
+      $('#op-modal-btn-cancel').removeClass("hide-block")
 
-      // $('#op-modal-btn-close').addClass("hide-block")
-      // $('#op-modal-btn-cancel').addClass("show-block")
+      $('#op-modal-btn-close').addClass("hide-block")
+      $('#op-modal-btn-cancel').addClass("show-block")
 
 
         // $('#Scan').addClass("disabled");
