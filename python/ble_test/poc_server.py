@@ -79,6 +79,8 @@ keepactive_all_CTE_during_location = False
 keepCTE_ON_aftert_location = False
 startCTE=True
 startCTE_address_filter=[]#["0C4314F45C27","0C4314F46E7B"]
+discover_rssi_start=False
+
 scan_control={"tag_re_scan":[],"scan":0, "redo_scan":False, "scan_loop":0}
 MAX_RESCAN=2
 val_outliers=1.5                    #mts to discard x and y intersections from the median
@@ -342,7 +344,7 @@ def device_found(device: BLEDevice, advertisement_data: AdvertisementData):
             if device.name.startswith("BoldTag"):
                 address=device.address.replace(":","")
                 rssi=advertisement_data.rssi
-                if address in startCTE_address_filter or len(startCTE_address_filter)==0:
+                if (address in startCTE_address_filter or len(startCTE_address_filter)==0) and discover_rssi_start:
                     #print("RSSI {0}:{1}".format(address,rssi))
                     tag_data_crc="0000000000000000"
                     if len(advertisement_data.manufacturer_data.items())>0:
@@ -1190,6 +1192,7 @@ async def main():
     global rssi_host_scan
     global scanstarted
     global discover_rssi
+    global discover_rssi_collect
     global devices_processed
     global scan_control
     global scan_control
@@ -1231,6 +1234,7 @@ async def main():
     # thread.join()
     print("MQTT thread stared")
     time_process=None
+
     scanner = BleakScanner()
     scanner.register_detection_callback(device_found)
 
@@ -1284,25 +1288,33 @@ async def main():
 
     app.print_statuslog("Starting...")
     app.print_statuslog("Scanning BoldTags\n")
-    await bscanner.discover_rssi_start()
-    n=0
-    while (n<20):
-        n=n+1
-        app.print_statuslog(".",addLFCR=False if n>1 else True)
-        time.sleep(1)
-    app.print_statuslog("\nFinished Scanning BoldTags...")
-    # await bscanner.discover_rssi_stop()
-    rssi_host_scan=bscanner.get_rssi_host_scan()
-    app.print_statuslog("BoldTag detected {}".format(bscanner.rssi_tag_scan))
+    # time.sleep(5)
+
+    # await bscanner.discover_rssi_start()
+    # time.sleep(5)
+    #
+    #BAC if i do not start this scanner the bscanner does not discover devices!!!!! TODO
+    # if discover_rssi:
+    #     await scanner.start()
+
+    # n=0
+    # while (n<20):
+    #     n=n+1
+    #     app.print_statuslog(".",addLFCR=False if n>1 else True)
+    #     time.sleep(1)
+    # app.print_statuslog("\nFinished Scanning BoldTags...")
+    #
+    # # await bscanner.discover_rssi_stop()
+    # rssi_host_scan=bscanner.get_rssi_host_scan()
+    # app.print_statuslog("BoldTag detected {}".format(bscanner.rssi_tag_scan))
     app.set_rssi_tag_scan(bscanner.rssi_tag_scan,True)
 
     while True:
         app.set_rssi_tag_scan(bscanner.rssi_tag_scan,False)
 
 
-        #check if MQTTT locators and server are running. If not start them
-        srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
-        #srv_antenna_anchor=terminate_mqttservers(srv_antenna_anchor)
+        # #check if MQTTT locators and server are running. If not start them
+        # if action == "LOCATION": srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
 
         #check status of the web API - Update type of data selected by API (page_configuration)
         app.checkstatus()
@@ -1312,16 +1324,18 @@ async def main():
         directory=app_localpath[:-1]
         app_scan_columnIds=app.columnIds
 
-        mqttsrv_status=True
-        for ix in srv_antenna_anchor.keys():
-            mqttsrv_status=srv_antenna_anchor[ix]["status"] & mqttsrv_status
-        if not mqttsrv_status:
-            for ix in srv_antenna_anchor.keys():
-                if not srv_antenna_anchor[ix]["status"] and srv_antenna_anchor[ix]["enabled"]:
-                    print(
-                        "MQTT ANTENNAS POLLING SERVER NOT RUNINNG!!!!!!!!!!!!!!!!!!!!!!!-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {0}".format(srv_antenna_anchor[ix]["bat_file"]))
-                if srv_antenna_anchor[ix]["enabled"]:
-                    print("Anchor {0} is disabled".format(srv_antenna_anchor[ix]["bat_file"]))
+        # if action == "LOCATION":
+        #     mqttsrv_status=True
+        #     for ix in srv_antenna_anchor.keys():
+        #         mqttsrv_status=srv_antenna_anchor[ix]["status"] & mqttsrv_status
+        #     if not mqttsrv_status:
+        #         for ix in srv_antenna_anchor.keys():
+        #             if not srv_antenna_anchor[ix]["status"] and srv_antenna_anchor[ix]["enabled"]:
+        #                 print(
+        #                     "MQTT ANTENNAS POLLING SERVER NOT RUNINNG!!!!!!!!!!!!!!!!!!!!!!!-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {0}".format(srv_antenna_anchor[ix]["bat_file"]))
+        #             if srv_antenna_anchor[ix]["enabled"]:
+        #                 print("Anchor {0} is disabled".format(srv_antenna_anchor[ix]["bat_file"]))
+
         if action == "LOCATION" and len(scan_control["tag_re_scan"])>0  and scan_control["redo_scan"]:
             #in case the loop is for a LOCATION redo
             scannaddress = []
@@ -1441,6 +1455,21 @@ async def main():
         else:
             uuid_data_type_filter = "base"
 
+        #check if MQTTT locators and server are running. If not start them
+        if action == "LOCATION": srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
+
+        if action == "LOCATION":
+            mqttsrv_status=True
+            for ix in srv_antenna_anchor.keys():
+                mqttsrv_status=srv_antenna_anchor[ix]["status"] & mqttsrv_status
+            if not mqttsrv_status:
+                for ix in srv_antenna_anchor.keys():
+                    if not srv_antenna_anchor[ix]["status"] and srv_antenna_anchor[ix]["enabled"]:
+                        print(
+                            "MQTT ANTENNAS POLLING SERVER NOT RUNINNG!!!!!!!!!!!!!!!!!!!!!!!-------------------->>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> {0}".format(srv_antenna_anchor[ix]["bat_file"]))
+                    if srv_antenna_anchor[ix]["enabled"]:
+                        print("Anchor {0} is disabled".format(srv_antenna_anchor[ix]["bat_file"]))
+
         if doscan:
             #start tag scanning for requstd operation
             read_nfc_done = False
@@ -1466,10 +1495,11 @@ async def main():
             init_location=False
             start_mqtt=True
             if discover_rssi:
+                discover_rssi_start=True
+                bscanner.discover_rssi_collect=True
                 await scanner.start()
-                time.sleep(1)  #5
-
                 await bscanner.discover_rssi_start()
+
 
                 #await scanner.stop()
             devices_processed=[]
@@ -1497,7 +1527,8 @@ async def main():
                     break
 
                 if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
-                    await bscanner.scan_tags(connect=True,max_retry=1, max_scans=4)
+                    await bscanner.scan_tags(connect=False,max_retry=1, max_scans=3)
+
 
                 if app.webcancel:
                     webcancelprocess = True
@@ -1505,15 +1536,30 @@ async def main():
 
 
                 tag_found=[x for x in bscanner.tags.items]
+                # Create asyncio tasks for each device connection
+                tasks = [bscanner.tags.connect(max_retry=3, index=x.index,timeout=15) for x in tag_found]
+
+                # Run all connection tasks in parallel
+                await asyncio.gather(*tasks)
+
+
                 if (len(tag_found)>0):
                     try:
-                        for x in tag_found:
-                            bscanner.tags.set_current(x.index)
-                            await bscanner.tags.connect(max_retry=1)
+                        res_conn={}
+                        ncount=0
+                        while ncount<4:
+                            ncount=ncount+1
+                            for x in tag_found:
+                                # bscanner.tags.set_current(x.index)
+                                res=await bscanner.tags.connect(max_retry=1, index=x.index, timeout=5)
+                                if app.webcancel:
+                                    webcancelprocess = True
+                                    break
+                                res_conn[x.address] = res
                             if app.webcancel:
                                 webcancelprocess = True
                                 break
-
+                            if (all([res_conn[x] for x in res_conn.keys()]) and len(res_conn.keys())==len(tag_found)): break
                     except Exception as e:
                         print(e)
 
@@ -1677,7 +1723,10 @@ async def main():
                     nscan=MaxScan
                     webcancelprocess = True
 
-            if discover_rssi:await scanner.stop()
+            if discover_rssi:
+                discover_rssi_start=False
+                bscanner.discover_rssi_collect = True
+                await scanner.stop()
 
         else:
             scanstarted=False

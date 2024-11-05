@@ -193,7 +193,7 @@ class boldtag:
         try:
             if self.rssi_tag_scan is not None:
                 if self.address.replace(":","") in list( self.rssi_tag_scan.keys()):
-                    res=self.rssi_tag_scan[self.address]["ble_data_crc"]
+                    res=self.rssi_tag_scan[self.address.replace(":","")]["ble_data_crc"]
         except Exception as e:
             print(e)
         return  res
@@ -202,7 +202,7 @@ class boldtag:
         try:
             if self.rssi_tag_scan is not None:
                 if self.address.replace(":","") in list( self.rssi_tag_scan.keys()):
-                    res=self.rssi_tag_scan[self.address]["asset_images_crc"]
+                    res=self.rssi_tag_scan[self.address.replace(":","")]["asset_image_crc"]
         except Exception as e:
             print(e)
         return  res
@@ -227,6 +227,7 @@ class boldtag:
 
     def set_current(self, index):
         try:
+            res=False
             self.update_current()
             if index>=0 and index<self.limit :
                 self.index=index
@@ -241,11 +242,11 @@ class boldtag:
                 self.last_seen =self.current.last_seen
                 self.ble_data_crc=self.current.ble_data_crc
                 self.asset_images_crc=self.current.asset_images_crc
-
+                res=True
                 self.gatewaydb.set_mac(self.address)
         except Exception as e:
             print(e)
-
+        return res
 
     def get_current(self):
         return self.current
@@ -264,35 +265,43 @@ class boldtag:
         except Exception as e:
             print(e)
 
-    async def connect(self,max_retry=3):
-        ncount = 0
-        res=self.connected
-        try:
-            if self.client  is not None:
-                res=self.client.is_connected
-            while not res and ncount < max_retry:
-                print("connecting to {} retry:{}".format(self.address,ncount ))
-                ncount = ncount + 1
-                try:
-                    self.client = BleakClient(self.address)
-                    #self.client.set_disconnected_callback(self.disconnected_callback)
-                    #await self.client.connect()
-                    await asyncio.wait_for(self.client.connect(), timeout=5)
-                    self.connected= self.client.is_connected
-                    res=self.connected
-                except Exception as e:
-                    print(e)
-                if self.connected:
-                    print("connecting to {} connected".format(self.address))
-                    svcs = await self.client.get_services()
-                    for service_1 in svcs:
-                        # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
-                        if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
-                            self.custom_service = service_1
-                            break
-                    self.update_current()
-        except Exception as e:
-            print(e)
+    async def connect(self,max_retry=3, index=None,timeout=15):
+        res_scan=True
+        if index is not None:
+            res_scan=self.set_current(index)
+        res=False
+        if res_scan:
+            ncount = 0
+            res=self.connected
+            try:
+                if self.client  is not None:
+                    res=self.client.is_connected
+                while not res and ncount < max_retry:
+                    print("connecting to {} retry:{}".format(self.address,ncount ))
+                    ncount = ncount + 1
+                    try:
+                        self.client = BleakClient(self.address)
+                        #self.client.set_disconnected_callback(self.disconnected_callback)
+                        #await self.client.connect()
+                        await asyncio.wait_for(self.client.connect(), timeout=timeout)
+                        self.connected= self.client.is_connected
+                        res=self.connected
+                        self.webapp.print_statuslog("BoldTag {} connected!".format(self.address))
+                    except Exception as e:
+                        print(e)
+                        self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.address))
+                    if self.connected:
+                        print("connecting to {} connected".format(self.address))
+                        svcs = await self.client.get_services()
+                        for service_1 in svcs:
+                            # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                            if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
+                                self.custom_service = service_1
+                                break
+                        self.update_current()
+            except Exception as e:
+                print(e)
+                self.webapp.print_statuslog("Connection error for BoldTag  {} ".format(self.address))
         return res
 
     async def dicconnect_and_remove(self, index=None):
@@ -979,9 +988,11 @@ class boldscanner:
         self.scanner_param["CTE_Wait_Time_prescan"] =CTE_Wait_Time_prescan
         self.scanner_param["CTE_Wait_Time"] =CTE_Wait_Time
 
+        self.discover_rssi = False
+        self.discover_rssi_collect = True
+
         self.scanner = BleakScanner(detection_callback=self.device_found)
         # self.scanner.register_detection_callback(self.device_found)
-        self.discover_rssi =False
 
         self.webapp = webapp
 
@@ -1010,15 +1021,21 @@ class boldscanner:
         self.rssi_host_scan_reset=True
 
     async def discover_rssi_start(self):
-        if self.discover_rssi == False:
-            await self.scanner.start()
-            time.sleep(1)
-            self.discover_rssi = True
+        try:
+            if self.discover_rssi == False:
+                await self.scanner.start()
+                #time.sleep(1)
+                self.discover_rssi = True
+        except Exception as e:
+            print(e)
 
     async def discover_rssi_stop(self):
-        if self.discover_rssi == True:
-            await self.scanner.stop()
-            self.discover_rssi = False
+        try:
+            if self.discover_rssi == True:
+                await self.scanner.stop()
+                self.discover_rssi = False
+        except Exception as e:
+            print(e)
 
             # ---------------------------------------------------------------------#
     # Call back advertisement
@@ -1032,23 +1049,24 @@ class boldscanner:
                 if device.name.startswith(self.DEVICE_NAME):
                     address = device.address.replace(":", "")
                     rssi = advertisement_data.rssi
-                    if address in self.startCTE_address_filter or len(self.startCTE_address_filter) == 0:
-                        # print("RSSI {0}:{1}".format(address,rssi))
-                        tag_data_crc = "0000000000000000"
-                        try:
-                            if len(advertisement_data.manufacturer_data.items()) > 0:
-                                tag_data_crc = [x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
-                        except Exception as e:
-                            print(e)
-                        rssi_host_scan={"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
-                        if self.rssi_host_scan_reset==True:
-                            self.rssi_host_scan={}
-                            self.rssi_host_scan_reset=False
+                    # print("RSSI {0}:{1}".format(address,rssi))
+                    tag_data_crc = "0000000000000000"
+                    try:
+                        if len(advertisement_data.manufacturer_data.items()) > 0:
+                            tag_data_crc = [x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
+                    except Exception as e:
+                        print(e)
+                    rssi_host_scan={"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
+                    if self.rssi_host_scan_reset==True:
+                        self.rssi_host_scan={}
+                        self.rssi_host_scan_reset=False
 
-                        ble_data_crc = tag_data_crc[8:]
-                        asset_image_crc = tag_data_crc[0:8]
-                        if tag_data_crc!='0000000000000000':
-                            self.rssi_tag_scan[address]={"time": time.strftime("%m/%d/%Y %H:%M:%S") , "rssi_host": rssi,"ble_data_crc":ble_data_crc,"asset_image_crc":asset_image_crc,"tag_data_crc":tag_data_crc}
+                    ble_data_crc = tag_data_crc[8:]
+                    asset_image_crc = tag_data_crc[0:8]
+                    if tag_data_crc!='0000000000000000':
+                        self.rssi_tag_scan[address]={"time": time.strftime("%m/%d/%Y %H:%M:%S") , "rssi_host": rssi,"ble_data_crc":ble_data_crc,"asset_image_crc":asset_image_crc,"tag_data_crc":tag_data_crc}
+
+                    if (address in self.startCTE_address_filter or len(self.startCTE_address_filter) == 0) and self.discover_rssi_collect:
                         self.rssi_host_scan[len(self.rssi_host_scan)] =rssi_host_scan# {"address": address, "rssi_host": rssi, "tag_data_crc": tag_data_crc}
                         self.tags.update_rssi_host_scan(address,rssi_host_scan)
 
@@ -1078,7 +1096,8 @@ class boldscanner:
                                     if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
                                 else:
                                     self.tags.set_current(ix)
-                                    await self.tags.connect(max_retry=max_retry)
+                                    if connect:
+                                        await self.tags.connect(max_retry=max_retry)
                                     existing_tags.append(device.address)
                         except Exception as e:
                             print(e)
