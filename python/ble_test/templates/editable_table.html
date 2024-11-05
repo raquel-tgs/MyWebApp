@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="flex h-full">
-      <div class="flex grow flex-col gap-y-5 bg-gray-800 w-72 p-6">
+      <div class="flex flex-col gap-y-5 bg-gray-800 w-72 p-6">
         <svg xmlns="http://www.w3.org/2000/svg" width="129" height="28" viewBox="0 0 129 28" fill="none">
           <g clip-path="url(#clip0_239_1642)">
             <path d="M23.4 8.16996L14.34 4.10996C14.62 3.92996 14.81 3.62996 14.81 3.28996V1.64996C14.81 0.969962 14.13 0.499962 13.49 0.729962L5.84 3.54996C5.08 3.82996 4.48 4.44996 4.23 5.21996L0.08 17.8C-0.19 18.61 0.2 19.48 0.98 19.83L10.04 23.89C9.76 24.07 9.57 24.37 9.57 24.71V26.35C9.57 27.03 10.25 27.5 10.89 27.27L18.54 24.45C19.3 24.17 19.9 23.55 20.15 22.78L24.3 10.19C24.57 9.37996 24.18 8.50996 23.4 8.15996V8.16996ZM18.67 13.12L17.52 18.15C17.33 18.99 16.71 19.67 15.9 19.95L12.82 21C12.08 21.25 11.25 21.11 10.64 20.62L6.59 17.4C5.84 16.8 5.5 15.83 5.72 14.9L6.87 9.86996C7.06 9.02996 7.68 8.34996 8.49 8.06996L11.57 7.01996C12.31 6.76996 13.14 6.90996 13.75 7.39996L17.8 10.62C18.55 11.22 18.89 12.19 18.67 13.12Z" fill="#F26E24"/>
@@ -44,6 +44,21 @@
                     Tags View
                   </a>
                 </li>
+
+                <li>
+                  <a href="{{ url_for('locationpage') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
+                    </svg>
+                    Tag Locations
+                  </a>
+                </li>
+
+                <!-- <form action="{{ url_for('locationpage') }}" method="get">
+                  <button id="redirectButton">Go to Tag Location Page</button>
+                </form> -->
+
+
                 <!-- <li>
                   <a href="{{ url_for('page_data_angles') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
@@ -121,7 +136,7 @@
               <button id="tag-update" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Update" name="Update" id="Update">Update</button>
             </form>
             <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
-              <button id="tag-location" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Location" name="Location" id="Location">View Locations</button>
+              <button id="tag-location" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Location" name="Location" id="Location">Scan Locations</button>
             </form>
             {% if userRole == 'certification' %}
               <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Process Certification Batch</button>
@@ -156,7 +171,17 @@
                 <p class="text-xs font-normal text-gray-500">{{tag.asset_diameter}}</p>
               </div>
               <div class="w-24">
-                <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
+                {% if tag.status == 'read' %}
+                  <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
+                {% elif tag.status == 'changed' %}
+                  <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
+                {% elif tag.status == 'updated' %}
+                  <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
+                {% elif tag.status == 'update error' %}
+                  <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
+                {% else %}
+                  <button type="button" class="border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
+                {% endif %}
               </div>
               <svg class="h-5 w-5 flex-none text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                 <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -234,9 +259,9 @@
                 <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="3" readonly id="statuslog"></textarea>
               </div>
             </div>
-            <div class="flex gap-3 justify-between mt-5 sm:mt-6">
-              <button id="op-modal-btn" type="button" class="border-0 outline-none">Close</button>
-              <form class="m-0" method="post" action="/api/canceloperation">
+            <div class="flex justify-end mt-5">
+              <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
+              <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation">
                 <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
               </form>
             </div>
