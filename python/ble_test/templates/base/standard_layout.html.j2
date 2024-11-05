@@ -1,8 +1,15 @@
+<! DOCTYPE html>
 <html>
   <head>
-    <title>Edit Tag Details</title>
-    <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" type="text/css" rel="stylesheet" /> -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <title>Detected Tags</title>
+    <!-- <link href="{{ url_for('static', filename='css/mermaid_min.css') }}" type="text/css" rel="stylesheet" /> -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/editable_table.css') }}">
+    <style>
+      body {
+        font-family: Sans-Serif;
+      }
+    </style>
   </head>
   <body>
     <div class="flex h-full">
@@ -47,6 +54,11 @@
                     Tag Locations
                   </a>
                 </li>
+
+                <!-- <form action="{{ url_for('locationpage') }}" method="get">
+                  <button id="redirectButton">Go to Tag Location Page</button>
+                </form> -->
+
 
                 <!-- <li>
                   <a href="{{ url_for('page_data_angles') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
@@ -96,219 +108,156 @@
       </div>
 
       <div class="container m-8 border border-dashed border-gray-400 rounded-xl h-fit">
-        <div class="flex p-4 justify-between items-center">
-          <h4 class="text-xl font-semibold">Edit Asset</h4>
-          <!-- <a class="flex gap-3" href="/tag-details/{{tag.mac}}">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="25" viewBox="0 0 24 25" fill="none">
-              <path d="M15 18.5L9 12.5L15 6.5" stroke="#7C3AED" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Back
-          </a> -->
-          <div class="flex gap-4">
-            <a href="/tag-details/{{tag.mac}}"><button class="text-gray-800 bg-gray-300 px-3 py-2 rounded-md">Cancel</button></a>
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
 
-            <!-- <button class="flex gap-1 items-center bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M10 4.16663V15.8333" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M4.16666 10H15.8333" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Add to Batch
-            </button>
-            <button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Locate</button>
-            <a href="/tag-details/edit/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Update</button></a> -->
-            <a href="/tag-details/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Save</button></a>
-          </div>
-        </div>
-        <div class="flex justify-between gap-1 p-4" style="height: 85vh; overflow: scroll;">
-          <div class="flex flex-col gap-5 w-3/5">
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-900 text-sm">Tag Name</label>
-              <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.name if tag.name else 'N/A'}}</p>
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">MAC</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.mac if tag.mac else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Tag ID</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_id" mac="{{tag.mac}}" value="{{tag.tag_id}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Asset ID</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_id" mac="{{tag.mac}}" value="{{tag.asset_id}}">
-              </div>
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">NDIR ID</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="ndir_id" mac="{{tag.mac}}" value="{{tag.ndir_id}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Machine ID</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="machine_id" mac="{{tag.mac}}" value="{{tag.machine_id}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Is Machine</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="is_machine" mac="{{tag.mac}}" value="{{tag.is_machine}}">
-              </div>
-
-            </div>
-
-            <div class="flex flex-col gap-2">
-              <label class="text-gray-900 text-sm">Comment</label>
-              <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_comment" mac="{{tag.mac}}" value="{{tag.asset_comment}}">
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Series</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="series" mac="{{tag.mac}}" value="{{tag.series}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Diameter</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_diameter" mac="{{tag.mac}}" value="{{tag.asset_diameter}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Color</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="color" mac="{{tag.mac}}" value="{{tag.color}}">
-              </div>
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">X</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.x if tag.x else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Y</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.y if tag.y else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Altitude</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.altitude if tag.altitude else 'N/A'}}</p>
-              </div>
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Moved</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.moved if tag.moved else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Type</label>
-                <input class="editable-field border border-gray-500 rounded-md p-2" name="type" mac="{{tag.mac}}" value="{{tag.type}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Batt. Voltage</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.battery_voltage if tag.battery_voltage else 'N/A'}}</p>
-              </div>
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Status Code</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.status_code if tag.status_code else 'N/A'}}</p>
-              </div>
-              <!-- <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Select</label>
-                <input class="border border-gray-500 rounded-md p-2" name="name" value="{{tag.select}}">
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Read NFC</label>
-                <input class="border border-gray-500 rounded-md p-2" name="name" value="{{tag.read_nfc}}">
-              </div> -->
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Cert ID</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certificate_id if tag.certificate_id else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Company Name</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_company_name if tag.certification_company_name else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Company ID</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_company_id if tag.certification_company_id else 'N/A'}}</p>
-              </div>
-
-            </div>
-
-            <div class="flex justify-between gap-2">
-
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Cert Place</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_place if tag.certification_place else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Cert Date</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_date if tag.certification_date else 'N/A'}}</p>
-              </div>
-              <div class="flex flex-col gap-2" style="width: 30%;">
-                <label class="text-gray-900 text-sm">Exp Date</label>
-                <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.expiration_date if tag.expiration_date else 'N/A'}}</p>
-              </div>
-
-            </div>
-
-
-            
-            <!-- <div>
-                <div class="w-1/2">
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Owner Company</span>{{tag.owner_company_name}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Owner Data</span>{{tag.owner_data}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Batch ID</span>{{tag.batch_id}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Batch Created</span>{{tag.batch_date}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Test Type</span>{{tag.test_type}}</p>
-                </div>
-              </div>
-            </div>
+    <dialog id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
             <div>
-              <p class="text-sm font-normal text-gray-700">CRC / Extensions</p>
-              <div class="flex gap-1">
-                <div class="w-1/2">
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">BLE Data CRC</span>{{tag.ble_data_crc}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Asset Image CRC</span>{{tag.asset_images_crc}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Logo Image CRC</span>{{tag.logo_images_crc}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Signature CRC</span>{{tag.signature_images_crc}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Expires</span>{{tag.expiration_date}}</p>
+              <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
+                {% if operation == 'Scan' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Scanning...</h3>
+                {% elif operation == 'Update' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Updating...</h3>
+                {% elif operation == 'Location' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Locating...</h3>
+                {% else %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">{{operation}}</h3>
+                {% endif %}
+                <div id="Progress_Status" class="w-full">
+                  <div id="myprogressBar" class="h-5 w-0 bg-indigo-600"></div>
                 </div>
-                <div class="w-1/2">
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Asset Image Ext</span>{{tag.asset_images_file_extension}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Logo Image Ext</span>{{tag.logo_file_extension}}</p>
-                  <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Signature Ext</span>{{tag.signature_image_file_extension}}</p>
-                </div>
+                <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="3" readonly id="statuslog"></textarea>
               </div>
-            </div> -->
-          </div>
-          <div>
-            <img class="rounded-lg w-96 pb-5" src="{{ url_for('static', filename=image) }}" alt="Asset Image">
-            <form class="flex flex-col gap-5" action="/api/image" method="post" enctype=multipart/form-data>
-              <input type="file" id="file-input" name="image" accept="image/*">
-              <input type="hidden" name="certificate_id" value="{{tag.certificate_id}}" />
-              <input type="hidden" name="mac" value="{{tag.mac}}" />
-              <button class="rounded-md border border-purple-600 bg-white text-purple-600 px-3 py-1 w-fit" type="submit">Upload new image</button>
-            </form>
+            </div>
+            <div class="flex justify-end mt-5">
+              <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
+              <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation">
+                <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
+              </form>
+            </div>
           </div>
         </div>
       </div>
+    </dialog>
+
+      <!-- Dropdown Menu -->
+     <!-- <div class="dropdown">
+      <button class="dropbtn">Menu</button>
+      <div class="dropdown-content">
+        <a  href="{{ url_for('page_configuration') }}">Configuration</a>
+        <a  href="{{ url_for('page_data_angles') }}">Data angles</a>
+        <a  href="{{ url_for('page_data_scan') }}">Data scan</a>
+        <a  href="{{ url_for('page_data_location') }}">Data location</a>
+        <a  href="{{ url_for('page_data_anchors') }}">Data anchors</a>
+      </div>
     </div>
-    <script src="{{ url_for('static', filename='js/edit_tag_details.js') }}"></script>
+
+    <form method="post" action="/api/gateway" id="formGateway">
+      <hr>
+      <label for="gateway">Choose a Zone:</label>
+      <select name="gateway_selection" id="gateway" class="gateway" onchange="submitFormGateway()">
+        <option value="Zone A">Certification Area 1</option>
+        <option value="Zone B">Certification Area 2</option>
+        <option value="Zone C">Warehouse</option>
+        <option value="Zone D">Loading Area</option>
+      </select>
+    </form>
+
+    <form method="post" action="/api/buttons">
+      <div id="outer">
+        <div class="inner">
+          <button class="contactButton"  value="Scan" name="Scan" id="Scan">
+            Scan
+            <div class="iconButton">
+              <svg
+                height="14"
+                width="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+          </button>
+        </div>
+
+          <div class="inner"><button class="contactButton" value="Update" name="Update" id="Update">
+            Update
+            <div class="iconButton">
+              <svg
+                height="14"
+                width="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+          </button></div>
+
+          <div class="inner"><button class="contactButton" value="Location" name="Location" id="Location">
+            Location
+            <div class="iconButton">
+              <svg
+                height="14"
+                width="24"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path d="M0 0h24v24H0z" fill="none"></path>
+                <path
+                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
+                  fill="currentColor"
+                ></path>
+              </svg>
+            </div>
+          </button></div>
+        </div>
+    </form>
+    <div>
+      <div id="table"></div>
+    </div>
+    <div class="row">
+      <div class="column" >
+        <p>Status Update</p>
+        <div> Date & Time: <span id="time"></span> </div>
+        <div id="Progress_Status">
+          <div id="myprogressBar"></div>
+        </div>
+        <div> -->
+            <!-- Button to load a different local webpage -->
+          <!-- <form action="{{ url_for('locationpage') }}" method="get">
+            <button id="redirectButton">Go to Tag Location Page</button>
+          </form> -->
+                    <!-- Button to load a different local webpage -->
+          <!-- <form method="post" action="/api/canceloperation">
+            <button id="cancelOperation">Cancel Operation</button>
+          </form>
+        </div>
+      </div>
+      <div class="column" >
+        <p>Status Log</p>
+        <textarea rows="6" cols="150" readonly id="statuslog"></textarea>
+      </div>
+    </div> -->
+
+    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
+    <script src="https://unpkg.com/gridjs/plugins/selection/dist/selection.umd.js"></script>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/editable_table.js') }}"></script>
   </body>
 </html>
