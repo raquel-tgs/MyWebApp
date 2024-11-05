@@ -96,7 +96,7 @@
           </a> -->
           <div class="flex gap-4">
             <a href="/tag-details/{{tag.mac}}"><button class="text-gray-800 bg-gray-300 px-3 py-2 rounded-md">Cancel</button></a>
-            <!-- <a href="/tag-details/{{tag.mac}}"><button class="text-white bg-purple-500 px-3 py-2 rounded-md">Update</button></a> -->
+
             <!-- <button class="flex gap-1 items-center bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
                 <path d="M10 4.16663V15.8333" stroke="#4338CA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -110,7 +110,6 @@
         </div>
         <div class="flex justify-between gap-1 p-4" style="height: 85vh; overflow: scroll;">
           <div class="flex flex-col gap-5 w-3/5">
-
             <div class="flex flex-col gap-2">
               <label class="text-gray-900 text-sm">Tag Name</label>
               <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.name if tag.name else 'N/A'}}</p>
@@ -124,11 +123,11 @@
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Tag ID</label>
-                <input class="border border-gray-500 rounded-md p-2" name="tag_id" value="{{tag.tag_id}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_id" mac="{{tag.mac}}" value="{{tag.tag_id}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Asset ID</label>
-                <input class="border border-gray-500 rounded-md p-2" name="asset_id" value="{{tag.asset_id}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_id" mac="{{tag.mac}}" value="{{tag.asset_id}}">
               </div>
 
             </div>
@@ -137,37 +136,37 @@
 
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">NDIR ID</label>
-                <input class="border border-gray-500 rounded-md p-2" name="ndir_id" value="{{tag.ndir_id}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="ndir_id" mac="{{tag.mac}}" value="{{tag.ndir_id}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Machine ID</label>
-                <input class="border border-gray-500 rounded-md p-2" name="machine_id" value="{{tag.machine_id}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="machine_id" mac="{{tag.mac}}" value="{{tag.machine_id}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Is Machine</label>
-                <input class="border border-gray-500 rounded-md p-2" name="is_machine" value="{{tag.is_machine}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="is_machine" mac="{{tag.mac}}" value="{{tag.is_machine}}">
               </div>
 
             </div>
 
             <div class="flex flex-col gap-2">
               <label class="text-gray-900 text-sm">Comment</label>
-              <input class="border border-gray-500 rounded-md p-2" name="asset_comment" value="{{tag.asset_comment}}">
+              <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_comment" mac="{{tag.mac}}" value="{{tag.asset_comment}}">
             </div>
 
             <div class="flex justify-between gap-2">
 
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Series</label>
-                <input class="border border-gray-500 rounded-md p-2" name="series" value="{{tag.series}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="series" mac="{{tag.mac}}" value="{{tag.series}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Diameter</label>
-                <input class="border border-gray-500 rounded-md p-2" name="asset_diameter" value="{{tag.asset_diameter}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_diameter" mac="{{tag.mac}}" value="{{tag.asset_diameter}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Color</label>
-                <input class="border border-gray-500 rounded-md p-2" name="color" value="{{tag.color}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="color" mac="{{tag.mac}}" value="{{tag.color}}">
               </div>
 
             </div>
@@ -197,7 +196,7 @@
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Type</label>
-                <input class="border border-gray-500 rounded-md p-2" name="type" value="{{tag.type}}">
+                <input class="editable-field border border-gray-500 rounded-md p-2" name="type" mac="{{tag.mac}}" value="{{tag.type}}">
               </div>
               <div class="flex flex-col gap-2" style="width: 30%;">
                 <label class="text-gray-900 text-sm">Batt. Voltage</label>
@@ -299,5 +298,6 @@
         </div>
       </div>
     </div>
+    <script src="{{ url_for('static', filename='js/edit_tag_details.js') }}"></script>
   </body>
 </html>
