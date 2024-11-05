@@ -69,6 +69,7 @@ def tag_table():
     global operation
     form = SearchForm()
     data_json = json.loads(data.to_json(orient="records"))
+    print('---------------------------------------------------', data_json)
     query = ''
     tags=[]
     if form.validate_on_submit():
@@ -145,7 +146,9 @@ def edit_tag_details(tag_mac):
     for tag in data_json:
         if tag['mac'] == tag_mac:
             tag_data = tag
-    image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+    image = ''
+    if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
+        image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
     return render_template('edit_tag_details.html', tag = tag_data, image = image)
 
 @app.route('/upload_file')
