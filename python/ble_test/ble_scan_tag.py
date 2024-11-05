@@ -267,26 +267,32 @@ class boldtag:
     async def connect(self,max_retry=3):
         ncount = 0
         res=self.connected
-        while not self.connected and ncount < max_retry:
-            print("connecting to {} retry:{}".format(self.address,ncount ))
-            ncount = ncount + 1
-            try:
-                self.client = BleakClient(self.address)
-                await self.client.connect()
-                self.connected= self.client.is_connected
-                res=self.connected
-            except Exception as e:
-                print(e)
-            if self.connected:
-                print("connecting to {} connected".format(self.address))
-                svcs = await self.client.get_services()
-                for service_1 in svcs:
-                    # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
-                    if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
-                        self.custom_service = service_1
-                        break
-                self.update_current()
-
+        try:
+            if self.client  is not None:
+                res=self.client.is_connected
+            while not res and ncount < max_retry:
+                print("connecting to {} retry:{}".format(self.address,ncount ))
+                ncount = ncount + 1
+                try:
+                    self.client = BleakClient(self.address)
+                    #self.client.set_disconnected_callback(self.disconnected_callback)
+                    #await self.client.connect()
+                    await asyncio.wait_for(self.client.connect(), timeout=5)
+                    self.connected= self.client.is_connected
+                    res=self.connected
+                except Exception as e:
+                    print(e)
+                if self.connected:
+                    print("connecting to {} connected".format(self.address))
+                    svcs = await self.client.get_services()
+                    for service_1 in svcs:
+                        # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                        if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
+                            self.custom_service = service_1
+                            break
+                    self.update_current()
+        except Exception as e:
+            print(e)
         return res
 
     async def dicconnect_and_remove(self, index=None):
@@ -356,7 +362,7 @@ class boldtag:
                 except Exception as e:
                     print(e)
                     connected = False
-
+            ble_data_crc=""
             if client is not None:
                 connected = client.is_connected
                 if not connected:
@@ -367,8 +373,8 @@ class boldtag:
                         print(e)
                         connected=False
                 try:
-                    char_uuid = self.filter_db(id="tag_mac")[0]["uuid"]
-                    char_uuid_val = bytes(await client.read_gatt_char(char_uuid))
+                    char_uuid = self.filter_db(id="ble_data_crc")[0]["uuid"]
+                    ble_data_crc = bytes(await client.read_gatt_char(char_uuid))
                     connected = True
                 except Exception as e:
                     print(e)
@@ -381,7 +387,7 @@ class boldtag:
             self.connected = connected
             self.update_current()
 
-        return connected
+        return connected,ble_data_crc
 
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
@@ -431,7 +437,7 @@ class boldtag:
         dfupdate_read=None
         recupdate = None
         devices_processed_location=None
-
+        ble_data_crc=None
         if service is not None:
             # try to connect
             try:
@@ -461,7 +467,7 @@ class boldtag:
                 #         connected = client.is_connected
                 #     except Exception as e:
                 #         print(e)
-                connected=await self.check_disconnect( client, address)
+                connected,ble_data_crc=await self.check_disconnect( client, address)
 
                 if connected:
                     print("Connected to Device")
@@ -574,6 +580,14 @@ class boldtag:
                     if (action == "LOCATION"):
                         ini_loc = False
                         if not init_location:
+                            # Stop_collecting = False
+                            # datadf = {}
+                            janhors_processed = []
+                            # datadf_pos = {}
+                            # datadf_corr = {}
+                            # jmpos_processed = []
+                            # jang_corr_processed = []
+
                             init_location = True
                             start_mqtt = True
                             try:
@@ -1041,32 +1055,35 @@ class boldscanner:
         except Exception as e:
             print(f'error in device_found {e}')
 
-    async def scan_tags(self,connect=False, max_retry=1):
-        try:
-            new_tags=[]
-            existing_tags=[]
-            #scanner = BleakScanner()
-            devices = await self.scanner.discover()
-            for device in devices:
-                # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
-                if device.name is not None:
-                    try:
-                        if device.name.startswith("BoldTag")  :
-                            if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
-                            ix=self.tags.find_tag(device.address)
-                            if ix==-1:
-                                await self.tags.new(connect=connect, device=device,max_retry=max_retry)
-                                new_tags.append(device.address)
-                                print("BoldTag {} Added ".format(device.address))
-                                if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
-                            else:
-                                self.tags.set_current(ix)
-                                await self.tags.connect(max_retry=max_retry)
-                                existing_tags.append(device.address)
-                    except Exception as e:
-                        print(e)
-        except Exception as e:
-            print(e)
+    async def scan_tags(self,connect=False, max_retry=1, max_scans=4):
+        nscan = 0
+        new_tags=[]
+        existing_tags=[]
+        while nscan < max_scans:
+            try:
+                nscan=nscan+1
+                #scanner = BleakScanner()
+                devices = await self.scanner.discover()
+                for device in devices:
+                    if self.webapp.webcancel: break
+                    if device.name is not None:
+                        try:
+                            if device.name.startswith("BoldTag")  :
+                                if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
+                                ix=self.tags.find_tag(device.address)
+                                if ix==-1:
+                                    await self.tags.new(connect=connect, device=device,max_retry=max_retry)
+                                    new_tags.append(device.address)
+                                    print("BoldTag {} Added ".format(device.address))
+                                    if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
+                                else:
+                                    self.tags.set_current(ix)
+                                    await self.tags.connect(max_retry=max_retry)
+                                    existing_tags.append(device.address)
+                        except Exception as e:
+                            print(e)
+            except Exception as e:
+                print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
 
     def totaltags(self):

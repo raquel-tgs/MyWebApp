@@ -277,10 +277,10 @@ def is_batch_file_running(batch_file_name):
                     # print(proc.info['cmdline'])
                     #print(proc.info['cmdline'][2])
                     if batch_file_name[4] == proc.info['cmdline'][2]:
-                        return True
+                        return True,proc
         except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
             pass
-    return False
+    return False,None
 
 def monitor_process(process,anchor,srv_antenna_anchor):
     """Function to monitor the process output and status."""
@@ -602,7 +602,9 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
                 dataavg1 = data.groupby(['anchor_mac', 'tag_mac']).median().reset_index()
                 dataavg1['samples'] = data[['anchor_mac', 'tag_mac', "azimuth"]].groupby(['anchor_mac', 'tag_mac']).count().values
             if data_pos.shape[0]>0:data_posavg = data_pos.groupby([ 'tag_mac']).mean().reset_index()
-            if data_corr.shape[0]>0:data_corravg = data_corr.groupby(['anchor_mac', 'tag_mac']).mean().reset_index()
+            if data_corr.shape[0]>0:
+                data_corravg = data_corr.groupby(['anchor_mac', 'tag_mac']).mean().reset_index()
+                data_corravg["samples"] = data_corr[['anchor_mac', 'tag_mac', "azimuth"]].groupby(['anchor_mac', 'tag_mac']).count().values
 
             if data_posavg is not None: data_posavg["d"] = np.sqrt(data_posavg["x"] ** 2 + data_posavg["y"] ** 2)
             # caltest.append(data_posavg.values[0])
@@ -1054,8 +1056,31 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
 #---------------------------------------------------------------------#
 #               Main Scan BLE
 #---------------------------------------------------------------------#
-
-
+import signal
+def terminate_mqttservers(srv_antenna_anchor):
+    try:
+        for ix in srv_antenna_anchor.keys():
+            if srv_antenna_anchor[ix]["status"]:
+                print(f"terminate_process(process) {ix}")
+                process = srv_antenna_anchor[ix]["process"]
+                if process is not None:
+                    process.send_signal(signal.SIGINT)
+                    print(f"Sent Ctrl+C (SIGINT) to process anchor {ix}.")
+                    process.send_signal(signal.SIGINT)
+                    print(f"Sent Ctrl+C (SIGINT) to process anchor {ix}.")
+                # # Terminate the process if needed
+                # terminate_process(process)
+                monitor_thread = srv_antenna_anchor[ix]["monitor_thread"]
+                if monitor_thread is not None:
+                    # Wait for the monitor thread to finish
+                    monitor_thread.join()
+                    # Check the final status of the process
+                #exit_code = process.poll()
+                #print(f"Process finished with exit code {exit_code}")
+                srv_antenna_anchor[ix]["status"] = False
+    except Exception as e:
+        print(e)
+    return srv_antenna_anchor
 
 def checkmqttservers(srv_antenna_anchor):
     # chck servers
@@ -1065,9 +1090,11 @@ def checkmqttservers(srv_antenna_anchor):
             bat_file = srv_antenna_anchor[ix]["bat_file"]
             if cmdline == "":
                 cmdline = ['start', '/MIN','cmd', '/c', bat_file]
-            if is_batch_file_running(cmdline):
+            res, process=is_batch_file_running(cmdline)
+            if res:
                 # print(f"{bat_file} is currently running.")
                 srv_antenna_anchor[ix]["status"] = True
+                srv_antenna_anchor[ix]["process"] =process
             else:
                 print(f"{bat_file} is not running.")
                 srv_antenna_anchor[ix]["status"] = False
@@ -1264,7 +1291,7 @@ async def main():
         app.print_statuslog(".",addLFCR=False if n>1 else True)
         time.sleep(1)
     app.print_statuslog("\nFinished Scanning BoldTags...")
-    await bscanner.discover_rssi_stop()
+    # await bscanner.discover_rssi_stop()
     rssi_host_scan=bscanner.get_rssi_host_scan()
     app.print_statuslog("BoldTag detected {}".format(bscanner.rssi_tag_scan))
     app.set_rssi_tag_scan(bscanner.rssi_tag_scan,True)
@@ -1275,6 +1302,7 @@ async def main():
 
         #check if MQTTT locators and server are running. If not start them
         srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
+        #srv_antenna_anchor=terminate_mqttservers(srv_antenna_anchor)
 
         #check status of the web API - Update type of data selected by API (page_configuration)
         app.checkstatus()
@@ -1302,7 +1330,9 @@ async def main():
             dfupdate = None
             doscan=True
             startCTE_address_filter = scan_control["tag_re_scan"]
+            redo_location=True
         else:
+            redo_location = False
             #Start normal operation requestd by API
             scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan":False, "scan_loop":0}
 
@@ -1466,8 +1496,8 @@ async def main():
                     webcancelprocess = True
                     break
 
-                if param_scan_new_tags:# or (not param_scan_new_tags and nscan==0):
-                    await bscanner.scan_tags(connect=True,max_retry=1)
+                if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
+                    await bscanner.scan_tags(connect=True,max_retry=1, max_scans=4)
 
                 if app.webcancel:
                     webcancelprocess = True
@@ -1597,7 +1627,16 @@ async def main():
                                         if (location_fx and action=="LOCATION" ) or action!="LOCATION":
                                             #try:
                                             #try to connect
-                                            if action=="LOCATION" : srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
+                                            if action=="LOCATION" :
+                                                srv_antenna_anchor = checkmqttservers(srv_antenna_anchor)
+                                                if not init_location:
+                                                    Stop_collecting = False
+                                                    datadf = {}
+                                                    janhors_processed = []
+                                                    datadf_pos = {}
+                                                    datadf_corr = {}
+                                                    jmpos_processed = []
+                                                    jang_corr_processed = []
                                             try:
                                                 scannaddress.append(d.address)
                                                 devprocessed.append(address)
@@ -1608,7 +1647,8 @@ async def main():
                                                                                 uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
                                                                                 keep_connected=True,csv_read_data=csv_read_data,
-                                                                                          param_enable_disable_tags=param_enable_disable_tags,janhors_processed=janhors_processed,start_mqtt=start_mqtt)
+                                                                                          param_enable_disable_tags=param_enable_disable_tags,
+                                                                                          janhors_processed=janhors_processed,start_mqtt=start_mqtt)
                                                     ressult = res["result"]
                                                     dfupdate_read = res["dfupdate_read"]
                                                     csv_read_data = res["csv_read_data"]
@@ -1683,7 +1723,7 @@ async def main():
                 app.print_statuslog("Stoping MQTT server")
                 if use_MQTT:
                     if not keep_mqtt_on: mqttclient.loop_stop()
-                time.sleep(1)
+                #time.sleep(1)
             except Exception as e:
                 start_mqtt = False
                 print("ERROR Stoping MQTT server")

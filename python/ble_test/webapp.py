@@ -456,53 +456,69 @@ def locationdata():
     global scan_angles_raw
     global scan_location
 
-    size_1m = 150
+    try:
+        size_1m = 150
 
-    anchors_data = pd.DataFrame.from_dict(anchors_init, orient="index").reset_index(names=["anchor_mac"])
-    x = [float(x) for x in data.dropna()["x"].values]
-    y = [float(y) for y in data.dropna()["y"].values]
-    mtext = list(data.dropna()["tag_id"].values)
-    if scan_location is not None:
-        msize=[]
-        for mac in mtext:
-            if sum(scan_location["tag_mac"] == mac)>0:
-                val=scan_location[scan_location["tag_mac"] == mac]["std"].values[0]
-                if not np.isnan(val) :
-                    msize.append(int(size_1m * val))
+        anchors_data = pd.DataFrame.from_dict(anchors_init, orient="index").reset_index(names=["anchor_mac"])
+        ix = (data["x"].isin(["",np.nan,None])) | (data["y"].isin(["",np.nan,None]))
+        data_cpy=data.loc[ix==False]
+        x = [float(x) for x in data_cpy["x"].values]
+        y = [float(y) for y in data_cpy["y"].values]
+        if "tag_id" in list(data_cpy.columns):
+            mtext = list(data_cpy["tag_id"].values)
+        else:
+            mtext = list(data_cpy["mac"].values)
+        if scan_location is not None:
+            msize=[]
+            for mac in mtext:
+                if sum(scan_location["tag_mac"] == mac)>0:
+                    val=scan_location[scan_location["tag_mac"] == mac]["std"].values[0]
+                    if not np.isnan(val) :
+                        msize.append(int(size_1m * val))
+                    else:
+                        msize.append(size_1m)
                 else:
                     msize.append(size_1m)
-            else:
-                msize.append(size_1m)
-    else:
-        msize= [int(size_1m) for x in mtext]
-    mcolor = ['red' for x in mtext]
-    tpos = ['center' for x in mtext]
-    x.extend([0, 0, 10, 10])
-    y.extend([0, 10, 0, 10])
-    mtext.extend(['1D', 'F2', 'C0', '3D'])
-    msize.extend([50, 50, 50, 50])
+        else:
+            msize= [int(size_1m) for x in mtext]
+        mcolor = ['red' for x in mtext]
+        tpos = ['center' for x in mtext]
+        x.extend([0, 0, 10, 10])
+        y.extend([0, 10, 0, 10])
+        mtext.extend(['1D', 'F2', 'C0', '3D'])
+        msize.extend([50, 50, 50, 50])
 
-    if scan_angles_raw is not None:
-        anchors=list(scan_angles_raw["anchor_mac"].unique())
-        mcolor_anchor=[]
-        for sid in mtext[len(mtext)-4:]:
-            #print(x)
-            if sum(anchors_data["short"] == sid) > 0:
-                mcolor_anchor.append('green' if anchors_data[anchors_data["short"]==sid]["anchor_mac"].values[0] in anchors else "red")
-            else:
-                mcolor_anchor.append('red')
-        mcolor.extend(mcolor_anchor)
-    else:
-        mcolor.extend(["black","black","black","black"])
-    tpos.extend(['top right', 'bottom right', 'top left', 'bottom left'])
-    data_location = {
-        'x': x, #[3,2,0,0,10,10],
-        'y': y,
-        'text':mtext ,  # Labels for markers
-        'marker_size':msize ,  # Sizes of markers
-        'marker_color':mcolor ,  # Colors of markers
-        'textposition': tpos
-    }
+        if scan_angles_raw is not None:
+            anchors=list(scan_angles_raw["anchor_mac"].unique())
+            mcolor_anchor=[]
+            for sid in mtext[len(mtext)-4:]:
+                #print(x)
+                if sum(anchors_data["short"] == sid) > 0:
+                    mcolor_anchor.append('green' if anchors_data[anchors_data["short"]==sid]["anchor_mac"].values[0] in anchors else "red")
+                else:
+                    mcolor_anchor.append('red')
+            mcolor.extend(mcolor_anchor)
+        else:
+            mcolor.extend(["black","black","black","black"])
+        tpos.extend(['top right', 'bottom right', 'top left', 'bottom left'])
+        data_location = {
+            'x': x, #[3,2,0,0,10,10],
+            'y': y,
+            'text':mtext ,  # Labels for markers
+            'marker_size':msize ,  # Sizes of markers
+            'marker_color':mcolor ,  # Colors of markers
+            'textposition': tpos
+        }
+    except Exception as e:
+        print(e)
+        data_location = {
+            'x': [], #[3,2,0,0,10,10],
+            'y': [],
+            'text':[] ,  # Labels for markers
+            'marker_size':[] ,  # Sizes of markers
+            'marker_color':[] ,  # Colors of markers
+            'textposition': []
+        }
     return jsonify(data_location)
 
 @app.route('/data')
@@ -1189,8 +1205,9 @@ def set_rssi_tag_scan(set_rssi_tag_scan,init_loading=False):
     global status
 
     rssi_tag_scan=set_rssi_tag_scan
-    status="Enabled"
-    if init_loading: readscanfile(True)
+    if init_loading:
+        status = "Enabled"
+        readscanfile(True)
 
 def readscanfile(load_init=False ):
     global localpath
