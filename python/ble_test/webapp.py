@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-import certgen_py
+#import certgen_py
 
 import logging
 
@@ -87,7 +87,8 @@ def tag_table():
     last = perPage*currentPage
     totalPages = math.ceil(len(tags)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
-    return render_template('editable_table.html', 
+    # return render_template('editable_table.html', 
+    return render_template('editable_table.html.j2', 
         tags = tags[first : last], 
         totalTags = len(tags), 
         first = first + 1, 
@@ -139,31 +140,33 @@ def view_tag_report(tag_mac):
 
 @app.route('/view/cert/<tag_mac>')
 def view_tag_cert(tag_mac):
-    cert = f'certs/{tag_mac}.pdf'
-
-    generate_pdf(tag_mac)
+    cert = generate_pdf(tag_mac)
+    print(cert)
     return render_template('view_cert.html', cert = cert, mac = tag_mac)
 
 def generate_pdf(mac):
     tag = get_tag_by_mac(mac)
-    file = mac
     logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
     asset = os.path.join(app.root_path, app.config['IMAGE'], 'rodpump.jpg')
     sig = os.path.join(app.root_path, app.config['IMAGE'], 'signature.jpg')
-    save = os.path.join(app.root_path, app.config['CERT'], f'{file}.pdf')
-    pdf = certgen_py.Asset(
-        company_name = tag['certification_company_name'],
-        company_id = tag['certification_company_id'],
-        certificate_id = tag['certificate_id'],
-        expiration_date = "2023-12-31", #tag['expiration_date'],
-        test_type = tag['test_type'],
-        asset_id = tag['asset_id'],
-        asset_type = "Widget", #tag['asset_type']
-        logo = logo,
-        asset_image = asset,
-        signature = sig
-    )
-    pdf.gen_cert(save)
+    path = os.path.join(app.root_path, app.config['CERT'], f'{mac}.pdf')
+    try:
+        pdf = certgen_py.Asset(
+            company_name = tag['certification_company_name'],
+            company_id = tag['certification_company_id'],
+            certificate_id = tag['certificate_id'],
+            expiration_date = "2023-12-31", #tag['expiration_date'],
+            test_type = tag['test_type'],
+            asset_id = tag['asset_id'],
+            asset_type = "Widget", #tag['asset_type']
+            logo = logo,
+            asset_image = asset,
+            signature = sig
+        )
+        pdf.gen_cert(path)    
+        return f'certs/{mac}.pdf'
+    except:
+        return 'certs/certification.pdf'
 
 def get_tag_by_mac(mac):
     data_json = json.loads(data.to_json(orient="records"))
@@ -1042,7 +1045,8 @@ def sync_init():
 
 @app.route('/page_scan_parameters')
 def page_scan_parameters():
-    return render_template('page_scan_parameters.html')
+    return render_template('page_scan_parameters.html.j2')
+    # return render_template('page_scan_parameters.html')
 
 # New endpoint to provide initial configuration values
 @app.route('/get_initial_config', methods=['GET'])
@@ -1354,14 +1358,14 @@ operation="None"
 rssi_tag_scan=None
 start_init=None
 
-localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+#localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
-#localpath=""    #initialized by poc_server.py with global directory
+localpath=""    #initialized by poc_server.py with global directory
 columnIds=[] #None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
