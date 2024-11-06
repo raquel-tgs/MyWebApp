@@ -1526,23 +1526,24 @@ async def main():
                     webcancelprocess = True
                     break
 
-                if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
-                    await bscanner.scan_tags(connect=False,max_retry=1, max_scans=3)
+                if action == "SCAN":
+                    if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
+                        await bscanner.scan_tags(connect=False,max_retry=1, max_scans=3)
 
 
-                if app.webcancel:
-                    webcancelprocess = True
-                    break
+                    if app.webcancel:
+                        webcancelprocess = True
+                        break
 
 
-                tag_found=[x for x in bscanner.tags.items]
-                # Create asyncio tasks for each device connection
-                tasks = [bscanner.tags.connect(max_retry=3, index=x.index,timeout=15) for x in tag_found]
+                    tag_found=[x for x in bscanner.tags.items]
+                    # Create asyncio tasks for each device connection
+                    tasks = [bscanner.tags.connect(max_retry=3, index=x.index,timeout=15) for x in tag_found]
 
-                # Run all connection tasks in parallel
-                await asyncio.gather(*tasks)
+                    # Run all connection tasks in parallel
+                    await asyncio.gather(*tasks)
 
-
+                tag_found = [x for x in bscanner.tags.items]
                 if (len(tag_found)>0):
                     try:
                         res_conn={}
