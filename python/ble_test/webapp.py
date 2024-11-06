@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-# import certgen_py
+import certgen_py
 
 import logging
 
@@ -30,9 +30,11 @@ app = Flask(__name__)
 
 image_folder = os.path.join('static', 'images')
 report_folder = os.path.join('static', 'reports')
+cert_folder = os.path.join('static', 'certs')
  
 app.config['IMAGE'] = image_folder
 app.config['REPORT'] = report_folder
+app.config['CERT'] = cert_folder
 app.config['SECRET_KEY'] = 'j4f894848wa4lh84who84wo'
 
 @app.route('/')
@@ -126,11 +128,7 @@ def get_set_image():
 
 @app.route('/tag-details/<tag_mac>')
 def tag_details(tag_mac):
-    data_json = json.loads(data.to_json(orient="records"))
-    tag_data = None
-    for tag in data_json:
-        if tag['mac'] == tag_mac:
-            tag_data = tag
+    tag_data = get_tag_by_mac(tag_mac)
     image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
     return render_template('tag_details.html', tag = tag_data, image = image)
 
@@ -141,32 +139,43 @@ def view_tag_report(tag_mac):
 
 @app.route('/view/cert/<tag_mac>')
 def view_tag_cert(tag_mac):
-    cert = 'certs/certification.pdf'
-    #generate_pdf()
+    cert = f'certs/{tag_mac}.pdf'
+
+    generate_pdf(tag_mac)
     return render_template('view_cert.html', cert = cert, mac = tag_mac)
 
-# def generate_pdf():
-#     asset = certgen_py.Asset(
-#         company_name="Vandelay Industries",
-#         company_id="12345",
-#         certificate_id="cert-67890",
-#         expiration_date="2023-12-31",
-#         test_type="Quality Inspection",
-#         asset_id="asset-112233",
-#         asset_type="Widget",
-#         logo="./static/images/logo.jpg",
-#         asset_image="./static/images/rodpump.jpg",
-#         signature="./static/images/signature.jpg"
-#     )
-#     asset.gen_cert("foo.pdf")
+def generate_pdf(mac):
+    tag = get_tag_by_mac(mac)
+    file = mac
+    logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
+    asset = os.path.join(app.root_path, app.config['IMAGE'], 'rodpump.jpg')
+    sig = os.path.join(app.root_path, app.config['IMAGE'], 'signature.jpg')
+    save = os.path.join(app.root_path, app.config['CERT'], f'{file}.pdf')
+    pdf = certgen_py.Asset(
+        company_name = tag['certification_company_name'],
+        company_id = tag['certification_company_id'],
+        certificate_id = tag['certificate_id'],
+        expiration_date = "2023-12-31", #tag['expiration_date'],
+        test_type = tag['test_type'],
+        asset_id = tag['asset_id'],
+        asset_type = "Widget", #tag['asset_type']
+        logo = logo,
+        asset_image = asset,
+        signature = sig
+    )
+    pdf.gen_cert(save)
 
-@app.route('/tag-details/edit/<tag_mac>')
-def edit_tag_details(tag_mac):
+def get_tag_by_mac(mac):
     data_json = json.loads(data.to_json(orient="records"))
     tag_data = None
     for tag in data_json:
-        if tag['mac'] == tag_mac:
+        if tag['mac'] == mac:
             tag_data = tag
+    return tag_data
+
+@app.route('/tag-details/edit/<tag_mac>')
+def edit_tag_details(tag_mac):
+    tag_data = get_tag_by_mac(tag_mac)
     image = ''
     if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
         image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
@@ -1341,14 +1350,14 @@ operation="None"
 rssi_tag_scan=None
 start_init=None
 
-#localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
-localpath=""    #initialized by poc_server.py with global directory
+#localpath=""    #initialized by poc_server.py with global directory
 columnIds=[] #None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
 cloud_columnIds=None
 cloud_csv_row=None
