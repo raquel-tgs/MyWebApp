@@ -35,10 +35,31 @@
         None
       </label><br><br>
     </form>
+
     <!-- Integer input for max retries -->
     <label>
+      Maximum scan:
+      <input type="number" id="scan_max_scans" min="1">
+    </label><br>
+
+    <label>
+      Connect Maximum Retries:
+      <input type="number" id="connect_max_retry" min="1">
+    </label>><br>
+
+    <label>
+      Maximum connect timeout (sec):
+      <input type="number" id="connect_timeout" min="1">
+    </label><br>
+
+    <label>
+      Maximum BoldTags to detect:
+      <input type="number" id="max_BoldTags" min="1">
+    </label><br>
+
+    <label>
       Maximum Retries:
-      <input type="number" id="maximum_retries" min="0">
+      <input type="number" id="maximum_retries" min="1">
     </label><br><br>
 
     <!-- Save button to submit data -->
@@ -47,7 +68,7 @@
 
   </form>
 
-  <script>
+ <script>
     // Fetch initial values from Flask endpoint
     document.addEventListener("DOMContentLoaded", function() {
       fetch('/get_initial_config')
@@ -56,6 +77,12 @@
           document.getElementById("keep_data").checked = data.keep_data;
           document.getElementById("scan_new_tags").checked = data.scan_new_tags;
           document.getElementById("maximum_retries").value = data.maximum_retries;
+
+          document.getElementById("scan_max_scans").value = data.scan_max_scans;
+          document.getElementById("connect_max_retry").value = data.connect_max_retry;
+          document.getElementById("connect_timeout").value = data.connect_timeout;
+          document.getElementById("max_BoldTags").value = data.max_BoldTags;
+
           // Set radio buttons based on the enabled tags value
                 if (data.enable_disable_tags === 'enable') {
                     document.getElementById('enabled').checked = true;
@@ -75,12 +102,24 @@
       const enable_disable_tags = document.querySelector('input[name="enable_disable_tags"]:checked').value;
       const maximumRetries = parseInt(document.getElementById("maximum_retries").value, 10);
 
+      const scan_max_scans = parseInt(document.getElementById("scan_max_scans").value, 3);
+      const connect_max_retry = parseInt(document.getElementById("connect_max_retry").value, 3);
+      const connect_timeout = parseInt(document.getElementById("connect_timeout").value, 15);
+      const max_BoldTags = parseInt(document.getElementById("max_BoldTags").value, 10);
+
+
       // Prepare data as JSON
       const data = {
         keep_data: keepData,
         scan_new_tags: scanNewTags,
         enable_disable_tags: enable_disable_tags,
-        maximum_retries: maximumRetries
+        maximum_retries: maximumRetries,
+
+        scan_max_scans: scan_max_scans,
+        connect_max_retry: connect_max_retry,
+        connect_timeout: connect_timeout,
+        max_BoldTags: max_BoldTags
+
       };
 
       // Send data to the Flask endpoint

@@ -1332,6 +1332,10 @@ video {
     max-width: 36rem;
   }
 
+  .sm\:max-w-sm {
+    max-width: 24rem;
+  }
+
   .sm\:flex-1 {
     flex: 1 1 0%;
   }
