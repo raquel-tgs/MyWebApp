@@ -1,8 +1,7 @@
 <! DOCTYPE html>
 <html>
   <head>
-    <title>Detected Tags</title>
-    <!-- <link href="{{ url_for('static', filename='css/mermaid_min.css') }}" type="text/css" rel="stylesheet" /> -->
+    <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/editable_table.css') }}">
     <style>
@@ -37,8 +36,9 @@
           <ul role="list" class="flex flex-1 flex-col gap-y-7">
             <li>
               <ul role="list" class="-mx-2 space-y-1">
+
                 <li>
-                  <a href="/tagtable?page=1" class="group flex gap-x-3 rounded-md bg-gray-800 p-2 text-sm font-semibold leading-6 text-white">
+                  <a href="/tagtable?page=1" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M9.348 14.652a3.75 3.75 0 0 1 0-5.304m5.304 0a3.75 3.75 0 0 1 0 5.304m-7.425 2.121a6.75 6.75 0 0 1 0-9.546m9.546 0a6.75 6.75 0 0 1 0 9.546M5.106 18.894c-3.808-3.807-3.808-9.98 0-13.788m13.788 0c3.808 3.807 3.808 9.98 0 13.788M12 12h.008v.008H12V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
                     </svg>
@@ -55,43 +55,16 @@
                   </a>
                 </li>
 
-                <!-- <form action="{{ url_for('locationpage') }}" method="get">
-                  <button id="redirectButton">Go to Tag Location Page</button>
-                </form> -->
+                <li>
+                  <a href="{{ url_for('page_scan_parameters') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    Scan Settings
+                  </a>
+                </li>
 
-
-                <!-- <li>
-                  <a href="{{ url_for('page_data_angles') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
-                    Data Angles
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('page_data_scan') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
-                    Data Scan
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('page_data_location') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
-                    Data Location
-                  </a>
-                </li>
-                <li>
-                  <a href="{{ url_for('page_data_anchors') }}" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
-                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.75V12A2.25 2.25 0 0 1 4.5 9.75h15A2.25 2.25 0 0 1 21.75 12v.75m-8.69-6.44-2.12-2.12a1.5 1.5 0 0 0-1.061-.44H4.5A2.25 2.25 0 0 0 2.25 6v12a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9a2.25 2.25 0 0 0-2.25-2.25h-5.379a1.5 1.5 0 0 1-1.06-.44Z" />
-                    </svg>
-                    Data Anchors
-                  </a>
-                </li> -->
                 <li>
                   <a href="{{ url_for('page_configuration') }}" target="_blank" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
@@ -101,6 +74,7 @@
                     Configuration
                   </a>
                 </li>
+                
               </ul>
             </li>
           </ul>
@@ -112,152 +86,5 @@
         {% endblock %}
       </div>
     </div>
-
-    <dialog id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
-      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
-        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
-            <div>
-              <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
-                {% if operation == 'Scan' %}
-                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Scanning...</h3>
-                {% elif operation == 'Update' %}
-                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Updating...</h3>
-                {% elif operation == 'Location' %}
-                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Locating...</h3>
-                {% else %}
-                <h3 class="text-base font-semibold text-gray-900" id="modal-title">{{operation}}</h3>
-                {% endif %}
-                <div id="Progress_Status" class="w-full">
-                  <div id="myprogressBar" class="h-5 w-0 bg-indigo-600"></div>
-                </div>
-                <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="3" readonly id="statuslog"></textarea>
-              </div>
-            </div>
-            <div class="flex justify-end mt-5">
-              <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
-              <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation">
-                <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </dialog>
-
-      <!-- Dropdown Menu -->
-     <!-- <div class="dropdown">
-      <button class="dropbtn">Menu</button>
-      <div class="dropdown-content">
-        <a  href="{{ url_for('page_configuration') }}">Configuration</a>
-        <a  href="{{ url_for('page_data_angles') }}">Data angles</a>
-        <a  href="{{ url_for('page_data_scan') }}">Data scan</a>
-        <a  href="{{ url_for('page_data_location') }}">Data location</a>
-        <a  href="{{ url_for('page_data_anchors') }}">Data anchors</a>
-      </div>
-    </div>
-
-    <form method="post" action="/api/gateway" id="formGateway">
-      <hr>
-      <label for="gateway">Choose a Zone:</label>
-      <select name="gateway_selection" id="gateway" class="gateway" onchange="submitFormGateway()">
-        <option value="Zone A">Certification Area 1</option>
-        <option value="Zone B">Certification Area 2</option>
-        <option value="Zone C">Warehouse</option>
-        <option value="Zone D">Loading Area</option>
-      </select>
-    </form>
-
-    <form method="post" action="/api/buttons">
-      <div id="outer">
-        <div class="inner">
-          <button class="contactButton"  value="Scan" name="Scan" id="Scan">
-            Scan
-            <div class="iconButton">
-              <svg
-                height="14"
-                width="24"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </div>
-          </button>
-        </div>
-
-          <div class="inner"><button class="contactButton" value="Update" name="Update" id="Update">
-            Update
-            <div class="iconButton">
-              <svg
-                height="14"
-                width="24"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </div>
-          </button></div>
-
-          <div class="inner"><button class="contactButton" value="Location" name="Location" id="Location">
-            Location
-            <div class="iconButton">
-              <svg
-                height="14"
-                width="24"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path d="M0 0h24v24H0z" fill="none"></path>
-                <path
-                  d="M16.172 11l-5.364-5.364 1.414-1.414L20 12l-7.778 7.778-1.414-1.414L16.172 13H4v-2z"
-                  fill="currentColor"
-                ></path>
-              </svg>
-            </div>
-          </button></div>
-        </div>
-    </form>
-    <div>
-      <div id="table"></div>
-    </div>
-    <div class="row">
-      <div class="column" >
-        <p>Status Update</p>
-        <div> Date & Time: <span id="time"></span> </div>
-        <div id="Progress_Status">
-          <div id="myprogressBar"></div>
-        </div>
-        <div> -->
-            <!-- Button to load a different local webpage -->
-          <!-- <form action="{{ url_for('locationpage') }}" method="get">
-            <button id="redirectButton">Go to Tag Location Page</button>
-          </form> -->
-                    <!-- Button to load a different local webpage -->
-          <!-- <form method="post" action="/api/canceloperation">
-            <button id="cancelOperation">Cancel Operation</button>
-          </form>
-        </div>
-      </div>
-      <div class="column" >
-        <p>Status Log</p>
-        <textarea rows="6" cols="150" readonly id="statuslog"></textarea>
-      </div>
-    </div> -->
-
-    <script src="https://unpkg.com/gridjs/dist/gridjs.umd.js"></script>
-    <script src="https://unpkg.com/gridjs/plugins/selection/dist/selection.umd.js"></script>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
-    <script src="{{ url_for('static', filename='js/editable_table.js') }}"></script>
   </body>
 </html>
