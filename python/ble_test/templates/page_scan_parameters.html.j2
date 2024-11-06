@@ -1,0 +1,79 @@
+{% extends "base/standard_layout.html.j2" %}
+{% block title %}Configuration Page{% endblock %}
+{% block content %}
+<div class="p-3 border-b border-gray-200">
+  <h2 class="text-xl">Configuration Settings</h2>
+</div>
+<div class="px-4 py-3">
+  <form id="configForm" class="flex flex-col gap-3 m-0">
+
+    <!-- Checkboxes for options -->
+    <div class="flex flex-col gap-3 pl-3">
+      <div class="flex gap-2">
+        <input type="checkbox" id="keep_data">
+        <label class="text-gray-900 text-sm">Keep Data</label>
+      </div>
+      
+      <div class="flex gap-2">
+        <input type="checkbox" id="scan_new_tags">
+        <label class="text-gray-900 text-sm">Scan New Tags</label>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <label class="text-gray-900 text-base">Select Tag Status on Read:</label>
+      <div class="pl-3">
+        <div>
+          <input type="radio" name="enable_disable_tags" value="enable" id="enabled">
+          <label class="text-gray-900 text-sm">Enabled</label>
+        </div>
+
+        <div>
+          <input type="radio" name="enable_disable_tags" value="disable" id="disabled">
+          <label class="text-gray-900 text-sm">Disabled</label>
+        </div>
+        
+        <div>
+          <input type="radio" name="enable_disable_tags" value="none" id="none" >
+          <label class="text-gray-900 text-sm">None</label>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Integer input for max retries -->
+    <div class="flex flex-col gap-1">
+      <label class="text-gray-900 text-sm">Maximum scan:</label>
+      <input class="border border-gray-500 rounded-md p-2 w-32" type="number" id="scan_max_scans" min="1">
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-gray-900 text-sm">Connect Maximum Retries:</label>
+      <input class="border border-gray-500 rounded-md p-2 w-32" type="number" id="connect_max_retry" min="1">
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-gray-900 text-sm">Maximum connect timeout (sec):</label>
+      <input class="border border-gray-500 rounded-md p-2 w-32" type="number" id="connect_timeout" min="1">
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-gray-900 text-sm">Maximum BoldTags to detect:</label>
+      <input class="border border-gray-500 rounded-md p-2 w-32" type="number" id="max_BoldTags" min="1">
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label class="text-gray-900 text-sm">Maximum Retries:</label>
+      <input class="border border-gray-500 rounded-md p-2 w-32" type="number" id="maximum_retries" min="1">
+    </div>
+
+    <!-- Save button to submit data -->
+    <div>
+      <button type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" onclick="saveConfig()">Save</button>
+    </div>
+  </form>
+</div>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
+<script src="{{ url_for('static', filename='js/page_scan_parameters.js') }}"></script>
+{% endblock %}
