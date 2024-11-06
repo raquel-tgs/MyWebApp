@@ -1045,7 +1045,11 @@ def get_initial_config():
         "keep_data": scan_parameters["keep_data"],
         "scan_new_tags": scan_parameters["scan_new_tags"],
         "enable_disable_tags": scan_parameters["enable_disable_tags"],
-        "maximum_retries": scan_parameters["maximum_retries"]
+        "maximum_retries": scan_parameters["maximum_retries"],
+        "scan_max_scans": scan_parameters["scan_max_scans"],
+        "connect_max_retry": scan_parameters["connect_max_retry"],
+        "connect_timeout": scan_parameters["connect_timeout"],
+        "max_BoldTags": scan_parameters["max_BoldTags"]
     }
     return jsonify(initial_values)
 
@@ -1375,7 +1379,7 @@ columnIds_location_configuration = ['tag_mac', 'out_prob']
 location_cvs_columnIds=None
 location_cvs_row=None
 
-scan_parameters={'enable_disable_tags': "none", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True}
+scan_parameters=scan_parameters={'enable_disable_tags': "none", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True,"scan_max_retry" :1, "scan_max_scans" : 3, "connect_max_retry":3,"connect_timeout":15, "max_BoldTags":2}
 
 admin_username='Admin'
 admin_password='1234'

@@ -1253,7 +1253,7 @@ async def main():
     bscanner = bldtag.boldscanner(disableCTE_duringlocation=disableCTE_duringlocation,
                                   keepactive_all_CTE_during_location=keepactive_all_CTE_during_location,
                                     use_MQTT =use_MQTT, mqttclient = mqttclient, keep_mqtt_on = keep_mqtt_on,
-                                    wait_for_mqtt_angles = wait_for_mqtt_angles, CTE_Wait_Time_prescan = CTE_Wait_Time_prescan, CTE_Wait_Time = CTE_Wait_Time,webapp=app)
+                                    wait_for_mqtt_angles = wait_for_mqtt_angles, CTE_Wait_Time_prescan = CTE_Wait_Time_prescan, CTE_Wait_Time = CTE_Wait_Time,webapp=app,directory=directory)
 
     # webapp initialization
     app.columnIds =bscanner.tags.gatewaydb.scan_columnIds
@@ -1516,6 +1516,11 @@ async def main():
                 param_scan_new_tags= scan_parameters["scan_new_tags"]
                 param_enable_disable_tags= scan_parameters["enable_disable_tags"]
 
+                scan_max_retry= scan_parameters["scan_max_retry"]
+                scan_max_scans= scan_parameters["scan_max_scans"]
+                connect_max_retry= scan_parameters["connect_max_retry"]
+                connect_timeout= scan_parameters["connect_timeout"]
+                max_BoldTags= scan_parameters["max_BoldTags"]
 
             while (nscan < MaxScan and len(scannaddress) <MaxTags and not (sum([0 if x in scannaddress_trim else 1 for x in startCTE_address_filter])==0 and len(startCTE_address_filter)>0)
                    and not (sum([0 if x in scannaddress_trim else 1 for x in scan_mac_filter])==0 and len(scan_mac_filter)>0) #not ((len(scan_mac_filter)>0) and (len(scannaddress)==len(scan_mac_filter)))
@@ -1526,22 +1531,22 @@ async def main():
                     webcancelprocess = True
                     break
 
-                if action == "SCAN":
+                if action == "READ":
                     if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
-                        await bscanner.scan_tags(connect=False,max_retry=1, max_scans=3)
+                        new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans, max_tags=max_BoldTags)
+
+                        if app.webcancel:
+                            webcancelprocess = True
+                            break
 
 
-                    if app.webcancel:
-                        webcancelprocess = True
-                        break
+                        tag_found=[x for x in bscanner.tags.items]
+                        if len(tag_found)<max_BoldTags or max_BoldTags==0:
+                            # Create asyncio tasks for each device connection
+                            tasks = [bscanner.tags.connect(max_retry=connect_max_retry, index=x.index,timeout=connect_timeout) for x in tag_found]
 
-
-                    tag_found=[x for x in bscanner.tags.items]
-                    # Create asyncio tasks for each device connection
-                    tasks = [bscanner.tags.connect(max_retry=3, index=x.index,timeout=15) for x in tag_found]
-
-                    # Run all connection tasks in parallel
-                    await asyncio.gather(*tasks)
+                            # Run all connection tasks in parallel
+                            await asyncio.gather(*tasks)
 
                 tag_found = [x for x in bscanner.tags.items]
                 if (len(tag_found)>0):
@@ -1689,8 +1694,8 @@ async def main():
                                                 devprocessed.append(address)
                                                 ix = bscanner.tags.find_tag(address)
                                                 if (ix>=0):
-                                                    bscanner.tags.set_current(ix)
-                                                    res=await bscanner.tags.tag_functions(action=action,uuid_filter_id=None,
+                                                    # bscanner.tags.set_current(ix)
+                                                    res=await bscanner.tags.get_tag_by_address(address).tag_functions(action=action,uuid_filter_id=None,
                                                                                 uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
                                                                                 keep_connected=True,csv_read_data=csv_read_data,
@@ -1988,7 +1993,7 @@ async def main():
 
 
     print("-----------------------------------------")
-    thread.join()
+    #thread.join()
     for ix in srv_antenna_anchor.keys():
         if srv_antenna_anchor[ix]["status"]:
             print(f"terminate_process(process) {ix}")
