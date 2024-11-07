@@ -91,6 +91,82 @@
                     Data Anchors
                   </a>
                 </li> -->
+
+                <li>
+                  <button class="collapsible flex gap-x-3 rounded-md bg-gray-700 text-sm font-semibold leading-6 p-2 text-gray-400 hover:bg-gray-700 hover:text-white w-full">
+                    <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 0 1 0 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 0 1 0-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28Z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                    <span>Scan Settings</span>
+                  </button>
+                  <div class="content rounded-md bg-gray-400 px-2">
+                    <form id="configForm" class="flex flex-col gap-2 m-0 py-2">
+                      <div class="flex flex-col gap-2">
+                        <div class="flex gap-2">
+                          <input type="checkbox" id="keep_data">
+                          <label class="text-gray-900 text-sm">Keep Data</label>
+                        </div>
+                        
+                        <div class="flex gap-2">
+                          <input type="checkbox" id="scan_new_tags">
+                          <label class="text-gray-900 text-sm">Scan New Tags</label>
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-2">
+                        <label class="text-gray-900 text-base">Select Tag Status on Read:</label>
+                        <div class="pl-2">
+                          <div>
+                            <input type="radio" name="enable_disable_tags" value="enable" id="enabled">
+                            <label class="text-gray-900 text-sm">Enabled</label>
+                          </div>
+
+                          <div>
+                            <input type="radio" name="enable_disable_tags" value="disable" id="disabled">
+                            <label class="text-gray-900 text-sm">Disabled</label>
+                          </div>
+                          
+                          <div>
+                            <input type="radio" name="enable_disable_tags" value="none" id="none" >
+                            <label class="text-gray-900 text-sm">None</label>
+                          </div>
+                          
+                        </div>
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-gray-900 text-sm">Maximum scan:</label>
+                        <input class="border border-gray-500 rounded-md p-1 w-32" type="number" id="scan_max_scans" min="1">
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-gray-900 text-sm">Connect Maximum Retries:</label>
+                        <input class="border border-gray-500 rounded-md p-1 w-32" type="number" id="connect_max_retry" min="1">
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-gray-900 text-sm">Maximum connect timeout (sec):</label>
+                        <input class="border border-gray-500 rounded-md p-1 w-32" type="number" id="connect_timeout" min="1">
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-gray-900 text-sm">Maximum BoldTags to detect:</label>
+                        <input class="border border-gray-500 rounded-md p-1 w-32" type="number" id="max_BoldTags" min="1">
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="text-gray-900 text-sm">Maximum Retries:</label>
+                        <input class="border border-gray-500 rounded-md p-1 w-32" type="number" id="maximum_retries" min="1">
+                      </div>
+
+                      <div>
+                        <button type="button" class="border-0 rounded-md px-2 py-1 text-white bg-purple-500" onclick="saveConfig()">Save</button>
+                      </div>
+                    </form>
+                  </div>
+                </li>
+
                 <li>
                   <a href="{{ url_for('page_configuration') }}" target="_blank" class="group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6 text-gray-400 hover:bg-gray-800 hover:text-white">
                     <svg class="h-6 w-6 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
@@ -164,7 +240,7 @@
               </div>
               <div class="w-40">
                 <p class="text-xs font-normal"><span class="font-semibold">Asset ID </span>{{tag.asset_id}}</p>
-                <p class="text-xs font-normal">exp<span class="font-semibold"> {{tag.color}}</span></p>
+                <p class="text-xs font-normal">color<span class="font-semibold"> {{tag.color}}</span></p>
               </div>
               <div class="w-40">
                 <p class="text-xs font-normal"><span class="font-semibold">Series </span>{{tag.series}}</p>
@@ -387,5 +463,6 @@
     <script src="https://unpkg.com/gridjs/plugins/selection/dist/selection.umd.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/editable_table.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/standard_layout.js') }}"></script>
   </body>
 </html>

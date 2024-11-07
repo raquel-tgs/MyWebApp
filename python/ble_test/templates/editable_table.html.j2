@@ -49,16 +49,20 @@
       </div>
       <div class="w-40">
         <p class="text-sm font-semibold">{{tag.mac}}</p>
-        <p class="text-xs font-normal">{{tag.name}}</p>
+        <p class="text-xs font-normal">{{tag.tag_id}}</p>
         <!-- <p class="text-xs font-normal">{{tag.tag_id}}</p> -->
       </div>
       <div class="w-40">
-        <p class="text-xs font-normal"><span class="font-semibold">Batch </span>{{tag.batch_id}}</p>
-        <p class="text-xs font-normal">exp<span class="font-semibold"> {{tag.expiration_date}}</span></p>
+        <p class="text-xs font-normal"><span class="font-semibold">Asset ID </span>{{tag.asset_id}}</p>
+        <p class="text-xs font-normal">color<span class="font-semibold"> {{tag.color}}</span></p>
       </div>
       <div class="w-40">
         <p class="text-xs font-normal"><span class="font-semibold">Series </span>{{tag.series}}</p>
-        <p class="text-xs font-normal text-gray-500">{{tag.asset_diameter}}</p>
+        <p class="text-xs font-normal text-gray-500">{{tag.type}}</p>
+      </div>
+      <div class="w-40">
+        <p class="text-xs font-normal"><span class="font-semibold">Cert ID </span>{{tag.certificate_id}}</p>
+        <p class="text-xs font-normal">exp<span class="font-semibold"> {{tag.expiration_date}}</span></p>
       </div>
       <div class="w-24">
         {% if tag.status == 'read' %}
