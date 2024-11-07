@@ -371,8 +371,8 @@ class ble_tag:
                 if self.client.is_connected():
 
                     print("Connected to Device")
-                    print("Performing action {}".format(action))
-                    if (app is not None): app.print_statuslog("Performing action {}".format(action))
+                    print("Executing action {}".format(action))
+                    if (app is not None): app.print_statuslog("Executing action {}".format(action))
 
                     if action == "READ" and not data_valid or action != "READ":
 
@@ -420,30 +420,25 @@ class ble_tag:
 
                                         result = False
 
-                                # try:
-                                #     self.csv_read_data["rssi"] = None
-                                #     if len(list(rssi_host_scan.keys())) > 0:
-                                #         ix = max([ix for ix in list(rssi_host_scan.keys()) if
-                                #                   rssi_host_scan[ix]["address"] == d.address.replace(":", "")])
-                                #         if rssi_host_scan[ix]["address"] == d.address.replace(":", ""):
-                                #             if csv_read_data is not None:
-                                id == "tag_enabled"
-                                char_uuid = self.filter_db(id='tag_enabled', data_type=None, scan=True)
-                                valread_raw = await client.read_gatt_char(char_uuid_id)
-                                if valread_raw is not None:
-                                    if type(valread_raw) is bytearray:
-                                        valread = int.from_bytes(bytes(valread_raw))
+                                try:
+                                    id = "tag_enabled"
+                                    char_uuid_id = self.filter_db(id=id, data_type=None, scan=True)[0]["uuid"]
+                                    valread_raw = await client.read_gatt_char(char_uuid_id)
+                                    if valread_raw is not None:
+                                        if type(valread_raw) is bytearray:
+                                            valread = int.from_bytes(bytes(valread_raw))
+                                        else:
+                                            pass
                                     else:
-                                        pass
-                                else:
-                                    valread = bytes(b'')
-                                csv_row_new[id] = valread
-
+                                        valread = bytes(b'')
+                                    csv_row_new[id] = valread
+                                except Exception as e:
+                                    print(e)
 
                                 if param_enable_disable_tags!='none':
                                     try:
-                                        id == "tag_enabled"
-                                        char_uuid=self.filter_db(id='tag_enabled', data_type=None, scan=True)
+                                        id = "tag_enabled"
+                                        char_uuid=self.filter_db(id=id, data_type=None, scan=True)
                                         if len(char_uuid)>0:
                                             char_uuid=char_uuid[0]
                                             char_uuid_id=char_uuid["uuid"]
@@ -657,7 +652,7 @@ class ble_tag:
                                                     if app is not None:app.print_statuslog("{0} read: {1}".format(id, val))
 
                                     except Exception as e:
-                                        if app is not None:app.print_statuslog(e)
+                                        if app is not None:app.print_statuslog(str(e))
                                         print("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
                                         print(e)
                                         if app is not None:app.print_statuslog("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
@@ -701,7 +696,7 @@ class ble_tag:
 
                                 if tag_updated:
                                     try:
-                                        end_transac_done = True
+                                        newval=1
                                         char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
                                         char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
                                         newval = newval.to_bytes(char_uuid_end_transac_length, byteorder='big', signed=False)
@@ -728,7 +723,7 @@ class ble_tag:
                                         #if id in list(dfupdate_read.columns): dfupdate_read.loc[index_update, id] = val
                                         #dfupdate_read.loc[index_update, "end_transac"] = 0
                                         self.ble_data_crc=val
-
+                                        dfupdate_read["ble_data_crc"][0] = val
                                     except Exception as e:
                                         print(e)
                                         if app is not None:  app.print_statuslog("Error {0}".format(e))
@@ -1934,11 +1929,12 @@ class boldscanner:
         except Exception as e:
             print(f'error in device_found {e}')
 
-    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[]):
+    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[]):
         nscan = 0
         new_tags=[]
         existing_tags=[]
-        while nscan < max_scans and ((len(new_tags)+len(existing_tags))<max_tags or max_tags==0):
+        filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
+        while nscan < max_scans and ((len(new_tags)+len(existing_tags))<max_tags or max_tags==0) and not filterout:
             try:
                 nscan=nscan+1
                 #scanner = BleakScanner()
@@ -1948,14 +1944,14 @@ class boldscanner:
                     if device.name is not None:
                         try:
                             if device.name.startswith("BoldTag"):
-                                if not (device.address in scan_mac_banned) :
+                                if not (device.address in scan_mac_banned) and (device.address in scan_mac_filter_address or len(scan_mac_filter_address)==0) :
                                     if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
                                     ix=self.tags.find_tag(device.address)
                                     if ix==-1:
                                         await self.tags.new(connect=connect, device=device,max_retry=max_retry)
                                         new_tags.append(device.address)
-                                        # print("BoldTag {} Added ".format(device.address))
-                                        # if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
+                                        filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
+                                        if filterout: break
                                     else:
                                         # self.tags.set_current(ix)
                                         # tag=self.tags.get_tag_by_index(ix)
@@ -1964,11 +1960,14 @@ class boldscanner:
                                             await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
                                         existing_tags.append(device.address)
                                 else:
-                                    if (self.webapp is not None): self.webapp.print_statuslog(
+                                    if (self.webapp is not None and device.address in scan_mac_banned): self.webapp.print_statuslog(
                                         "BoldTag  banned {}".format(device.address))
 
                         except Exception as e:
                             print(e)
+
+                if filterout:break
+
             except Exception as e:
                 print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}

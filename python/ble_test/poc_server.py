@@ -1240,7 +1240,7 @@ async def main():
 
 
 
-    time.sleep(5)
+    #time.sleep(5)
     print("MQTT paused")
     if use_MQTT:
         if not keep_mqtt_on : mqttclient.loop_stop()
@@ -1313,8 +1313,9 @@ async def main():
 
     while True:
         app.set_rssi_tag_scan(bscanner.rssi_tag_scan,False)
-
-        scan_mac_banned_read=pd.read_csv(directory + "/scan_mac_banned.csv")
+        scan_mac_banned_read=pd.DataFrame()
+        if os.path.exists(directory+"/scan_mac_banned.csv"):
+            scan_mac_banned_read=pd.read_csv(directory + "/scan_mac_banned.csv")
         if scan_mac_banned_read.shape[0]>0:
             scan_mac_banned=scan_mac_banned_read.values[0]
         else:
@@ -1481,11 +1482,11 @@ async def main():
             #start tag scanning for requstd operation
             read_nfc_done = False
             scan_mac_filter=app.mac_filter
-            #update_mac_filter=app.mac_filter
+            scan_mac_filter_address=[":".join([scan_mac_filter[0][x]+scan_mac_filter[0][x+1] for x in range(0,len(mac),2)]) for mac in scan_mac_filter]
             startCTE_address_filter=app.mac_filter if len(scan_control["tag_re_scan"])==0 else scan_control["tag_re_scan"]
             if len(startCTE_address_filter) >0 : MaxTags=len(startCTE_address_filter)
             if len(scan_mac_filter) > 0: MaxTags = len(scan_mac_filter)
-
+            if dfupdate is not None: scan_mac_filter_address.extend(list(dfupdate["mac"].values))
             app.print_statuslog(f'action: {doscan}')
             service=None
             rssi_host_scan={}
@@ -1538,9 +1539,9 @@ async def main():
                     webcancelprocess = True
                     break
 
-                if action == "READ":
+                if action == "READ" or action == "UPDATE":
                     if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
-                        new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans, max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned)
+                        new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans, max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address)
 
                         if app.webcancel:
                             webcancelprocess = True
@@ -1921,7 +1922,7 @@ async def main():
                                     df_back[x]=None
 
                             #update existing records with new data
-                            df_back["status"]="not read"
+                            df_back["status"]="unknown"
                             if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
                                 for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
                                     for k in app.columnIds[1:-2]:
@@ -1979,7 +1980,7 @@ async def main():
                     print(e)
             else:
                 scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan": False, "scan_loop": 0}
-                if len(scan_mac_filter) == 0:
+                if len(scan_mac_filter) == 0 or True:#TODO to check!!!!!!
                     if os.path.exists(file_path_lastscan):
                         try:
                             try:

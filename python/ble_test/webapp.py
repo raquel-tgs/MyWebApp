@@ -1222,26 +1222,28 @@ def print_statuslog(value, clear=False, addLFCR=True, addtime=False, maxlines=40
     if statuslog_maxlines>maxlines:
         statuslog_maxlines=0
         statuslog=""
+    try:
+        statuslog_maxlines=statuslog_maxlines+1
 
-    statuslog_maxlines=statuslog_maxlines+1
-
-    dtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if clear:
-        if addtime:
-            statuslog = dtime + "-> " + value
-        else:
-            statuslog = value
-    else:
-        if addLFCR:
+        dtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if clear:
             if addtime:
-                statuslog=dtime + "-> " + value+"\n"+statuslog
+                statuslog = dtime + "-> " + value
             else:
-                statuslog = value + "\n" + statuslog
+                statuslog = value
         else:
-            if addtime:
-                statuslog = dtime + "-> " + value+statuslog
+            if addLFCR:
+                if addtime:
+                    statuslog=dtime + "-> " + value+"\n"+statuslog
+                else:
+                    statuslog = value + "\n" + statuslog
             else:
-                statuslog = value + statuslog
+                if addtime:
+                    statuslog = dtime + "-> " + value+statuslog
+                else:
+                    statuslog = value + statuslog
+    except Exception as e:
+        print(e)
 
 def run_wepapp():
     print("Flask app is running in a separate thread")
@@ -1266,58 +1268,60 @@ def readscanfile(load_init=False ):
     global scan_angles_raw
     global scan_location
     global rssi_tag_scan
+    try:
+        if os.path.exists(localpath+"scan.csv"):
+            data = pd.read_csv(localpath+"scan.csv")
+            for x in columnIds:
+                if x not in list(data.columns):
+                    data[x]=None
+            if load_init and len(rssi_tag_scan.keys())>0:
+                data["status"]="Unkown"
+                if rssi_tag_scan is not None:
+                    try:
+                        for ix,rec in data.iterrows():
+                            mac=rec["mac"]
+                            if mac is not None:
+                                mac=mac.replace(":","")
+                                if rssi_tag_scan is not None:
+                                    if mac in list(rssi_tag_scan.keys()):
+                                        if "ble_data_crc" in list(data.columns):
+                                            if mac in list(rssi_tag_scan.keys()):
+                                                if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
+                                                    data.loc[ix, "status"]="read"
 
-    if os.path.exists(localpath+"scan.csv"):
-        data = pd.read_csv(localpath+"scan.csv")
-        for x in columnIds:
-            if x not in list(data.columns):
-                data[x]=None
-        if load_init and len(rssi_tag_scan.keys())>0:
-            data["status"]="Unkown"
-            if rssi_tag_scan is not None:
-                try:
-                    for ix,rec in data.iterrows():
-                        mac=rec["mac"]
-                        if mac is not None:
-                            mac=mac.replace(":","")
-                            if rssi_tag_scan is not None:
-                                if mac in list(rssi_tag_scan.keys()):
-                                    if "ble_data_crc" in list(data.columns):
-                                        if mac in list(rssi_tag_scan.keys()):
-                                            if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
-                                                data.loc[ix, "status"]="read"
+                    except Exception as e:
+                        print(e)
+                data.to_csv(localpath + "scan.csv")
 
-                except Exception as e:
-                    print(e)
-            data.to_csv(localpath + "scan.csv")
+            data_update=data.copy()
+            for k in list(data_update.columns)[1:]:
+                data_update[k]=None
+        else:
+            data = pd.DataFrame(columns=columnIds)
+            data_update = data.copy()
+        # if os.path.exists(localpath+"cloud.csv"):
+        #     cloud = pd.read_csv(localpath+"cloud.csv")
+        # else:
+        #     cloud = pd.DataFrame(columns=cloud_columnIds)
 
-        data_update=data.copy()
-        for k in list(data_update.columns)[1:]:
-            data_update[k]=None
-    else:
-        data = pd.DataFrame(columns=columnIds)
-        data_update = data.copy()
-    # if os.path.exists(localpath+"cloud.csv"):
-    #     cloud = pd.read_csv(localpath+"cloud.csv")
-    # else:
-    #     cloud = pd.DataFrame(columns=cloud_columnIds)
+        # try:
+        #     data = pd.merge(data, cloud, on='mac', how="left")
+        #     data = data.loc[data["mac"].isna()==False]
+        # except Exception as e:
+        #     print('--------------ERROR----------------', e)
 
-    # try:
-    #     data = pd.merge(data, cloud, on='mac', how="left")
-    #     data = data.loc[data["mac"].isna()==False]
-    # except Exception as e:
-    #     print('--------------ERROR----------------', e)
-    
-    data=data.fillna("")
-    if os.path.exists(localpath + "scan_angles_raw.csv"):
-        scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
-    if os.path.exists(localpath + "scan_location.csv"):
-        scan_location = pd.read_csv(localpath + "scan_location.csv")
+        data=data.fillna("")
+        if os.path.exists(localpath + "scan_angles_raw.csv"):
+            scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
+        if os.path.exists(localpath + "scan_location.csv"):
+            scan_location = pd.read_csv(localpath + "scan_location.csv")
 
-    if data is not None:
-        data["select"]=0
-        # data['x'] = data['x'].apply(lambda x: '{:,.1f}'.format(x))
-        # data['y'] = data['y'].apply(lambda x: '{:,.1f}'.format(x))
+        if data is not None:
+            data["select"]=0
+            # data['x'] = data['x'].apply(lambda x: '{:,.1f}'.format(x))
+            # data['y'] = data['y'].apply(lambda x: '{:,.1f}'.format(x))
+    except Exception as e:
+        print(e)
 
 global status
 global operation
@@ -1362,7 +1366,7 @@ semaphore=False
 dfilter_back=None
 status="Strting"
 operation="None"
-rssi_tag_scan=None
+rssi_tag_scan= {}
 start_init=None
 
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
