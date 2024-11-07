@@ -12,6 +12,8 @@ for(editableField of editableFields) {
     const name = ev.target.name
     const value = ev.target.value
 
+    console.log(mac, name, value)
+
     if(savedValue != value) {
       fetch('/api/data', {
         method: 'POST',

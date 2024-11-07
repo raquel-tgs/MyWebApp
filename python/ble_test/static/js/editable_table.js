@@ -28,28 +28,28 @@ function updateCheckboxState(rowId, checkbox) {
 }
 
 // Capture checkbox changes and send data to Flask
-document.addEventListener('change', function(e) {
-  if (e.target && e.target.matches('input.checkbox_select')) {
-    let isChecked = e.target.checked;
-    let rowId = e.target.getAttribute('data-id');
+// document.addEventListener('change', function(e) {
+//   if (e.target && e.target.matches('input.checkbox_select')) {
+//     let isChecked = e.target.checked;
+//     let rowId = e.target.getAttribute('data-id');
 
-    // Send checkbox state to Flask using fetch
-    fetch('/checkbox_select', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ rowId: rowId, checked: isChecked })
-    })
-    .then(response => response.json())
-    .then(data => {
-      console.log('Success:', data);
-    })
-    .catch((error) => {
-      console.error('Error:', error);
-    });
-  }
-});
+//     // Send checkbox state to Flask using fetch
+//     fetch('/checkbox_select', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       body: JSON.stringify({ rowId: rowId, checked: isChecked })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//       console.log('Success:', data);
+//     })
+//     .catch((error) => {
+//       console.error('Error:', error);
+//     });
+//   }
+// });
 
 const tagCheckboxes = document.getElementsByClassName('tag-checkbox')
 for(tagCheckbox of tagCheckboxes) {
@@ -86,18 +86,22 @@ function checkboxSelect(isChecked, rowId) {
   });
 }
 
-const opModal = document.getElementById('op-modal')
-const modalOpen = opModal.getAttribute('modalOpen');
-if(modalOpen == 'True') {
-  opModal.showModal()
-} else {
-  opModal.close()
-}
 
-const opModalBtn = document.getElementById('op-modal-btn-close')
-opModalBtn.addEventListener('click', () => {
-  opModal.close()
-})
+
+// const opModal = document.getElementById('op-modal')
+// const modalOpen = opModal.getAttribute('modalOpen');
+// if(modalOpen == 'True') {
+//   opModal.showModal()
+// } else {
+//   opModal.close()
+// }
+
+// const opModalBtn = document.getElementById('op-modal-btn-close')
+// opModalBtn.addEventListener('click', () => {
+//   opModal.close()
+// })
+
+
 
 // Capture checkbox changes and send data to Flask
 document.addEventListener('change', function(e) {
@@ -161,6 +165,5 @@ setInterval(updater_bar, 2000);  // run `updater_bar()` every 2000ms (2s)
 setInterval(updater_statuslog, 1000);  // run `updater_statuslog()` every 1000ms (1s)
 
 function submitFormGateway() {
-  console.log('submitFormGateway')
   document.getElementById('formGateway').submit();
 }

@@ -125,11 +125,12 @@
   </div>
 </div>
 
-<dialog id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
+{% if modalOpen %}
+<div id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
   <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
   <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
     <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-      <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+      <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl sm:p-6">
         <div>
           <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
             {% if operation == 'Scan' %}
@@ -148,7 +149,9 @@
           </div>
         </div>
         <div class="flex justify-end mt-5">
+          <a href="{{ url_for('close_op_modal') }}">
           <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
+          </a>
           <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation">
             <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
           </form>
@@ -156,7 +159,8 @@
       </div>
     </div>
   </div>
-</dialog>
+</div>
+{% endif %}
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
 <script src="{{ url_for('static', filename='js/editable_table.js') }}"></script>

@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-#import certgen_py
+import certgen_py
 
 import logging
 
@@ -102,6 +102,12 @@ def tag_table():
         operation = operation,
         form = form)
 
+@app.route('/api/close-op-modal')
+def close_op_modal():
+    global modalOpen
+    modalOpen = False
+    return redirect(url_for('tag_table'))
+
 @app.route('/api/image', methods=['GET', 'POST'])
 def get_set_image():
     if request.method == 'GET':
@@ -130,7 +136,20 @@ def get_set_image():
 @app.route('/tag-details/<tag_mac>')
 def tag_details(tag_mac):
     tag_data = get_tag_by_mac(tag_mac)
-    image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+    print(tag_data)
+    image = ''
+    isImage = False
+    try:
+        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
+            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+            isImage = True
+    except Exception as e:
+        print(e)
+    if not isImage:
+        try:
+            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+        except Exception as e:
+            print(e)    
     return render_template('tag_details.html', tag = tag_data, image = image)
 
 @app.route('/view/report/<tag_mac>')
@@ -180,8 +199,18 @@ def get_tag_by_mac(mac):
 def edit_tag_details(tag_mac):
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
-    if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
-        image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+    isImage = False
+    try:
+        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
+            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+            isImage = True
+    except Exception as e:
+        print(e)
+    if not isImage:
+        try:
+            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+        except Exception as e:
+            print(e) 
     return render_template('edit_tag_details.html', tag = tag_data, image = image)
 
 @app.route('/upload_file')
