@@ -837,7 +837,8 @@ def buttons_web():
 def buttons():
     print(request.method)
     interphase = request.referrer[len(request.host_url):]
-    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location') )
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),interphase=interphase )
+    page_selected=interphase
     return redirect(url_for(page_selected))
 
 def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location,interphase="page_configuration"):
