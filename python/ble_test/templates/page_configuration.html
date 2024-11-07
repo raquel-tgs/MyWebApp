@@ -133,6 +133,23 @@
           </button></div>
         </div>
     </form>
+        <script>
+    document.getElementById("sendUrlButton").addEventListener("click", function() {
+      const pageUrl = window.location.href;
+
+      fetch('/receive-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ url: pageUrl })
+      })
+      .then(response => response.json())
+      .then(data => console.log('Response:', data))
+      .catch(error => console.error('Error:', error));
+    });
+  </script>
+
     <div>
       <div id="table"></div>
     </div>

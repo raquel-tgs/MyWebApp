@@ -115,14 +115,14 @@ def get_set_image():
             img.filename = certificate_id+'.'+extension
             img.save(os.path.join(app.root_path, app.config['IMAGE'], img.filename))
             shutil.copy(os.path.join(app.root_path, app.config['IMAGE'], img.filename), os.path.join(localpath, 'images', img.filename))
-            cloud_data = pd.read_csv(localpath+"cloud.csv")
+            cloud_data = pd.read_csv(localpath+"scan.csv")
             cloud_json = json.loads(cloud_data.to_json(orient="records"))
             for tag in cloud_json:
                 if tag['mac'] == mac:
                     tag['asset_images_file_extension'] = extension.upper()
             updated_cloud_string = json.dumps(cloud_json)
             updated_cloud = pd.read_json(StringIO(updated_cloud_string))
-            updated_cloud.to_csv(localpath+"cloud.csv")
+            updated_cloud.to_csv(localpath+"scan.csv")
             return redirect(url_for('edit_tag_details', tag_mac = mac))
         else:
             return redirect(url_for('edit_tag_details', tag_mac = mac))
@@ -441,7 +441,6 @@ def checkbox_read_nfc():
 
 @app.route('/api/data', methods=['POST'])
 def update():
-    # data = pd.read_csv("scan.csv")
     global data
     global data_update
     global reloadpage
@@ -451,12 +450,8 @@ def update():
         data_page = request.get_json()
         if 'id' not in data_page:
             abort(400)
-        # user = User.query.get(data['id'])
 
         field=list(data_page.items())[1][0]
-        # if field=="select":
-        #     if data_page["id"] not in mac_filter:
-        #         mac_filter.append(data_page["id"])
 
         if field in ["certificate_id","expiration_date"]:
             ix = data.index
@@ -469,11 +464,7 @@ def update():
                 data_update.loc[i,field]=data_page[field]
                 updatedix.append(i)
                 data.loc[i, "status"] = "changed"
-        # for field in ['name', 'age', 'address', 'phone', 'email']:
-        #     if field in data:
-        #         setattr(user, field, data[field])
-        # db.session.commit()
-        #if flag:
+
         reloadpage = "True"
     except Exception as e:
         print(e)
@@ -610,29 +601,29 @@ def checkbox_state():
 
 @app.route('/page_configuration')
 def page_configuration():
-    global columnIds
-    global columnIds_location
-    global cloud_csv_row
-    global cloud_columnIds
-    global localpath
+    # global columnIds
+    # global columnIds_location
+    # global cloud_csv_row
+    # global cloud_columnIds
+    # global localpath
     global page_selected
-    global page_datatype_selected
+    # global page_datatype_selected
 
-    page_reload = False
-    if page_datatype_selected!="page_configuration":
-        page_reload=True
+    # page_reload = False
+    # if page_datatype_selected!="page_configuration":
+    #     page_reload=True
 
-    page_datatype_selected="page_configuration"
-    columnIds=columnIds_base
-    columnIds_location=columnIds_location_base
-    cloud_csv_row=cloud_csv_row_base
-    cloud_columnIds=cloud_columnIds_base
-    localpath=localpath_base
+    # page_datatype_selected="page_configuration"
+    # columnIds=columnIds_base
+    # columnIds_location=columnIds_location_base
+    # cloud_csv_row=cloud_csv_row_base
+    # cloud_columnIds=cloud_columnIds_base
+    # localpath=localpath_base
     page_selected="page_configuration"
-    sync_init()
-
-    if page_reload:
-        readscanfile()
+    # sync_init()
+    #
+    # if page_reload:
+    #     readscanfile()
 
     return render_template("page_configuration.html")
 
@@ -646,57 +637,57 @@ def get_current_page():
 
 @app.route('/page_configuration_detail')
 def page_configuration_detail():
-    global columnIds
-    global columnIds_location
-    global cloud_csv_row
-    global cloud_columnIds
-    global localpath
+    # global columnIds
+    # global columnIds_location
+    # global cloud_csv_row
+    # global cloud_columnIds
+    # global localpath
     global page_selected
-    global page_datatype_selected
-    page_reload = False
-    if page_datatype_selected!="page_configuration_detail":
-        page_reload=True
+    # global page_datatype_selected
+    # page_reload = False
+    # if page_datatype_selected!="page_configuration_detail":
+    #     page_reload=True
 
-    page_datatype_selected="page_configuration_detail"
+    # page_datatype_selected="page_configuration_detail"
 
-    columnIds=columnIds_detail
-    columnIds_location=columnIds_location_detail
-    cloud_csv_row=cloud_csv_row_detail
-    cloud_columnIds=cloud_columnIds_detail
-    localpath=localpath_detail
+    # columnIds=columnIds_detail
+    # columnIds_location=columnIds_location_detail
+    # cloud_csv_row=cloud_csv_row_detail
+    # cloud_columnIds=cloud_columnIds_detail
+    # localpath=localpath_detail
     page_selected="page_configuration_detail"
-    sync_init()
-
-    if page_reload:
-        readscanfile()
+    # sync_init()
+    #
+    # if page_reload:
+    #     readscanfile()
     return render_template("page_configuration_detail.html")
 
 @app.route('/page_configuration_configuration')
 def page_configuration_configuration():
-    global columnIds
-    global columnIds_location
-    global cloud_csv_row
-    global cloud_columnIds
-    global localpath
+    # global columnIds
+    # global columnIds_location
+    # global cloud_csv_row
+    # global cloud_columnIds
+    # global localpath
     global page_selected
-    global page_datatype_selected
+    # global page_datatype_selected
 
-    page_reload=False
-    if page_datatype_selected!="page_configuration_configuration":
-        page_reload=True
-
-    page_datatype_selected="page_configuration_configuration"
-
-    columnIds=columnIds_configuration
-    columnIds_location=columnIds_location_configuration
-    cloud_csv_row=cloud_csv_row_configuration
-    cloud_columnIds=cloud_columnIds_configuration
-    localpath=localpath_configuration
+    # page_reload=False
+    # if page_datatype_selected!="page_configuration_configuration":
+    #     page_reload=True
+    #
+    # page_datatype_selected="page_configuration_configuration"
+    #
+    # columnIds=columnIds_configuration
+    # columnIds_location=columnIds_location_configuration
+    # cloud_csv_row=cloud_csv_row_configuration
+    # cloud_columnIds=cloud_columnIds_configuration
+    # localpath=localpath_configuration
     page_selected="page_configuration_configuration"
-    sync_init()
-
-    if page_reload:
-        readscanfile()
+    # sync_init()
+    #
+    # if page_reload:
+    #     readscanfile()
 
     return render_template("page_configuration_configuration.html")
 
@@ -846,10 +837,11 @@ def buttons_web():
 def buttons():
     print(request.method)
     interphase = request.referrer[len(request.host_url):]
-    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location') )
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'),interphase=interphase )
+    page_selected=interphase
     return redirect(url_for(page_selected))
 
-def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location):
+def buttons_back(request_method, request_form_get_scan, request_form_get_update, request_form_get_location,interphase="page_configuration"):
     global status
     global operation
     global semaphore
@@ -857,13 +849,13 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     global mac_filter
     global data_update
     global updatedix
-    # global request_forced
+    global page_selected
     global dfilter_back
     global modalOpen
 
     modalOpen=True
     semaphore=True
-    # print(request.method)
+    page_selected=interphase #"page_configuration_configuration"
     try:
         mac_filter=[]
         dfilter=[x.replace(":","") for x in list(set(list(data[data["select"]==1]["mac"].values)))]
@@ -975,72 +967,72 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
 def sync_init():
     global start_init
 
-    if start_init is None:
-        start_init = {localpath: False}
+    # if start_init is None:
+    #     start_init = {localpath: False}
+    #
+    # if localpath in start_init.keys():
+    #     status=start_init[localpath]
+    # else:
+    #     start_init = {localpath: False}
+    #     status=False
 
-    if localpath in start_init.keys():
-        status=start_init[localpath]
-    else:
-        start_init = {localpath: False}
-        status=False
-
-    if not status:
-        start_init[localpath]=True
+    # if not status:
+    # start_init[localpath]=True
+    try:
+        file_path=localpath+"scan.csv"
+        file_path_copy = localpath + "scan_copylastscan.csv"
+        if not os.path.exists(file_path):
+            print(f"File '{file_path}' does not exist.")
+            try:
+                if os.path.exists(file_path_copy):
+                    try:
+                        # Copy file and metadata, and overwrite if it already exists
+                        shutil.copy(file_path_copy,file_path)
+                        print(f"File copied successfully from {file_path_copy} to {file_path}")
+                    except Exception as e:
+                        print(f"Error occurred: {e}")
+                else:
+                    print(f"File '{file_path}' empty.")
+                    data = pd.DataFrame(columns=columnIds)
+                    # cloud = pd.DataFrame(columns=cloud_columnIds)
+                    data.to_csv(file_path)
+                    data.to_csv(file_path_copy)
+                    # cloud.to_csv(localpath + "cloud.csv")
+            except Exception as e:
+                print(f"An error occurred while creating file: {e}")
+                # return False
         try:
-            file_path=localpath+"scan.csv"
-            file_path_copy = localpath + "scan_copylastscan.csv"
+            file_path=localpath + "scan_update.csv"
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"An error occurred while deleting the file: {e}")
+            # return False
+
+        try:
+            file_path=localpath+"scan_location.csv"
+            file_path_copy = localpath + "scan_location_copylastlocation.csv"
             if not os.path.exists(file_path):
                 print(f"File '{file_path}' does not exist.")
-                try:
-                    if os.path.exists(file_path_copy):
-                        try:
-                            # Copy file and metadata, and overwrite if it already exists
-                            shutil.copy(file_path_copy,file_path)
-                            print(f"File copied successfully from {file_path_copy} to {file_path}")
-                        except Exception as e:
-                            print(f"Error occurred: {e}")
-                    else:
-                        print(f"File '{file_path}' empty.")
-                        data = pd.DataFrame(columns=columnIds)
-                        cloud = pd.DataFrame(columns=cloud_columnIds)
-                        data.to_csv(file_path)
-                        data.to_csv(file_path_copy)
-                        cloud.to_csv(localpath + "cloud.csv")
-                except Exception as e:
-                    print(f"An error occurred while creating file: {e}")
-                    # return False
-            try:
-                file_path=localpath + "scan_update.csv"
-                if os.path.exists(file_path):
-                    os.remove(file_path)
-            except Exception as e:
-                print(f"An error occurred while deleting the file: {e}")
-                # return False
-
-            try:
-                file_path=localpath+"scan_location.csv"
-                file_path_copy = localpath + "scan_location_copylastlocation.csv"
-                if not os.path.exists(file_path):
-                    print(f"File '{file_path}' does not exist.")
-                    if os.path.exists(file_path_copy):
-                        try:
-                            # Copy file and metadata, and overwrite if it already exists
-                            shutil.copy(file_path_copy,file_path)
-                            print(f"File copied successfully from {file_path_copy} to {file_path}")
-                        except Exception as e:
-                            print(f"Error occurred: {e}")
-                    else:
-                        print(f"File '{file_path}' empty.")
-                        data = pd.DataFrame(columns=location_cvs_columnIds)
-                        data.to_csv(file_path)
-                        data.to_csv(file_path_copy)
-            except Exception as e:
-                print(f"An error occurred while creating the file: {e}")
-                # return False
-
+                if os.path.exists(file_path_copy):
+                    try:
+                        # Copy file and metadata, and overwrite if it already exists
+                        shutil.copy(file_path_copy,file_path)
+                        print(f"File copied successfully from {file_path_copy} to {file_path}")
+                    except Exception as e:
+                        print(f"Error occurred: {e}")
+                else:
+                    print(f"File '{file_path}' empty.")
+                    data = pd.DataFrame(columns=location_cvs_columnIds)
+                    data.to_csv(file_path)
+                    data.to_csv(file_path_copy)
         except Exception as e:
-            print(e)
-            print("error at buttons")
+            print(f"An error occurred while creating the file: {e}")
+            # return False
+
+    except Exception as e:
+        print(e)
+        print("error at buttons")
 
 
 @app.route('/page_scan_parameters')
@@ -1120,7 +1112,21 @@ def get_variables():
     # Return the variables as a JSON response
     return jsonify(status=status, operation=operation)
 
+@app.route('/get_data', methods=['GET'])
+def get_data():
+    global localpath
+    global columnIds
 
+    try:
+        if os.path.exists(localpath + "scan.csv"):
+            data = pd.read_csv(localpath + "scan.csv")
+        else:
+            data = pd.DataFrame(columns=columnIds)
+    except Exception as e:
+        print(e)
+
+    json_data = data.to_json(orient="records")
+    return Response(json_data, mimetype='application/json')
 def run_flask_app():
     global app_host
     global app_port
@@ -1216,26 +1222,28 @@ def print_statuslog(value, clear=False, addLFCR=True, addtime=False, maxlines=40
     if statuslog_maxlines>maxlines:
         statuslog_maxlines=0
         statuslog=""
+    try:
+        statuslog_maxlines=statuslog_maxlines+1
 
-    statuslog_maxlines=statuslog_maxlines+1
-
-    dtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    if clear:
-        if addtime:
-            statuslog = dtime + "-> " + value
-        else:
-            statuslog = value
-    else:
-        if addLFCR:
+        dtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        if clear:
             if addtime:
-                statuslog=dtime + "-> " + value+"\n"+statuslog
+                statuslog = dtime + "-> " + value
             else:
-                statuslog = value + "\n" + statuslog
+                statuslog = value
         else:
-            if addtime:
-                statuslog = dtime + "-> " + value+statuslog
+            if addLFCR:
+                if addtime:
+                    statuslog=dtime + "-> " + value+"\n"+statuslog
+                else:
+                    statuslog = value + "\n" + statuslog
             else:
-                statuslog = value + statuslog
+                if addtime:
+                    statuslog = dtime + "-> " + value+statuslog
+                else:
+                    statuslog = value + statuslog
+    except Exception as e:
+        print(e)
 
 def run_wepapp():
     print("Flask app is running in a separate thread")
@@ -1252,6 +1260,7 @@ def set_rssi_tag_scan(set_rssi_tag_scan,init_loading=False):
         status = "Enabled"
         readscanfile(True)
 
+
 def readscanfile(load_init=False ):
     global localpath
     global data
@@ -1259,58 +1268,60 @@ def readscanfile(load_init=False ):
     global scan_angles_raw
     global scan_location
     global rssi_tag_scan
-
-    if os.path.exists(localpath+"scan.csv"):
-        data = pd.read_csv(localpath+"scan.csv")
-        for x in columnIds:
-            if x not in list(data.columns):
-                data[x]=None
-        if load_init and len(rssi_tag_scan.keys())>0:
-            data["status"]="Unkown"
-            if rssi_tag_scan is not None:
-                try:
-                    for ix,rec in data.iterrows():
-                        mac=rec["mac"]
-                        if mac is not None:
-                            mac=mac.replace(":","")
-                            if rssi_tag_scan is not None:
-                                if mac in list(rssi_tag_scan.keys()):
-                                    if "ble_data_crc" in list(data.columns):
-                                        if mac in list(rssi_tag_scan.keys()):
-                                            if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
-                                                data.loc[ix, "status"]="read"
-
-                except Exception as e:
-                    print(e)
-            data.to_csv(localpath + "scan.csv")
-
-        data_update=data.copy()
-        for k in list(data_update.columns)[1:]:
-            data_update[k]=None
-    else:
-        data = pd.DataFrame(columns=columnIds)
-        data_update = data.copy()
-    if os.path.exists(localpath+"cloud.csv"):
-        cloud = pd.read_csv(localpath+"cloud.csv")
-    else:
-        cloud = pd.DataFrame(columns=cloud_columnIds)
-
     try:
-        data = pd.merge(data, cloud, on='mac', how="left")
-        data = data.loc[data["mac"].isna()==False]
-    except Exception as e:
-        print('--------------ERROR----------------', e)
-    
-    data=data.fillna("")
-    if os.path.exists(localpath + "scan_angles_raw.csv"):
-        scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
-    if os.path.exists(localpath + "scan_location.csv"):
-        scan_location = pd.read_csv(localpath + "scan_location.csv")
+        if os.path.exists(localpath+"scan.csv"):
+            data = pd.read_csv(localpath+"scan.csv")
+            for x in columnIds:
+                if x not in list(data.columns):
+                    data[x]=None
+            if load_init and len(rssi_tag_scan.keys())>0:
+                data["status"]="Unkown"
+                if rssi_tag_scan is not None:
+                    try:
+                        for ix,rec in data.iterrows():
+                            mac=rec["mac"]
+                            if mac is not None:
+                                mac=mac.replace(":","")
+                                if rssi_tag_scan is not None:
+                                    if mac in list(rssi_tag_scan.keys()):
+                                        if "ble_data_crc" in list(data.columns):
+                                            if mac in list(rssi_tag_scan.keys()):
+                                                if rec["ble_data_crc"]==rssi_tag_scan[mac]["ble_data_crc"]:
+                                                    data.loc[ix, "status"]="read"
 
-    if data is not None:
-        data["select"]=0
-        # data['x'] = data['x'].apply(lambda x: '{:,.1f}'.format(x))
-        # data['y'] = data['y'].apply(lambda x: '{:,.1f}'.format(x))
+                    except Exception as e:
+                        print(e)
+                data.to_csv(localpath + "scan.csv")
+
+            data_update=data.copy()
+            for k in list(data_update.columns)[1:]:
+                data_update[k]=None
+        else:
+            data = pd.DataFrame(columns=columnIds)
+            data_update = data.copy()
+        # if os.path.exists(localpath+"cloud.csv"):
+        #     cloud = pd.read_csv(localpath+"cloud.csv")
+        # else:
+        #     cloud = pd.DataFrame(columns=cloud_columnIds)
+
+        # try:
+        #     data = pd.merge(data, cloud, on='mac', how="left")
+        #     data = data.loc[data["mac"].isna()==False]
+        # except Exception as e:
+        #     print('--------------ERROR----------------', e)
+
+        data=data.fillna("")
+        if os.path.exists(localpath + "scan_angles_raw.csv"):
+            scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
+        if os.path.exists(localpath + "scan_location.csv"):
+            scan_location = pd.read_csv(localpath + "scan_location.csv")
+
+        if data is not None:
+            data["select"]=0
+            # data['x'] = data['x'].apply(lambda x: '{:,.1f}'.format(x))
+            # data['y'] = data['y'].apply(lambda x: '{:,.1f}'.format(x))
+    except Exception as e:
+        print(e)
 
 global status
 global operation
@@ -1340,7 +1351,7 @@ app_scan_columnIds=None
 webcancel=False
 anchors_init=None
 data = None
-cloud = None
+# cloud = None
 scan_angles_raw = None
 scan_location=None
 data_update=None
@@ -1355,39 +1366,39 @@ semaphore=False
 dfilter_back=None
 status="Strting"
 operation="None"
-rssi_tag_scan=None
+rssi_tag_scan= {}
 start_init=None
 
 #localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
 #localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
-page_datatype_selected=""
+# page_datatype_selected=""
 
 #initialized by poc_server.py with global directory
 localpath=""    #initialized by poc_server.py with global directory
 columnIds=[] #None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
-cloud_columnIds=None
-cloud_csv_row=None
+# cloud_columnIds=None
+# cloud_csv_row=None
 columnIds_location = ['tag_mac', 'out_prob']
 
-localpath_base=""    #initialized by poc_server.py with global directory
-columnIds_base = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
-cloud_columnIds_base=None
-cloud_csv_row_base=None
-columnIds_location_base = ['tag_mac', 'out_prob']
+# localpath_base=""    #initialized by poc_server.py with global directory
+# columnIds_base = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+# cloud_columnIds_base=None
+# cloud_csv_row_base=None
+# columnIds_location_base = ['tag_mac', 'out_prob']
 
-localpath_detail=""    #initialized by poc_server.py with global directory
-columnIds_detail = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
-cloud_columnIds_detail=None
-cloud_csv_row_detail=None
-columnIds_location_detail = ['tag_mac', 'out_prob']
+# localpath_detail=""    #initialized by poc_server.py with global directory
+# columnIds_detail = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+# cloud_columnIds_detail=None
+# cloud_csv_row_detail=None
+# columnIds_location_detail = ['tag_mac', 'out_prob']
 
-localpath_configuration=""    #initialized by poc_server.py with global directory
-columnIds_configuration = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
-cloud_columnIds_configuration=None
-cloud_csv_row_configuration=None
-columnIds_location_configuration = ['tag_mac', 'out_prob']
+# localpath_configuration=""    #initialized by poc_server.py with global directory
+# columnIds_configuration = None #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color', 'series','asset_images_file_extension','read_nfc',  'x', 'y']; Must be initialized by poc_server
+# cloud_columnIds_configuration=None
+# cloud_csv_row_configuration=None
+# columnIds_location_configuration = ['tag_mac', 'out_prob']
 
 location_cvs_columnIds=None
 location_cvs_row=None
@@ -1402,6 +1413,7 @@ isLoggedIn=False
 modalOpen=False
 
 if __name__ == '__main__':
+
 
     logger = logging.getLogger(__name__)
     logger.info("Staring webapp..")

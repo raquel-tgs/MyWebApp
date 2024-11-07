@@ -16,7 +16,7 @@ from bleak.backends.device import BLEDevice
 from bleak.backends.scanner import AdvertisementData
 import numpy as np
 import time
-
+import zlib
 class ble_tag:
 
     char_uuid = {}
@@ -141,8 +141,8 @@ class ble_tag:
         self.csv_row_previous = {}
         self.csv_row_last = {}
         self.csv_row = self.gatewaydb.csv_row
-        self.csv_cfg_row = self.gatewaydb.csv_cfg_row
-        self.csv_det_row = self.gatewaydb.csv_det_row
+        # self.csv_cfg_row = self.gatewaydb.csv_cfg_row
+        # self.csv_det_row = self.gatewaydb.csv_det_row
         self.connect_retries=0
         self.max_connect_retries=max_connect_retries
         try:
@@ -170,12 +170,19 @@ class ble_tag:
         res=self.connected
         try:
             if self.client  is not None:
-                res=self.client.is_connected
+                try:
+                    res=self.client.is_connected
+                except Exception as e:
+                    print(e)
+                    res=False
+                    self.client=None
+
             while not res and ncount < max_retry and self.connect_retries<self.max_connect_retries:
                 print("connecting to {} retry:{}".format(self.address,ncount ))
                 ncount = ncount + 1
                 try:
-                    self.client = BleakClient(self.address)
+                    if self.client is None:
+                        self.client = BleakClient(self.address)
                     #self.client.set_disconnected_callback(self.disconnected_callback)
                     #await self.client.connect()
                     self.connect_retries=self.connect_retries+1
@@ -217,7 +224,7 @@ class ble_tag:
                     connected = False
             ble_data_crc = ""
             if self.client is not None:
-                self.connected = self.client.is_connected
+                connected = self.client.is_connected
                 if not connected:
                     try:
                         await asyncio.wait_for(self.client.connect(), timeout=timeout) #await self.client.connect()
@@ -260,7 +267,8 @@ class ble_tag:
     async def tag_functions(self, action="READ",
                             uuid_filter_id=None, uuid_data_type_filter="base",
                             init_location=False,
-                            dfupdate=None, keep_connected=True,csv_read_data=[],param_enable_disable_tags=False,janhors_processed=[],start_mqtt=False):
+                            dfupdate=None, keep_connected=True,csv_read_data=[],
+                            param_enable_disable_tags=False,janhors_processed=[],start_mqtt=False, columnsIds_filter=[]):
         client = self.client
         device = self.device
         service=self.custom_service
@@ -269,14 +277,23 @@ class ble_tag:
 
 
         address=device.address
-        if uuid_data_type_filter=='base':
-            csv_row_new = self.csv_row.copy()
-        elif uuid_data_type_filter=='detail':
-            csv_row_new = self.csv_det_row.copy()
-        elif uuid_data_type_filter=='configuration':
-            csv_row_new = self.csv_cfg_row.copy()
-        else:
-            csv_row_new = self.csv_row.copy()
+        # if uuid_data_type_filter=='base':
+        #     csv_row_new = self.csv_row.copy()
+        # elif uuid_data_type_filter=='detail':
+        #     csv_row_new = self.csv_det_row.copy()
+        # elif uuid_data_type_filter=='configuration':
+        #     csv_row_new = self.csv_cfg_row.copy()
+        # else:
+        csv_row_new = self.csv_row.copy()
+        # if columnsIds_filter is None:
+        #     if uuid_data_type_filter=='base':
+        #         columnsIds_filter = self.gatewaydb.scan_columnIds.copy()
+        #     elif uuid_data_type_filter=='detail':
+        #         columnsIds_filter = self.gatewaydb.scan_det_columnIds.copy()
+        #     elif uuid_data_type_filter=='configuration':
+        #         columnsIds_filter = self.gatewaydb.scan_cfg_columnIds.copy()
+        #     else:
+        #         columnsIds_filter = self.gatewaydb.scan_columnIds.copy()
 
         csv_row_new["mac"] = address
         csv_row_new["name"] = device.name
@@ -336,26 +353,26 @@ class ble_tag:
                 #     except Exception as e:
                 #         print(e)
                 data_valid = False
-                connected,ble_data_crc=await self.check_disconnect()
-                if connected:
-                    csv_row_new["ble_data_crc"]=ble_data_crc
+                # connected,ble_data_crc=await self.check_disconnect()
+                # if connected:
+                #     csv_row_new["ble_data_crc"]=ble_data_crc
 
-                if uuid_data_type_filter in list(self.csv_row_last.keys()):
-                    if self.csv_row_last[uuid_data_type_filter]["ble_data_crc"]==csv_row_new["ble_data_crc"]:
+                if "row_crc32" in list(self.csv_row_last.keys()):
+                    if self.csv_row_last["row_crc32"]==csv_row_new["ble_data_crc"]:
                         data_valid=True
                 if not data_valid:
-                    if uuid_data_type_filter in list(self.csv_row_last.keys()):
-                        if self.csv_row_previous[uuid_data_type_filter]["ble_data_crc"] == csv_row_new["ble_data_crc"]:
+                    if "row_crc32" in list(self.csv_row_previous.keys()):
+                        if self.csv_row_previous["row_crc32"] == csv_row_new["ble_data_crc"]:
                             data_valid = True
-                            self.csv_row_last[uuid_data_type_filter]=self.csv_row_previous[uuid_data_type_filter].copy()
-                if data_valid:
-                    csv_row_new=self.csv_row_last[uuid_data_type_filter].copy()
-
-                if connected:
+                            self.csv_row_last=self.csv_row_previous.copy()
+                if not self.csv_row_last=={}:
+                    csv_row_new=self.csv_row_last.copy()
+                result=self.client.is_connected()
+                if self.client.is_connected():
 
                     print("Connected to Device")
-                    print("Performing action {}".format(action))
-                    if (app is not None): app.print_statuslog("Performing action {}".format(action))
+                    print("Executing action {}".format(action))
+                    if (app is not None): app.print_statuslog("Executing action {}".format(action))
 
                     if action == "READ" and not data_valid or action != "READ":
 
@@ -371,7 +388,7 @@ class ble_tag:
                                         scan = scan_list[k]['scan']
                                         char_uuid_val = bytes(await client.read_gatt_char(char_uuid_id))
                                         print("{0} ({1}): {2}".format(id, scan, char_uuid_val))
-                                        if scan:
+                                        if scan and (id in columnsIds_filter or len(columnsIds_filter)==0):
                                             if (scan_list[k]['type'] == 'HEX'):
                                                 val = int.from_bytes(char_uuid_val, byteorder='big')
                                             else:
@@ -403,25 +420,25 @@ class ble_tag:
 
                                         result = False
 
-                                # try:
-                                #     self.csv_read_data["rssi"] = None
-                                #     if len(list(rssi_host_scan.keys())) > 0:
-                                #         ix = max([ix for ix in list(rssi_host_scan.keys()) if
-                                #                   rssi_host_scan[ix]["address"] == d.address.replace(":", "")])
-                                #         if rssi_host_scan[ix]["address"] == d.address.replace(":", ""):
-                                #             if csv_read_data is not None:
-                                if uuid_data_type_filter in list(self.csv_row_last.keys()):
-                                    self.csv_row_previous[uuid_data_type_filter] = None
-                                else:
-                                    self.csv_row_previous[uuid_data_type_filter]=self.csv_row_last[uuid_data_type_filter]
-                                csv_read_data.append(csv_row_new)
-                                self.csv_row_last[uuid_data_type_filter] = csv_row_new.copy()
-
+                                try:
+                                    id = "tag_enabled"
+                                    char_uuid_id = self.filter_db(id=id, data_type=None, scan=True)[0]["uuid"]
+                                    valread_raw = await client.read_gatt_char(char_uuid_id)
+                                    if valread_raw is not None:
+                                        if type(valread_raw) is bytearray:
+                                            valread = int.from_bytes(bytes(valread_raw))
+                                        else:
+                                            pass
+                                    else:
+                                        valread = bytes(b'')
+                                    csv_row_new[id] = valread
+                                except Exception as e:
+                                    print(e)
 
                                 if param_enable_disable_tags!='none':
                                     try:
-                                        id == "tag_enabled"
-                                        char_uuid=self.filter_db(id='tag_enabled', data_type=None, scan=True)
+                                        id = "tag_enabled"
+                                        char_uuid=self.filter_db(id=id, data_type=None, scan=True)
                                         if len(char_uuid)>0:
                                             char_uuid=char_uuid[0]
                                             char_uuid_id=char_uuid["uuid"]
@@ -454,6 +471,24 @@ class ble_tag:
                                             "error at param_enable_disable_tags address:{} ".format(address, ))
                                         print("error at param_enable_disable_tags address:{}".format(address,))
                                         print(e)
+
+                                self.csv_row_previous = self.csv_row_last.copy()
+                                csv_row_new_crc = self.gatewaydb.generate_crc32(csv_row_new)
+                                if csv_row_new_crc is None:
+                                    csv_row_new["row_crc32"] = "-"
+                                else:
+                                    csv_row_new = csv_row_new_crc
+                                csv_read_data.append(csv_row_new)
+                                self.csv_row_last = csv_row_new.copy()
+
+                                # df=pd.DataFrame(csv_row_new, index=[0])
+                                # if self.csv_row_last.shape[0]>0:
+                                #     ix=df["mac"]==self.csv_row_last["mac"]
+                                #     if len(ix)>0:
+                                #         self.csv_row_last.drop(self.csv_row_last[ix].index, inplace=True)
+                                #         self.csv_row_last = pd.concat([self.csv_row_last, df], ignore_index=True, axis=0, sort=False)
+                                # else:
+                                #     self.csv_row_last=df.copy()
 
                         if (action == "LOCATION"):
                             ini_loc = False
@@ -617,7 +652,7 @@ class ble_tag:
                                                     if app is not None:app.print_statuslog("{0} read: {1}".format(id, val))
 
                                     except Exception as e:
-                                        if app is not None:app.print_statuslog(e)
+                                        if app is not None:app.print_statuslog(str(e))
                                         print("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
                                         print(e)
                                         if app is not None:app.print_statuslog("Error address:{0} id:{1} char_uuid_id:{2}".format(address,id, char_uuid_id))
@@ -661,7 +696,7 @@ class ble_tag:
 
                                 if tag_updated:
                                     try:
-                                        end_transac_done = True
+                                        newval=1
                                         char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
                                         char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
                                         newval = newval.to_bytes(char_uuid_end_transac_length, byteorder='big', signed=False)
@@ -688,7 +723,7 @@ class ble_tag:
                                         #if id in list(dfupdate_read.columns): dfupdate_read.loc[index_update, id] = val
                                         #dfupdate_read.loc[index_update, "end_transac"] = 0
                                         self.ble_data_crc=val
-
+                                        dfupdate_read["ble_data_crc"][0] = val
                                     except Exception as e:
                                         print(e)
                                         if app is not None:  app.print_statuslog("Error {0}".format(e))
@@ -887,7 +922,7 @@ class boldtag:
         #     print(e)
 
     def __iter__(self):
-        self._index=0
+        self._index=-1
         return self
 
     def __next__(self):
@@ -903,6 +938,7 @@ class boldtag:
         if index < self.limit and index>=0:
             return self.items[index]
         else:
+            self._index = 0
             raise IndexError("Index out of range")
 
     def __del__(self):
@@ -991,9 +1027,14 @@ class boldtag:
             item=self.items[self._index]
             if connect:
                 await self.items[self._index].connect(max_retry=max_retry,timeout=timeout)
-                msg="BoldTag {} Added and connected".format(device.address)
-                print(msg)
-                if (self.webapp is not None): self.webapp.print_statuslog(msg)
+                res = self.items[self._index].connected
+                if res:
+                    self.webapp.print_statuslog("BoldTag {} connected!".format(self.items[self._index].address))
+                else:
+                    self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.items[self._index].address))
+                # msg="BoldTag {} Added and connected".format(device.address)
+                # print(msg)
+                # if (self.webapp is not None): self.webapp.print_statuslog(msg)
             else:
                 msg="BoldTag {} Added fail to connect".format(device.address)
                 print(msg)
@@ -1046,7 +1087,7 @@ class boldtag:
     async def dicconnect_and_remove(self, index=None):
         if index is None:
             index=self._index
-        if index>0 and index<self.limit:
+        if index>=0 and index<self.limit:
             tag=self.items[index]
             if tag["connected"]:
                 try:
@@ -1631,23 +1672,34 @@ class boldtag:
 
 
 class gatewaydb:
-    csv_row = {"mac": "", "name": "", "tag_id": "", "asset_id": "", "certificate_id": "", "type": "",
-               "expiration_date": "", "color": "", "series": "", "read_nfc": "", "status": "", "status_code": "",
-               "asset_images_file_extension": "","manufacturer_data":"","rssi_host":"","last_seen":"", "asset_images_crc":"","ble_data_crc":"", "x": "", "y": ""}
+    # csv_row = {"mac": "", "name": "", "tag_id": "", "asset_id": "", "certificate_id": "", "type": "",
+    #            "expiration_date": "", "color": "", "series": "", "read_nfc": "", "status": "", "status_code": "",
+    #            "asset_images_file_extension": "","manufacturer_data":"","rssi_host":"","last_seen":"", "asset_images_crc":"","ble_data_crc":"", "x": "", "y": ""}
+
+    csv_row = {"mac": None, "name": None, "tag_id": None, "asset_id": None, "certificate_id": None, "type": None,
+               "expiration_date": None, "color": None, "series": None, "read_nfc": None, "tag_mac": None,  "asset_images_file_extension": None,
+               "certification_company_name": None, "certification_company_id": None, "certification_place": None,"certification_date": None, "test_type": None, "asset_diameter": None,
+               "batch_id": None, "batch_date": None, "machine_id": None, "owner_company_name": None, "owner_data": None,"asset_comment": None, "logo_file_extension": None, "signature_image_file_extension": None,"ndir_id":None,
+               "ble_data_crc": None,"asset_images_crc": None,"logo_images_crc": None, "signature_images_crc": None,
+               "tag_advertisement_period": None,"ble_on_period": None, "ble_on_wakeup_period": None, "ble_off_period": None, "tag_periodic_scan": None,
+               "update_nfc": None, "enable_cte": None, "tag_enabled": None,"read_battery_voltage": None,
+               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None,"x": "", "y": ""}
+
+
     scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
                       "series", "read_nfc", "status", "status_code", "asset_images_file_extension","last_seen","asset_images_crc","ble_data_crc", "x", "y"]
 
-    csv_cfg_row = {"mac":"", "name": "","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
-                   "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
-                   "battery_voltage":"","altitude":"","moved":"","tag_firmware":"","manufacturer_data":"","rssi_host":"","last_seen":"","asset_images_crc":"","status":"","x":"","y":""}
+    # csv_cfg_row = {"mac":"", "name": "","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
+    #                "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
+    #                "battery_voltage":"","altitude":"","moved":"","tag_firmware":"","manufacturer_data":"","rssi_host":"","last_seen":"","asset_images_crc":"","status":"","x":"","y":""}
     scan_cfg_columnIds = ["mac", "status_code", "enable_cte", "tag_enabled", "tag_advertisement_period",
                              "ble_on_period", "tag_mac", "read_battery_voltage",
                              "ble_on_wakeup_period", "ble_off_period", "tag_periodic_scan", "altitude", "moved",
                              "battery_voltage", "tag_firmware","manufacturer_data","rssi_host","last_seen","asset_images_crc","ble_data_crc", "status", "x", "y"]
 
-    csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
-                     "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
-                     "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","manufacturer_data":"","rssi_host":"","last_seen":"","status":"","x":"","y":""}
+    # csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
+    #                  "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
+    #                  "owner_company_name":"","owner_data":"","altitude":"","moved":"","battery_voltage":"","asset_comment":"","manufacturer_data":"","rssi_host":"","last_seen":"","status":"","x":"","y":""}
     scan_det_columnIds = ["mac", "certification_company_name",
                                "certification_company_id", "certification_place", "certification_date", "test_type",
                                "asset_diameter", "batch_id", "batch_date",
@@ -1659,39 +1711,76 @@ class gatewaydb:
     location_cvs_row = {"tag_mac": "", "out_prob": "", "out_prob_k": "", "anchors": "", "result": "", "x": "", "y": ""}
     location_cvs_columnIds = ["tag_mac", "out_prob", "out_prob_k", "anchors", "result", "x", "y"]
 
-    cloud_csv_row = {"mac": "", "logo_file_extension": "", "signature_image_file_extension": "", "is_machine": ""}
+    # cloud_csv_row = {"mac": "", "logo_file_extension": "", "signature_image_file_extension": "", "is_machine": ""}
     cloud_scan_columnIds = ["mac", "logo_file_extension", "signature_image_file_extension", "is_machine"]
+
+    #TODO uniformize 'asset_type', 'asset_color', 'asset_series'
+    ble_crc_attributes=["tag_id", "asset_id", "certificate_id", "type",
+                                       "expiration_date", "color", "series",
+                                       "asset_images_file_extension", "enable_cte",
+                                       "certification_company_name", "certification_company_id",
+                                       "certification_place", "certification_date", "test_type",
+                                       "asset_diameter", "asset_comment", "batch_id", "batch_date",
+                                       "machine_id", "status_code", "asset_images_crc",
+                                       "logo_images_crc", "signature_images_crc", "owner_company_name",
+                                       "owner_data", "ndir_id", "tag_mac", "altitude",
+                                       "moved"]
 
 
     def __init__(self):
         self.new_csv_row=None
-        self.new_csv_cfg_row=None
-        self.new_csv_det_row = None
+        # self.new_csv_cfg_row=None
+        # self.new_csv_det_row = None
         self.mac=None
 
     def set_mac(self,mac):
         self.mac=mac
 
-    def dfupdate(self,asdf=True, datatype='base'):
+    # Function to calculate CRC32 for a row
+    def crc32_row(self, row):
+        # Convert the row to a string or bytes, then calculate CRC32
+        row_data = ''.join(str(value) for value in row).encode('utf-8')
+        return zlib.crc32(row_data) & 0xFFFFFFFF  # Mask to ensure 32-bit unsigned
+
+    def generate_crc32(self, data):
+        try:
+            res=None
+            if type(data) is dict:
+                all_keys_in_list = all(key in list(data.keys()) for key in self.ble_crc_attributes)
+                if all_keys_in_list:
+                    df = pd.DataFrame(data, index=[0])
+                    df['row_crc32'] = df[self.ble_crc_attributes].apply(self.crc32_row, axis=1)
+                    df['row_crc32'] = df['row_crc32'].apply(lambda x: hex(x)[2:])
+                    res=df.to_dict(orient='records')[0] if df.shape[0]==1 else df.to_dict()
+            elif type(data) is pd.DataFrame:
+                all_keys_in_list = all(key in list(data.columns) for key in self.ble_crc_attributes)
+                if all_keys_in_list:
+                    data['row_crc32'] = data[self.ble_crc_attributes].apply(self.crc32_row, axis=1)
+                    data['row_crc32'] = data['row_crc32'].apply(lambda x: hex(x)[2:])
+                    res=data
+        except Exception as e:
+            print(e)
+        return res
+    def dfupdate(self,asdf=True, ):
         if asdf:
             res=pd.DataFrame.from_dict(self.new_csv_row)
         else:
             res=self.new_csv_row
         return  res
 
-    def dfupdate_cfg(self, asdf=True):
-        if asdf:
-            res=pd.DataFrame.from_dict(self.new_csv_cfg_row)
-        else:
-            res=self.new_csv_cfg_row
-        return  res
-
-    def dfupdate_det(self, asdf=True):
-        if asdf:
-            res=pd.DataFrame.from_dict(self.new_csv_det_row)
-        else:
-            res=self.new_csv_det_row
-        return  res
+    # def dfupdate_cfg(self, asdf=True):
+    #     if asdf:
+    #         res=pd.DataFrame.from_dict(self.new_csv_cfg_row)
+    #     else:
+    #         res=self.new_csv_cfg_row
+    #     return  res
+    #
+    # def dfupdate_det(self, asdf=True):
+    #     if asdf:
+    #         res=pd.DataFrame.from_dict(self.new_csv_det_row)
+    #     else:
+    #         res=self.new_csv_det_row
+    #     return  res
 
     def new_csv_row_id(self):
         if self.new_csv_row is None:
@@ -1708,35 +1797,35 @@ class gatewaydb:
             res = True
         return res
 
-    def new_csv_cfg_row_id(self):
-        if self.new_csv_cfg_row is None:
-            self.new_csv_cfg_row = self.csv_cfg_row.copy()
-            for x in self.new_csv_cfg_row.keys():
-                self.new_csv_cfg_row[x] = np.nan
+    # def new_csv_cfg_row_id(self):
+    #     if self.new_csv_cfg_row is None:
+    #         self.new_csv_cfg_row = self.csv_cfg_row.copy()
+    #         for x in self.new_csv_cfg_row.keys():
+    #             self.new_csv_cfg_row[x] = np.nan
+    #
+    # def set_csv_cfg_row_id(self, id, value):
+    #     self.new_csv_cfg_row_id()
+    #     res=False
+    #     if id in self.new_csv_cfg_row.keys():
+    #         self.new_csv_cfg_row[id] = [value]
+    #         self.new_csv_cfg_row["mac"] = [self.mac ]
+    #         res = True
+    #     return res
 
-    def set_csv_cfg_row_id(self, id, value):
-        self.new_csv_cfg_row_id()
-        res=False
-        if id in self.new_csv_cfg_row.keys():
-            self.new_csv_cfg_row[id] = [value]
-            self.new_csv_cfg_row["mac"] = [self.mac ]
-            res = True
-        return res
-
-    def new_csv_det_row_id(self):
-        if self.new_csv_det_row is None:
-            self.new_csv_det_row = self.csv_det_row.copy()
-            for x in self.new_csv_det_row.keys():
-                self.new_csv_det_row[x] = np.nan
-
-    def set_csv_det_row_id(self, id, value):
-        self.new_csv_det_row_id()
-        res=False
-        if id in self.new_csv_det_row.keys():
-            self.new_csv_det_row[id] = [value]
-            self.new_csv_det_row["mac"] = [self.mac ]
-            res = True
-        return res
+    # def new_csv_det_row_id(self):
+    #     if self.new_csv_det_row is None:
+    #         self.new_csv_det_row = self.csv_det_row.copy()
+    #         for x in self.new_csv_det_row.keys():
+    #             self.new_csv_det_row[x] = np.nan
+    #
+    # def set_csv_det_row_id(self, id, value):
+    #     self.new_csv_det_row_id()
+    #     res=False
+    #     if id in self.new_csv_det_row.keys():
+    #         self.new_csv_det_row[id] = [value]
+    #         self.new_csv_det_row["mac"] = [self.mac ]
+    #         res = True
+    #     return res
 
 class boldscanner:
     DEVICE_NAME = "BoldTag"
@@ -1840,11 +1929,12 @@ class boldscanner:
         except Exception as e:
             print(f'error in device_found {e}')
 
-    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0):
+    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[]):
         nscan = 0
         new_tags=[]
         existing_tags=[]
-        while nscan < max_scans and ((len(new_tags)+len(existing_tags))<max_tags or max_tags==0):
+        filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
+        while nscan < max_scans and ((len(new_tags)+len(existing_tags))<max_tags or max_tags==0) and not filterout:
             try:
                 nscan=nscan+1
                 #scanner = BleakScanner()
@@ -1853,23 +1943,31 @@ class boldscanner:
                     if self.webapp.webcancel: break
                     if device.name is not None:
                         try:
-                            if device.name.startswith("BoldTag")  :
-                                if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
-                                ix=self.tags.find_tag(device.address)
-                                if ix==-1:
-                                    await self.tags.new(connect=connect, device=device,max_retry=max_retry)
-                                    new_tags.append(device.address)
-                                    # print("BoldTag {} Added ".format(device.address))
-                                    # if (self.webapp is not None): self.webapp.print_statuslog("BoldTag {} Added ".format(device.address))
+                            if device.name.startswith("BoldTag"):
+                                if not (device.address in scan_mac_banned) and (device.address in scan_mac_filter_address or len(scan_mac_filter_address)==0) :
+                                    if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
+                                    ix=self.tags.find_tag(device.address)
+                                    if ix==-1:
+                                        await self.tags.new(connect=connect, device=device,max_retry=max_retry)
+                                        new_tags.append(device.address)
+                                        filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
+                                        if filterout: break
+                                    else:
+                                        # self.tags.set_current(ix)
+                                        # tag=self.tags.get_tag_by_index(ix)
+                                        if connect:
+                                            # await self.tags.connect(max_retry=max_retry)
+                                            await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
+                                        existing_tags.append(device.address)
                                 else:
-                                    # self.tags.set_current(ix)
-                                    # tag=self.tags.get_tag_by_index(ix)
-                                    if connect:
-                                        # await self.tags.connect(max_retry=max_retry)
-                                        await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
-                                    existing_tags.append(device.address)
+                                    if (self.webapp is not None and device.address in scan_mac_banned): self.webapp.print_statuslog(
+                                        "BoldTag  banned {}".format(device.address))
+
                         except Exception as e:
                             print(e)
+
+                if filterout:break
+
             except Exception as e:
                 print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
@@ -1911,10 +2009,13 @@ async def main():
             # dfupdate =bscanner.tags.gatewaydb.dfupdate()
             # res_tag = await bscanner.tags.tag_functions(action="UPDATE",uuid_data_type_filter=None,dfupdate=dfupdate)
             # print(res_tag)
-            tag.gatewaydb.set_csv_cfg_row_id(id="enable_cte", value=1)
+            # tag.gatewaydb.set_csv_cfg_row_id(id="enable_cte", value=1)
+            tag.gatewaydb.set_csv_row_id(id="enable_cte", value=1)
             # bscanner.tags.gatewaydb.set_csv_row_id(id="asset_id", value=np.nan)
-            dfupdate_cfg =tag.gatewaydb.dfupdate_cfg()
-            res_tag = await tag.tag_functions(action="UPDATE",uuid_data_type_filter="configuration",dfupdate=dfupdate_cfg)
+            # dfupdate_cfg =tag.gatewaydb.dfupdate_cfg()
+            dfupdate = tag.gatewaydb.dfupdate()
+            # res_tag = await tag.tag_functions(action="UPDATE",uuid_data_type_filter="configuration",dfupdate=dfupdate_cfg)
+            res_tag = await tag.tag_functions(action="UPDATE", uuid_data_type_filter="configuration",dfupdate=dfupdate)
             print(res_tag)
             res_tag = await tag.tag_functions(action="LOCATION", uuid_data_type_filter=None)
             print(res_tag)
