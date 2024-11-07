@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 function saveConfig() {
-  console.log('saving!!!!')
   // Get the values from form fields
   const keepData = document.getElementById("keep_data").checked;
   const scanNewTags = document.getElementById("scan_new_tags").checked;
