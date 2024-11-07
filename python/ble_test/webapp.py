@@ -88,7 +88,7 @@ def tag_table():
     totalPages = math.ceil(len(tags)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
     # return render_template('editable_table.html', 
-    return render_template('editable_table.html.j2', 
+    return render_template('editable_table.html', 
         tags = tags[first : last], 
         totalTags = len(tags), 
         first = first + 1, 
@@ -150,18 +150,18 @@ def tag_details(tag_mac):
             image = os.path.join('images', f"{tag_data['mac']}.jpg")
         except Exception as e:
             print(e)    
-    return render_template('tag_details.html.j2', tag = tag_data, image = image)
+    return render_template('tag_details.html', tag = tag_data, image = image)
 
 @app.route('/view/report/<tag_mac>')
 def view_tag_report(tag_mac):
     report = 'reports/ADDF-23.pdf'
-    return render_template('view_report.html.j2', report = report, mac = tag_mac)
+    return render_template('view_report.html', report = report, mac = tag_mac)
 
 @app.route('/view/cert/<tag_mac>')
 def view_tag_cert(tag_mac):
     cert = generate_pdf(tag_mac)
     print(cert)
-    return render_template('view_cert.html.j2', cert = cert, mac = tag_mac)
+    return render_template('view_cert.html', cert = cert, mac = tag_mac)
 
 def generate_pdf(mac):
     tag = get_tag_by_mac(mac)
@@ -211,7 +211,7 @@ def edit_tag_details(tag_mac):
             image = os.path.join('images', f"{tag_data['mac']}.jpg")
         except Exception as e:
             print(e) 
-    return render_template('edit_tag_details.html.j2', tag = tag_data, image = image)
+    return render_template('edit_tag_details.html', tag = tag_data, image = image)
 
 @app.route('/upload_file')
 def upload_file():
@@ -1066,7 +1066,7 @@ def sync_init():
 
 @app.route('/page_scan_parameters')
 def page_scan_parameters():
-    return render_template('page_scan_parameters.html.j2')
+    return render_template('page_scan_parameters_j2.html')
     # return render_template('page_scan_parameters.html')
 
 # New endpoint to provide initial configuration values
