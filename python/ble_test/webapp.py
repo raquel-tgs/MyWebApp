@@ -88,7 +88,7 @@ def tag_table():
     totalPages = math.ceil(len(tags)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
     # return render_template('editable_table.html', 
-    return render_template('editable_table.html.j2', 
+    return render_template('editable_table.html', 
         tags = tags[first : last], 
         totalTags = len(tags), 
         first = first + 1, 
@@ -1066,7 +1066,7 @@ def sync_init():
 
 @app.route('/page_scan_parameters')
 def page_scan_parameters():
-    return render_template('page_scan_parameters.html.j2')
+    return render_template('page_scan_parameters_j2.html')
     # return render_template('page_scan_parameters.html')
 
 # New endpoint to provide initial configuration values
