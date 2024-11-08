@@ -203,7 +203,7 @@
     </div> -->
   </div>
   <div>
-    <img class="rounded-lg w-96 pb-5" src="{{ url_for('static', filename=image) }}" alt="Asset Image">
+    <img class="rounded-lg w-96 pb-5" src="{{ url_for('static', filename=image) }}" alt="{{image}}">
     <form class="flex flex-col gap-5" action="/api/image" method="post" enctype=multipart/form-data>
       <input type="file" id="file-input" name="image" accept="image/*">
       <input type="hidden" name="certificate_id" value="{{tag.certificate_id}}" />
