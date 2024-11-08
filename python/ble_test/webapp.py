@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-import certgen_py
+# import certgen_py
 
 import logging
 
@@ -115,20 +115,24 @@ def get_set_image():
     else:
         certificate_id = request.form['certificate_id']
         mac = request.form['mac']
+        tag_id = request.form['tag_id']
         img = request.files['image']
         if img.filename:
             extension = img.filename.split('.')[1]
-            img.filename = certificate_id+'.'+extension
-            img.save(os.path.join(app.root_path, app.config['IMAGE'], img.filename))
-            shutil.copy(os.path.join(app.root_path, app.config['IMAGE'], img.filename), os.path.join(localpath, 'images', img.filename))
-            cloud_data = pd.read_csv(localpath+"scan.csv")
-            cloud_json = json.loads(cloud_data.to_json(orient="records"))
-            for tag in cloud_json:
-                if tag['mac'] == mac:
-                    tag['asset_images_file_extension'] = extension.upper()
-            updated_cloud_string = json.dumps(cloud_json)
-            updated_cloud = pd.read_json(StringIO(updated_cloud_string))
-            updated_cloud.to_csv(localpath+"scan.csv")
+            img.filename = tag_id+'.'+extension
+            img.save(app.config['IMAGE']+"\\"+img.filename)
+            # shutil.copy(os.path.join(app.root_path, app.config['IMAGE'], img.filename), os.path.join(localpath, 'images', img.filename))
+            # cloud_data = pd.read_csv(localpath+"scan.csv")
+            # cloud_json = json.loads(data.to_json(orient="records"))
+            ix=data["mac"]==mac
+            if len(ix)>0:
+                data.loc[ix,"asset_images_file_extension"]=extension.upper()
+            # for tag in cloud_json:
+            #     if tag['mac'] == mac:
+            #         tag['asset_images_file_extension'] = extension.upper()
+            # updated_cloud_string = json.dumps(cloud_json)
+            # updated_cloud = pd.read_json(StringIO(updated_cloud_string))
+            # updated_cloud.to_csv(localpath+"scan.csv")
             return redirect(url_for('edit_tag_details', tag_mac = mac))
         else:
             return redirect(url_for('edit_tag_details', tag_mac = mac))
@@ -140,14 +144,14 @@ def tag_details(tag_mac):
     image = ''
     isImage = False
     try:
-        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
-            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+        if tag_data and tag_data['tag_id'] and tag_data['asset_images_file_extension']:
+            image = os.path.join('images', f"{tag_data['tag_id']}.{tag_data['asset_images_file_extension'].lower()}")
             isImage = True
     except Exception as e:
         print(e)
     if not isImage:
         try:
-            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+            image = os.path.join('images', f"{tag_data['tag_id']}.jpg")
         except Exception as e:
             print(e)    
     return render_template('tag_details.html', tag = tag_data, image = image)
@@ -201,14 +205,14 @@ def edit_tag_details(tag_mac):
     image = ''
     isImage = False
     try:
-        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
-            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+        if tag_data and tag_data['tag_id'] and tag_data['asset_images_file_extension']:
+            image = os.path.join('images', f"{tag_data['tag_id']}.{tag_data['asset_images_file_extension'].lower()}")
             isImage = True
     except Exception as e:
         print(e)
     if not isImage:
         try:
-            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+            image = os.path.join('images', f"{tag_data['tag_id']}.jpg")
         except Exception as e:
             print(e) 
     return render_template('edit_tag_details.html', tag = tag_data, image = image)
