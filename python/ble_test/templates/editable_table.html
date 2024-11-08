@@ -43,43 +43,46 @@
 
   {% for tag in tags %}    
     <li class="hover:bg-gray-50 px-6 py-3">
-      <a class="relative flex justify-between items-center gap-x-6" href="/tag-details/{{tag.mac}}">   
-      <div>
-        <input aria-describedby="comments-description" name="comments" type="checkbox" data-id="{{tag.mac}}" class="tag-checkbox h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
+      <div class="relative flex justify-between items-center gap-x-3">
+        <a class="relative flex justify-between items-center gap-x-3" href="/tag-details/{{tag.mac}}">   
+          <div>
+            <input aria-describedby="comments-description" name="comments" type="checkbox" data-id="{{tag.mac}}" class="tag-checkbox h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
+          </div>
+          <div class="w-40">
+            <p class="text-xs font-normal"><span class="font-semibold">Cert ID </span>{{tag.certificate_id}}</p>
+            <p class="text-xs font-normal">exp<span class="font-semibold"> {{tag.expiration_date}}</span></p>
+          </div>
+          <div class="w-40">
+            <p class="text-sm font-semibold">{{tag.mac}}</p>
+            <p class="text-xs font-normal">{{tag.tag_id}}</p>
+          </div>
+          <div class="w-40">
+            <p class="text-xs font-normal"><span class="font-semibold">Asset ID </span>{{tag.asset_id}}</p>
+            <p class="text-xs font-normal">color<span class="font-semibold"> {{tag.color}}</span></p>
+          </div>
+          <div class="w-40">
+            <p class="text-xs font-normal"><span class="font-semibold">Series </span>{{tag.series}}</p>
+            <p class="text-xs font-normal text-gray-500">{{tag.type}}</p>
+          </div>
+          <div class="w-24">
+            {% if tag.status == 'read' %}
+              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
+            {% elif tag.status == 'changed' %}
+              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
+            {% elif tag.status == 'updated' %}
+              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
+            {% elif tag.status == 'update error' %}
+              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
+            {% else %}
+              <button type="button" class="border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
+            {% endif %}
+          </div>
+        </a> 
+        <a href="/tag-details/edit/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Edit</button></a>
+        <svg class="h-5 w-5 flex-none text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
+          <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+        </svg>
       </div>
-      <div class="w-40">
-        <p class="text-sm font-semibold">{{tag.mac}}</p>
-        <p class="text-xs font-normal">{{tag.tag_id}}</p>
-      </div>
-      <div class="w-40">
-        <p class="text-xs font-normal"><span class="font-semibold">Asset ID </span>{{tag.asset_id}}</p>
-        <p class="text-xs font-normal">color<span class="font-semibold"> {{tag.color}}</span></p>
-      </div>
-      <div class="w-40">
-        <p class="text-xs font-normal"><span class="font-semibold">Series </span>{{tag.series}}</p>
-        <p class="text-xs font-normal text-gray-500">{{tag.type}}</p>
-      </div>
-      <div class="w-40">
-        <p class="text-xs font-normal"><span class="font-semibold">Cert ID </span>{{tag.certificate_id}}</p>
-        <p class="text-xs font-normal">exp<span class="font-semibold"> {{tag.expiration_date}}</span></p>
-      </div>
-      <div class="w-24">
-        {% if tag.status == 'read' %}
-          <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
-        {% elif tag.status == 'changed' %}
-          <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
-        {% elif tag.status == 'updated' %}
-          <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
-        {% elif tag.status == 'update error' %}
-          <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
-        {% else %}
-          <button type="button" class="border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
-        {% endif %}
-      </div>
-      <svg class="h-5 w-5 flex-none text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-        <path fill-rule="evenodd" d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
-      </svg>
-      </a>  
     </li>
   {% endfor %}
 

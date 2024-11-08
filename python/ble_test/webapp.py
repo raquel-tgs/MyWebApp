@@ -140,8 +140,9 @@ def get_set_image():
 
 @app.route('/tag-details/<tag_mac>')
 def tag_details(tag_mac):
+    global page_selected
+    page_selected="page_configuration"
     tag_data = get_tag_by_mac(tag_mac)
-    print(tag_data)
     image = ''
     is_image = False
     try:
@@ -203,6 +204,8 @@ def get_tag_by_mac(mac):
 
 @app.route('/tag-details/edit/<tag_mac>')
 def edit_tag_details(tag_mac):
+    global page_selected
+    page_selected="page_configuration_detail"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
     isImage = False
@@ -218,6 +221,13 @@ def edit_tag_details(tag_mac):
         except Exception as e:
             print(e)
     return render_template('edit_tag_details.html', tag = tag_data, image = image)
+
+@app.route('/tag-details/edit/config/<tag_mac>')
+def edit_tag_config(tag_mac):
+    global page_selected
+    page_selected="page_configuration_configuration"
+    tag_data = get_tag_by_mac(tag_mac)
+    return render_template('edit_tag_configuration.html', tag = tag_data)
 
 @app.route('/upload_file')
 def upload_file():

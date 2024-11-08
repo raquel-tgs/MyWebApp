@@ -95,8 +95,13 @@
       <a href="/view/report/{{tag.mac}}"><button class="text-white rounded-md bg-gray-500 px-3 py-1">View Report</button></a>
     </div>
   </div>
-  <div>
+  <div class="flex flex-col justify-between items-end">
     <img class="rounded-lg w-96 pb-5" src="{{ url_for('static', filename=image) }}" alt="Asset Image">
+    <a href="/tag-details/edit/config/{{tag.mac}}">
+      <button class="text-white rounded-md bg-gray-500 px-3 py-1">
+        <span>Config</span>
+      </button>
+    </a>
   </div>
 </div>
 {% endblock %}
