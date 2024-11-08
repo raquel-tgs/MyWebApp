@@ -29,12 +29,11 @@ function saveConfig() {
   const keepData = document.getElementById("keep_data").checked;
   const scanNewTags = document.getElementById("scan_new_tags").checked;
   const enable_disable_tags = document.querySelector('input[name="enable_disable_tags"]:checked').value;
-  const maximumRetries = parseInt(document.getElementById("maximum_retries").value, 10);
-
-  const scan_max_scans = parseInt(document.getElementById("scan_max_scans").value, 3);
-  const connect_max_retry = parseInt(document.getElementById("connect_max_retry").value, 3);
-  const connect_timeout = parseInt(document.getElementById("connect_timeout").value, 15);
-  const max_BoldTags = parseInt(document.getElementById("max_BoldTags").value, 10);
+  const maximumRetries = parseInt(document.getElementById("maximum_retries").value);
+  const scan_max_scans = parseInt(document.getElementById("scan_max_scans").value);
+  const connect_max_retry = parseInt(document.getElementById("connect_max_retry").value);
+  const connect_timeout = parseInt(document.getElementById("connect_timeout").value);
+  const max_BoldTags = parseInt(document.getElementById("max_BoldTags").value);
 
 
   // Prepare data as JSON
