@@ -115,20 +115,25 @@ def get_set_image():
     else:
         certificate_id = request.form['certificate_id']
         mac = request.form['mac']
+        tag_id = request.form['tag_id']
         img = request.files['image']
         if img.filename:
             extension = img.filename.split('.')[1]
-            img.filename = certificate_id+'.'+extension
-            img.save(os.path.join(app.root_path, app.config['IMAGE'], img.filename))
-            shutil.copy(os.path.join(app.root_path, app.config['IMAGE'], img.filename), os.path.join(localpath, 'images', img.filename))
-            cloud_data = pd.read_csv(localpath+"scan.csv")
-            cloud_json = json.loads(cloud_data.to_json(orient="records"))
-            for tag in cloud_json:
-                if tag['mac'] == mac:
-                    tag['asset_images_file_extension'] = extension.upper()
-            updated_cloud_string = json.dumps(cloud_json)
-            updated_cloud = pd.read_json(StringIO(updated_cloud_string))
-            updated_cloud.to_csv(localpath+"scan.csv")
+            img.filename = f'{tag_id.replace(":", "")}.{extension}'
+            print(app.config['IMAGE']+"\\"+img.filename)
+            img.save(app.config['IMAGE']+"\\"+img.filename)
+            # shutil.copy(os.path.join(app.root_path, app.config['IMAGE'], img.filename), os.path.join(localpath, 'images', img.filename))
+            # cloud_data = pd.read_csv(localpath+"scan.csv")
+            # cloud_json = json.loads(data.to_json(orient="records"))
+            ix=data["mac"]==mac
+            if len(ix)>0:
+                data.loc[ix,"asset_images_file_extension"]=extension.upper()
+            # for tag in cloud_json:
+            #     if tag['mac'] == mac:
+            #         tag['asset_images_file_extension'] = extension.upper()
+            # updated_cloud_string = json.dumps(cloud_json)
+            # updated_cloud = pd.read_json(StringIO(updated_cloud_string))
+            # updated_cloud.to_csv(localpath+"scan.csv")
             return redirect(url_for('edit_tag_details', tag_mac = mac))
         else:
             return redirect(url_for('edit_tag_details', tag_mac = mac))
@@ -138,18 +143,18 @@ def tag_details(tag_mac):
     tag_data = get_tag_by_mac(tag_mac)
     print(tag_data)
     image = ''
-    isImage = False
+    is_image = False
     try:
-        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
-            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
-            isImage = True
+        if tag_data and tag_data['tag_id'] and tag_data['asset_images_file_extension']:
+            image = f"images/{tag_data['tag_id'].replace(':', '')}.{tag_data['asset_images_file_extension'].lower()}"
+            is_image = True
     except Exception as e:
         print(e)
-    if not isImage:
+    if not is_image:
         try:
-            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+            image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
-            print(e)    
+            print(e)
     return render_template('tag_details.html', tag = tag_data, image = image)
 
 @app.route('/view/report/<tag_mac>')
@@ -165,15 +170,16 @@ def view_tag_cert(tag_mac):
 
 def generate_pdf(mac):
     tag = get_tag_by_mac(mac)
-    logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
-    asset = os.path.join(app.root_path, app.config['IMAGE'], 'rodpump.jpg')
-    sig = os.path.join(app.root_path, app.config['IMAGE'], 'signature.jpg')
-    path = os.path.join(app.root_path, app.config['CERT'], f'{mac}.pdf')
+    #logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
+    logo = './static/images/logo.jpg'
+    asset ='./static/images/rodpump.jpg'
+    sig = './static/images/signature.jpg'
+    path = f'./static/certs/{mac.replace(":", "")}.pdf'
     try:
         pdf = certgen_py.Asset(
             company_name = tag['certification_company_name'],
             company_id = tag['certification_company_id'],
-            certificate_id = tag['certificate_id'],
+            certificate_id = '1234', # tag['certificate_id'],
             expiration_date = "2023-12-31", #tag['expiration_date'],
             test_type = tag['test_type'],
             asset_id = tag['asset_id'],
@@ -183,9 +189,9 @@ def generate_pdf(mac):
             signature = sig
         )
         pdf.gen_cert(path)    
-        return f'certs/{mac}.pdf'
-    except:
-        return 'certs/certification.pdf'
+        return f'certs/{mac.replace(":", "")}.pdf'
+    except Exception as e:
+        return ''
 
 def get_tag_by_mac(mac):
     data_json = json.loads(data.to_json(orient="records"))
@@ -201,16 +207,16 @@ def edit_tag_details(tag_mac):
     image = ''
     isImage = False
     try:
-        if tag_data and tag_data['certificate_id'] and tag_data['asset_images_file_extension']:
-            image = os.path.join('images', f"{tag_data['certificate_id']}.{tag_data['asset_images_file_extension'].lower()}")
+        if tag_data and tag_data['tag_id'] and tag_data['asset_images_file_extension']:
+            image = f"images/{tag_data['tag_id'].replace(':', '')}.{tag_data['asset_images_file_extension'].lower()}"
             isImage = True
     except Exception as e:
         print(e)
     if not isImage:
         try:
-            image = os.path.join('images', f"{tag_data['mac']}.jpg")
+            image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
-            print(e) 
+            print(e)
     return render_template('edit_tag_details.html', tag = tag_data, image = image)
 
 @app.route('/upload_file')
