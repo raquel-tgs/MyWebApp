@@ -198,6 +198,7 @@ class ble_tag:
                 except Exception as e:
                     print(e)
                     self.webapp.print_statuslog("BoldTag {} dormant - {}".format(self.address,e))
+                    self.client = BleakClient(self.address)
 
                 if self.connected:
                     print("BoldTag {} gathering services".format(self.address))
