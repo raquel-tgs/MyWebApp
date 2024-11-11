@@ -438,11 +438,12 @@ class ble_tag:
                                             if (csv_row_new is not None):
                                                 if id in csv_row_new.keys():
                                                     csv_row_new[id] = val
-                                                    if id=="tag_id":
-                                                        try:
-                                                            csv_row_new[id]=int(val, 16)
-                                                        except Exception as e:
-                                                            print(e)
+                                                    #TODO for the moement hex
+                                                    # if id=="tag_id":
+                                                    #     try:
+                                                    #         csv_row_new[id]=int(val, 16)
+                                                    #     except Exception as e:
+                                                    #         print(e)
                                     except Exception as e:
                                         if type(e) is  bleak.exc.BleakDeviceNotFoundError: #THE_OBJECT_HAS_BEEN_CLOSED = 22
                                             msg="Connection closed for address:{} id:{} char_uuid_id:{}".format(address, id, char_uuid_id)
