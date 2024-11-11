@@ -5,52 +5,33 @@
   <h4 class="text-xl font-semibold">Edit Asset</h4>
   <div class="flex gap-4">
     <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+      <button id="tag-update" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md" value="Update" name="Update" id="Update">Save</button>
+    </form>
+    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
       <button id="tag-scan" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Scan" name="Scan" id="Scan">Read</button>
     </form>
     <a href="/tag-details/{{tag.mac}}"><button class="text-gray-800 bg-gray-300 px-3 py-2 rounded-md">Cancel</button></a>
-    <a href="/tag-details/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Save</button></a>
   </div>
 </div>
-<div class="flex justify-between gap-1 p-4" style="height: 85vh; overflow: scroll;">
+<div class="flex justify-between gap-1 p-4 mb-4" style="height: 85vh; overflow: scroll;">
   <div class="flex flex-col gap-5 w-3/5">
-    <div class="flex flex-col gap-2">
-      <label class="text-gray-900 text-sm">Tag Name</label>
-      <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.name if tag.name else 'N/A'}}</p>
-    </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">MAC</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.mac if tag.mac else 'N/A'}}</p>
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Tag ID</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_id" mac="{{tag.mac}}" value="{{tag.tag_id}}">
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Asset ID</label>
+        <label class="text-gray-900 text-base font-semibold">Asset ID</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_id" mac="{{tag.mac}}" value="{{tag.asset_id}}">
       </div>
-
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-base font-semibold">Cert ID</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="certificate_id" mac="{{tag.mac}}" value="{{tag.certificate_id}}">
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-base font-semibold">Exp Date</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="expiration_date" mac="{{tag.mac}}" value="{{tag.expiration_date}}">
+      </div>
     </div>
 
-    <div class="flex justify-between gap-2">
-
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">NDIR ID</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="ndir_id" mac="{{tag.mac}}" value="{{tag.ndir_id}}">
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Machine ID</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="machine_id" mac="{{tag.mac}}" value="{{tag.machine_id}}">
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Is Machine</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="is_machine" mac="{{tag.mac}}" value="{{tag.is_machine}}">
-      </div>
-
-    </div>
+    <h1 class="text-lg font-semibold">Asset Info</h1>
 
     <div class="flex flex-col gap-2">
       <label class="text-gray-900 text-sm">Comment</label>
@@ -58,7 +39,6 @@
     </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Series</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="series" mac="{{tag.mac}}" value="{{tag.series}}">
@@ -71,123 +51,94 @@
         <label class="text-gray-900 text-sm">Color</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="color" mac="{{tag.mac}}" value="{{tag.color}}">
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
-
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">X</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.x if tag.x else 'N/A'}}</p>
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Y</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.y if tag.y else 'N/A'}}</p>
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Altitude</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.altitude if tag.altitude else 'N/A'}}</p>
-      </div>
-
-    </div>
-
-    <div class="flex justify-between gap-2">
-
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Moved</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.moved if tag.moved else 'N/A'}}</p>
-      </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Type</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="type" mac="{{tag.mac}}" value="{{tag.type}}">
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Batt. Voltage</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.battery_voltage if tag.battery_voltage else 'N/A'}}</p>
+        <label class="text-gray-900 text-sm">Machine ID</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="machine_id" mac="{{tag.mac}}" value="{{tag.machine_id}}">
       </div>
-
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">Is Machine</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="is_machine" mac="{{tag.mac}}" value="{{tag.is_machine}}">
+      </div>
     </div>
 
-    {# <div class="flex justify-between gap-2">
-
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Status Code</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.status_code if tag.status_code else 'N/A'}}</p>
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Select</label>
-        <input class="border border-gray-500 rounded-md p-2" name="name" value="{{tag.select}}">
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Read NFC</label>
-        <input class="border border-gray-500 rounded-md p-2" name="name" value="{{tag.read_nfc}}">
-      </div>
-
-    </div> #}
+    <h1 class="text-lg font-semibold">Cert Info</h1>
 
     <div class="flex justify-between gap-2">
-
-      <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Cert ID</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certificate_id if tag.certificate_id else 'N/A'}}</p>
-      </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
+      <div class="flex flex-col gap-2" style="width: 47%;">
         <label class="text-gray-900 text-sm">Company Name</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_company_name if tag.certification_company_name else 'N/A'}}</p>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="certification_company_name" mac="{{tag.mac}}" value="{{tag.certification_company_name}}">
+        {# <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.certification_company_name if tag.certification_company_name else 'N/A'}}</p> #}
       </div>
-      <div class="flex flex-col gap-2" style="width: 30%;">
+      <div class="flex flex-col gap-2" style="width: 47%;">
         <label class="text-gray-900 text-sm">Company ID</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_company_id if tag.certification_company_id else 'N/A'}}</p>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="certification_company_id" mac="{{tag.mac}}" value="{{tag.certification_company_id}}">
+        {# <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.certification_company_id if tag.certification_company_id else 'N/A'}}</p> #}
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Cert Place</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_place if tag.certification_place else 'N/A'}}</p>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="certification_place" mac="{{tag.mac}}" value="{{tag.certification_place}}">
+        {# <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.certification_place if tag.certification_place else 'N/A'}}</p> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Cert Date</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.certification_date if tag.certification_date else 'N/A'}}</p>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="certification_date" mac="{{tag.mac}}" value="{{tag.certification_date}}">
+        {# <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.certification_date if tag.certification_date else 'N/A'}}</p> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
-        <label class="text-gray-900 text-sm">Exp Date</label>
-        <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.expiration_date if tag.expiration_date else 'N/A'}}</p>
-      </div>
-
-    </div>
-
-
-    
-    <!-- <div>
-        <div class="w-1/2">
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Owner Company</span>{{tag.owner_company_name}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Owner Data</span>{{tag.owner_data}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Batch ID</span>{{tag.batch_id}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Batch Created</span>{{tag.batch_date}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Test Type</span>{{tag.test_type}}</p>
-        </div>
+        <label class="text-gray-900 text-sm">NDIR ID</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="ndir_id" mac="{{tag.mac}}" value="{{tag.ndir_id}}">
       </div>
     </div>
-    <div>
-      <p class="text-sm font-normal text-gray-700">CRC / Extensions</p>
-      <div class="flex gap-1">
-        <div class="w-1/2">
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">BLE Data CRC</span>{{tag.ble_data_crc}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Asset Image CRC</span>{{tag.asset_images_crc}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Logo Image CRC</span>{{tag.logo_images_crc}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Signature CRC</span>{{tag.signature_images_crc}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Expires</span>{{tag.expiration_date}}</p>
-        </div>
-        <div class="w-1/2">
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Asset Image Ext</span>{{tag.asset_images_file_extension}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Logo Image Ext</span>{{tag.logo_file_extension}}</p>
-          <p class="flex text-sm font-normal"><span class="font-semibold w-32 block">Signature Ext</span>{{tag.signature_image_file_extension}}</p>
-        </div>
+
+    <h1 class="text-lg font-semibold">BoltTag Info</h1>
+
+    <div class="flex justify-between gap-2">
+      <div class="flex flex-col gap-2" style="width: 50%;">
+        <label class="text-gray-900 text-sm">Tag ID</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.tag_id if tag.tag_id else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_id" mac="{{tag.mac}}" value="{{tag.tag_id}}"> #}
       </div>
-    </div> -->
+    </div>
+
+    <div class="flex justify-between gap-2">
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">X</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.x if tag.x else 'N/A'}}</p>
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">Y</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.y if tag.y else 'N/A'}}</p>
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">Altitude</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.altitude if tag.altitude else 'N/A'}}</p>
+      </div>
+    </div>
+
+    <div class="flex justify-between gap-2">
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">Batt. Voltage</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.battery_voltage if tag.battery_voltage else 'N/A'}}</p>
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">MAC</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.mac if tag.mac else 'N/A'}}</p>
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-sm">Moved</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.moved if tag.moved else 'N/A'}}</p>
+      </div>
+    </div>
   </div>
   <div>
     <img class="rounded-lg w-96 pb-5" src="{{ url_for('static', filename=image) }}" alt="{{image}}">

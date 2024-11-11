@@ -5,24 +5,38 @@
   <h4 class="text-xl font-semibold">Edit Configuration</h4>
   <div class="flex gap-4">
     <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+      <button id="tag-update" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md" value="Update" name="Update" id="Update">Save</button>
+    </form>
+    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
       <button id="tag-scan" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Scan" name="Scan" id="Scan">Read</button>
     </form>
     <a href="/tag-details/{{tag.mac}}"><button class="text-gray-800 bg-gray-300 px-3 py-2 rounded-md">Cancel</button></a>
-    <a href="/tag-details/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Save</button></a>
   </div>
 </div>
 <div class="flex justify-between gap-1 p-4" style="height: 85vh; overflow: scroll;">
   <div class="flex flex-col gap-5 w-3/5">
-    <div class="flex flex-col gap-2">
-      <label class="text-gray-900 text-sm">Tag Name</label>
-      <p class="border border-gray-500 rounded-md p-2 cursor-pointer">{{tag.name if tag.name else 'N/A'}}</p>
-    </div>
-    
-    <div class="flex justify-between gap-2">
 
+    <div class="flex justify-between gap-2">
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-base font-semibold">Asset ID</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="asset_id" mac="{{tag.mac}}" value="{{tag.asset_id}}">
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-base font-semibold">Tag ID</label>
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.tag_id if tag.tag_id else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_id" mac="{{tag.mac}}" value="{{tag.tag_id}}"> #}
+      </div>
+      <div class="flex flex-col gap-2" style="width: 30%;">
+        <label class="text-gray-900 text-base font-semibold">Exp Date</label>
+        <input class="editable-field border border-gray-500 rounded-md p-2" name="expiration_date" mac="{{tag.mac}}" value="{{tag.expiration_date}}">
+      </div>
+    </div>
+
+    <div class="flex justify-between gap-2">
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">MAC</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="mac" mac="{{tag.mac}}" value="{{tag.mac}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.mac if tag.mac else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="mac" mac="{{tag.mac}}" value="{{tag.mac}}"> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Update NFC</label>
@@ -30,13 +44,12 @@
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Status Code</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="status_code" mac="{{tag.mac}}" value="{{tag.status_code}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.status_code if tag.status_code else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="status_code" mac="{{tag.mac}}" value="{{tag.status_code}}"> #}
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Enable CTE</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="enable_cte" mac="{{tag.mac}}" value="{{tag.enable_cte}}">
@@ -49,11 +62,9 @@
         <label class="text-gray-900 text-sm">Tag Advertisement Period</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_advertisement_period" mac="{{tag.mac}}" value="{{tag.tag_advertisement_period}}">
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">BLE on Period</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="ble_on_period" mac="{{tag.mac}}" value="{{tag.ble_on_period}}">
@@ -66,39 +77,40 @@
         <label class="text-gray-900 text-sm">BLE Off Period</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="ble_off_period" mac="{{tag.mac}}" value="{{tag.ble_off_period}}">
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
-
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Tag Periodic Scan</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_periodic_scan" mac="{{tag.mac}}" value="{{tag.tag_periodic_scan}}">
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Battery Voltage</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="battery_voltage" mac="{{tag.mac}}" value="{{tag.battery_voltage}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.battery_voltage if tag.battery_voltage else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="battery_voltage" mac="{{tag.mac}}" value="{{tag.battery_voltage}}"> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Read Battery Voltage</label>
         <input class="editable-field border border-gray-500 rounded-md p-2" name="read_battery_voltage" mac="{{tag.mac}}" value="{{tag.read_battery_voltage}}">
       </div>
-
     </div>
 
     <div class="flex justify-between gap-2">
 
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Altitude</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="altitude" mac="{{tag.mac}}" value="{{tag.altitude}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.altitude if tag.altitude else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="altitude" mac="{{tag.mac}}" value="{{tag.altitude}}"> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Moved</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="moved" mac="{{tag.mac}}" value="{{tag.moved}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.moved if tag.moved else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="moved" mac="{{tag.mac}}" value="{{tag.moved}}"> #}
       </div>
       <div class="flex flex-col gap-2" style="width: 30%;">
         <label class="text-gray-900 text-sm">Tag Firmware</label>
-        <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_firmware" mac="{{tag.mac}}" value="{{tag.tag_firmware}}">
+        <p class="border border-gray-500 bg-gray-200 rounded-md p-2 cursor-pointer">{{tag.tag_firmware if tag.tag_firmware else 'N/A'}}</p>
+        {# <input class="editable-field border border-gray-500 rounded-md p-2" name="tag_firmware" mac="{{tag.mac}}" value="{{tag.tag_firmware}}"> #}
       </div>
 
     </div>
