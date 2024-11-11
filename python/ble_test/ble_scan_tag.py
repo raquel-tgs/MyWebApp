@@ -125,7 +125,6 @@ class ble_tag:
         self.address=device.address
         self.connected=False
         self.client=None
-        self.custom_service=None
         self.index=index
         self.name=device.name
         self.rssi_host_scan = None
@@ -137,7 +136,7 @@ class ble_tag:
         self.serv_uuid_Custom_Service=serv_uuid_Custom_Service
         self.directory=directory
         self.scanner_param=scanner_param
-
+        self.error=None
         self.gatewaydb = gatewaydb()
         self.gatewaydb.set_mac(self.address)
         self.csv_row_previous = {}
@@ -153,6 +152,11 @@ class ble_tag:
                     self.char_uuid[ix]["NFC"]=True
         except Exception as e:
             print(e)
+        self.client = BleakClient(self.address)
+        self.client.set_disconnected_callback(self.handle_disconnect)
+
+    def set_custom_service(self,custom_service):
+        self.custom_service=custom_service
 
     def read_db(self):
         try:
@@ -162,86 +166,104 @@ class ble_tag:
         except Exception as e:
             print(e)
 
-    async def connect(self,max_retry=3, timeout=15):
-        # res_scan=True
-        # if index is not None:
-        #     res_scan=self.set_current(index)
-        # res=False
-        # if res_scan:
-        ncount = 0
-        res=self.connected
+    def handle_disconnect(self, device):
         try:
-            if self.client  is not None:
-                try:
-                    res=self.client.is_connected
-                except Exception as e:
-                    print(e)
-                    res=False
-                    self.client=None
-
-            while not res and ncount < max_retry: # and self.connect_retries<self.max_connect_retries:
-                print("connecting to {} retry:{}".format(self.address,ncount ))
-                ncount = ncount + 1
-                try:
-                    if self.client is None:
-                        self.client = BleakClient(self.address)
-                    #self.client.set_disconnected_callback(self.disconnected_callback)
-                    #await self.client.connect()
-                    self.connect_retries=self.connect_retries+1
-                    await asyncio.wait_for(self.client.connect(), timeout=timeout)
-                    self.connected= self.client.is_connected
-                    res=self.connected
-                    if res:
-                        self.webapp.print_statuslog("BoldTag {} connected!".format(self.address))
-                    else:
-                        self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.address))
-                except Exception as e:
-                    print(e)
-                    self.webapp.print_statuslog("BoldTag {} dormant - {}".format(self.address,e))
-                    self.client = BleakClient(self.address)
-
-                if self.connected:
-                    print("BoldTag {} gathering services".format(self.address))
-                    svcs = await self.client.get_services()
-                    for service_1 in svcs:
-                        # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
-                        if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
-                            self.custom_service = service_1
-                            break
-                    # self.update_current()
-
+            self.connected=False
         except Exception as e:
             print(e)
-            self.webapp.print_statuslog("Connection error for BoldTag  {} ".format(self.address))
-        return res
+
+    # async def connect(self,max_retry=3, timeout=15):
+    #     # res_scan=True
+    #     # if index is not None:
+    #     #     res_scan=self.set_current(index)
+    #     # res=False
+    #     # if res_scan:
+    #     ncount = 0
+    #     res=self.connected
+    #     error=False
+    #     try:
+    #         # if self.client  is not None:
+    #         #     try:
+    #         #         res=await self.client.is_connected()
+    #         #     except Exception as e:
+    #         #         print(e)
+    #         #         res=False
+    #         #         error=True
+    #         #
+    #         # if error == True:
+    #         #     try:
+    #         #         self.client.disconnect()
+    #         #         self.client=None
+    #         #     except Exception as e:
+    #         #         print(e)
+    #
+    #         res=self.connected
+    #         while res!=True and ncount < max_retry : # and self.connect_retries<self.max_connect_retries:
+    #             print("connecting to {} retry:{}".format(self.address,ncount ))
+    #             ncount = ncount + 1
+    #             try:
+    #                 if self.client is None:
+    #                     self.client = BleakClient(self.address)
+    #                     self.client.set_disconnected_callback(self.handle_disconnect)
+    #                 #self.client.set_disconnected_callback(self.disconnected_callback)
+    #                 #await self.client.connect()
+    #                 self.connect_retries=self.connect_retries+1
+    #                 # await asyncio.wait_for(self.client.connect(), timeout=timeout)
+    #                 res=await self.client.connect()
+    #                 # self.connected= await self.client.is_connected()
+    #                 self.connected=res
+    #                 if res:
+    #                     self.webapp.print_statuslog("BoldTag {} connected!".format(self.address))
+    #                 else:
+    #                     self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.address))
+    #             except Exception as e:
+    #                 print(e)
+    #                 self.webapp.print_statuslog("BoldTag {} dormant - {}".format(self.address,e))
+    #
+    #
+    #             if self.connected:
+    #                 print("BoldTag {} gathering services".format(self.address))
+    #                 svcs = await self.client.get_services()
+    #                 for service_1 in svcs:
+    #                     # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+    #                     if service_1.uuid == self.scanner_param["serv_uuid_Custom_Service"]:
+    #                         self.custom_service = service_1
+    #                         break
+    #                 # self.update_current()
+    #
+    #     except Exception as e:
+    #         print(e)
+    #         self.webapp.print_statuslog("Connection error for BoldTag  {} ".format(self.address))
+    #     return res
 
     async def check_disconnect(self,timeout=15):
         try:
-            connected = False
-            if self.client is None:
+            # connected = False
+            # if self.client is None:
+            #     try:
+            #         self.client = BleakClient(self.address)
+            #         connected = await self.client.is_connected()
+            #     except Exception as e:
+            #         print(e)
+            #         connected = False
+            # ble_data_crc = ""
+            # if self.client is not None:
+            connected = self.connected #await self.client.is_connected()
+            if not connected:
                 try:
-                    self.client = BleakClient(self.address)
-                    connected = self.client.is_connected
+                    # await asyncio.wait_for(self.client.connect(), timeout=timeout) #await self.client.connect()
+                    res=await self.client.connect()
+                    self.connected = res #await self.client.is_connected()
                 except Exception as e:
                     print(e)
                     connected = False
-            ble_data_crc = ""
-            if self.client is not None:
-                connected = self.client.is_connected
-                if not connected:
-                    try:
-                        await asyncio.wait_for(self.client.connect(), timeout=timeout) #await self.client.connect()
-                        self.connected = self.client.is_connected
-                    except Exception as e:
-                        print(e)
-                        connected = False
-                try:
-                    char_uuid = self.filter_db(id="ble_data_crc")[0]["uuid"]
-                    self.ble_data_crc = bytes(await self.client.read_gatt_char(char_uuid))
-                    connected = True
-                except Exception as e:
-                    print(e)
-                    connected = False
+            try:
+                char_uuid = self.filter_db(id="ble_data_crc")[0]["uuid"]
+                self.ble_data_crc = bytes(await self.client.read_gatt_char(char_uuid))
+                connected = True
+            except Exception as e:
+                print(e)
+                connected = False
 
         except Exception as e:
             print(e)
@@ -272,6 +294,7 @@ class ble_tag:
                             init_location=False,
                             dfupdate=None, keep_connected=True,csv_read_data=[],
                             param_enable_disable_tags=False,janhors_processed=[],start_mqtt=False, columnsIds_filter=[]):
+
         client = self.client
         device = self.device
         service=self.custom_service
@@ -370,8 +393,8 @@ class ble_tag:
                             self.csv_row_last=self.csv_row_previous.copy()
                 if not self.csv_row_last=={}:
                     csv_row_new=self.csv_row_last.copy()
-                result=self.client.is_connected()
-                if self.client.is_connected():
+                result= self.connected
+                if result:
 
                     print("Connected to Device")
                     print("Executing action {}".format(action))
@@ -389,7 +412,10 @@ class ble_tag:
                                         char_uuid_id = scan_list[k]['uuid']
                                         id = scan_list[k]['id']
                                         scan = scan_list[k]['scan']
-                                        char_uuid_val = bytes(await client.read_gatt_char(char_uuid_id))
+                                        # char_uuid_val = bytes(await client.read_gatt_char(char_uuid_id))
+                                        char_uuid_val = await self.readgatt(char_uuid_id)
+                                        if char_uuid_val is not None:
+                                            char_uuid_val=bytes(char_uuid_val)
                                         print("{0} ({1}): {2}".format(id, scan, char_uuid_val))
                                         if scan and (id in columnsIds_filter or len(columnsIds_filter)==0):
                                             if (scan_list[k]['type'] == 'HEX'):
@@ -417,9 +443,17 @@ class ble_tag:
                                             if (app is not None): app.print_statuslog(msg)
                                             print(msg)
                                             print(e)
-                                            self.connected = False
+                                            # self.connected = False
+                                            # self.client = None
                                             # self.update_current()
                                             break
+                                        elif type(e) is OSError:
+                                            if e.strerror== 'The object has been closed':
+                                                msg = "Connection closed for address:{} id:{} char_uuid_id:{}".format(
+                                                    address, id, char_uuid_id)
+                                                if (app is not None): app.print_statuslog(msg)
+                                                # self.connected = False
+                                                # self.client = None
                                         else:
                                             msg="error address:{} id:{} char_uuid_id:{}".format(address, id, char_uuid_id)
                                             if (app is not None): app.print_statuslog(msg)
@@ -431,7 +465,7 @@ class ble_tag:
                                 try:
                                     id = "tag_enabled"
                                     char_uuid_id = self.filter_db(id=id, data_type=None, scan=True)[0]["uuid"]
-                                    valread_raw = await client.read_gatt_char(char_uuid_id)
+                                    valread_raw = await self.readgatt(char_uuid_id) #await client.read_gatt_char(char_uuid_id)
                                     if valread_raw is not None:
                                         if type(valread_raw) is bytearray:
                                             valread = int.from_bytes(bytes(valread_raw))
@@ -458,7 +492,7 @@ class ble_tag:
                                                             newval.to_bytes(char_uuid['length'], byteorder='big',
                                                                     signed=False),response=True)
 
-                                            valread_raw = await client.read_gatt_char(char_uuid_id)
+                                            valread_raw = await self.readgatt(char_uuid_id) #await client.read_gatt_char(char_uuid_id)
                                             if valread_raw is not None:
                                                 if type(valread_raw) is bytearray:
                                                     valread = int.from_bytes(bytes(valread_raw))
@@ -529,10 +563,7 @@ class ble_tag:
                                 devices_processed_location=address
                                 if disableCTE_duringlocation or keepactive_all_CTE_during_location:
                                     # char_uuid_enable_cte = "c92c584f-7b9e-473a-ad4e-d9965e0cd678"
-                                    res = await client.write_gatt_char(
-                                        service.get_characteristic(char_uuid_enable_cte),
-                                        bytearray([0x01]),
-                                        response=True)
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_enable_cte),bytearray([0x01]),response=True)
                                     # if ini_loc: time.sleep(CTE_Wait_Time_prescan)
                                 dev_found = False
                                 n = 0
@@ -559,10 +590,7 @@ class ble_tag:
 
                                 # Stop advertisement CTE
                                 if disableCTE_duringlocation:
-                                    res = await client.write_gatt_char(
-                                        service.get_characteristic(char_uuid_enable_cte),
-                                        bytearray([0x00]),
-                                        response=True)
+                                    res = await client.write_gatt_char(service.get_characteristic(char_uuid_enable_cte),bytearray([0x00]),response=True)
                                 # else:
                                 #    print("disableCTE is FALSE!! - no scan")
 
@@ -622,20 +650,12 @@ class ble_tag:
                                                         fupdate = True
 
                                                     if (scan_list[k]['type'] == 'HEX'):
-                                                        res = await client.write_gatt_char(
-                                                            service.get_characteristic(
-                                                                char_uuid_id),
-                                                            newval.to_bytes(scan_list[k]['length'], byteorder='big',
-                                                                            signed=False),
-                                                            response=True)
+                                                        res = await client.write_gatt_char(service.get_characteristic(char_uuid_id),newval.to_bytes(scan_list[k]['length'], byteorder='big',signed=False),response=True)
                                                     else:
-                                                        res = await client.write_gatt_char(
-                                                            service.get_characteristic(char_uuid_id),
-                                                            bytearray(newval, 'utf-8'),
-                                                            response=True)
+                                                        res = await client.write_gatt_char(service.get_characteristic(char_uuid_id),bytearray(newval, 'utf-8'),response=True)
 
                                                     # print(res)
-                                                    valread_raw = await client.read_gatt_char(char_uuid_id)
+                                                    valread_raw =  await self.readgatt(char_uuid_id)  #await client.read_gatt_char(char_uuid_id)
                                                     if valread_raw is not None:
                                                         if type(valread_raw) is bytearray:
                                                             valread = bytes(valread_raw)
@@ -715,7 +735,7 @@ class ble_tag:
 
                                         #update crc
                                         id="ble_data_crc"
-                                        valread_raw = await client.read_gatt_char(char_uuid_ble_data_crc)
+                                        valread_raw =await self.readgatt(char_uuid_ble_data_crc) # await client.read_gatt_char(char_uuid_ble_data_crc)
                                         if valread_raw is not None:
                                             if type(valread_raw) is bytearray:
                                                 valread = bytes(valread_raw)
@@ -756,6 +776,27 @@ class ble_tag:
         res={"result":result, "dfupdate_read":dfupdate_read, "csv_read_data":csv_read_data,
              "recupdate":recupdate, "devices_processed_location":devices_processed_location,"init_location":init_location,"start_mqtt":start_mqtt}
         return res
+
+    async def writegatt(self,char_uuid, value,response=True):
+        try:
+            service_char=self.custom_service.get_characteristic(char_uuid)
+            res=await self.client.write_gatt_char(service_char, bytearray(value), response=True)
+        except Exception as e:
+            print(e)
+            self.error=e
+        return res
+
+    async def readgatt(self,char_uuid_id):
+        try:
+            err=False
+            char_uuid_val=None
+            char_uuid_val = await self.client.read_gatt_char(char_uuid_id)
+        except Exception as e:
+            print(e)
+            self.error = e
+            # if type(e) is  bleak.exc.BleakDeviceNotFoundError: type(e) is OSError  e.strerror=="The object has been closed"
+
+        return char_uuid_val
 
     def filter_db(self,id, data_type=None, scan=None):
         try:
@@ -850,14 +891,10 @@ class boldtag:
         # Returns the length of the list
         return self.limit
 
-    def all_connected(self):
-       return (sum([1 if x.connected else 0 for x in self.items]) ==self.limit)
-
-
-    async def new(self, device, connect=False, max_retry=3,timeout=15):
+    async def new(self, device):#, connect=False, max_retry=3,timeout=15):
         #add new data
         try:
-            item=None
+            res=-1
             # item=ble_tag(device=device, webapp=self.webapp, index=self.index,scanner_param=self.scanner_param)
             if self._index==-1:
                 self.items = []
@@ -867,31 +904,32 @@ class boldtag:
 
             self.limit = self.limit + 1
             self._index=self.limit -1 # self.set_current(self.limit-1)
-            item=self.items[self._index]
-            if connect:
-                res=False
-                try:
-                    await self.items[self._index].connect(max_retry=max_retry,timeout=timeout)
-                    res = self.items[self._index].connected
-                except Exception as e:
-                    print(e)
-
-                if res:
-                    self.webapp.print_statuslog("BoldTag {} connected!".format(self.items[self._index].address))
-                else:
-                    self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.items[self._index].address))
-                # msg="BoldTag {} Added and connected".format(device.address)
-                # print(msg)
-                # if (self.webapp is not None): self.webapp.print_statuslog(msg)
-            else:
-                msg="BoldTag {} Added fail to connect".format(device.address)
-                print(msg)
-                if (self.webapp is not None): self.webapp.print_statuslog(msg)
+            # item=self.items[self._index]
+            res=self._index
+            # if connect:
+            #     res=False
+            #     try:
+            #         await self.items[self._index].connect(max_retry=max_retry,timeout=timeout)
+            #         res = self.items[self._index].connected
+            #     except Exception as e:
+            #         print(e)
+            #
+            #     if res:
+            #         self.webapp.print_statuslog("BoldTag {} connected!".format(self.items[self._index].address))
+            #     else:
+            #         self.webapp.print_statuslog("BoldTag {} fail to connect".format(self.items[self._index].address))
+            #     # msg="BoldTag {} Added and connected".format(device.address)
+            #     # print(msg)
+            #     # if (self.webapp is not None): self.webapp.print_statuslog(msg)
+            # else:
+            #     msg="BoldTag {} Added fail to connect".format(device.address)
+            #     print(msg)
+            #     if (self.webapp is not None): self.webapp.print_statuslog(msg)
         except Exception as e:
             print(e)
             msg = "BoldTag {} error: {} ".format(device.address, e)
             if (self.webapp is not None): self.webapp.print_statuslog(msg)
-        return item
+        return res
 
     async def dicconnect_and_remove(self, index=None):
         if index is None:
@@ -925,12 +963,13 @@ class boldtag:
     def find_tag(self, address):#, set_current=True):
         try:
             res=-1
-            index=[x for x in range(len(self.items)) if self.items[x].address==address]
-            if len(index)>0:
-                index=index[0]
-                # if set_current:
-                #     self.set_current(index)
-                res= index
+            if self.limit>0:
+                index=[x for x in range(len(self.items)) if self.items[x].address==address]
+                if len(index)>0:
+                    index=index[0]
+                    # if set_current:
+                    #     self.set_current(index)
+                    res= index
         except Exception as e:
             print(e)
         return res
@@ -938,12 +977,13 @@ class boldtag:
     def get_tag_by_address(self, address):#, set_current=True):
         try:
             res=None
-            index=[x for x in range(len(self.items)) if self.items[x].address==address]
-            if len(index)>0:
-                index=index[0]
-                # if set_current:
-                #     self.set_current(index)
-                return self.items[index]
+            if self.limit > 0:
+                index=[x for x in range(len(self.items)) if self.items[x].address==address]
+                if len(index)>0:
+                    index=index[0]
+                    # if set_current:
+                    #     self.set_current(index)
+                    return self.items[index]
         except Exception as e:
             print(e)
         return res
@@ -957,16 +997,16 @@ class boldtag:
             print(e)
         return res
 
-    async def connect(self,index, max_retry=3,timeout=15):
-        # tag=self.get_tag_by_index(index)
-        # if tag is not None:
-        res=False
-        try:
-            tag=self.get_tag_by_index(index)
-            res=await tag.connect(max_retry=max_retry,timeout=15)
-        except Exception as e:
-            print(e)
-        return res
+    # async def connect(self,index, max_retry=3,timeout=15):
+    #     # tag=self.get_tag_by_index(index)
+    #     # if tag is not None:
+    #     res=False
+    #     try:
+    #         tag=self.get_tag_by_index(index)
+    #         res=await tag.connect(max_retry=max_retry,timeout=15)
+    #     except Exception as e:
+    #         print(e)
+    #     return res
 
 class gatewaydb:
     # csv_row = {"mac": "", "name": "", "tag_id": "", "asset_id": "", "certificate_id": "", "type": "",
@@ -1116,8 +1156,10 @@ class boldscanner:
         self.rssi_tag_scan = {}
 
         self.tags = boldtag(self.scanner_param, self.webapp, self.rssi_tag_scan,self.directory)
-
+        self.tag_devices=[]
         self.scanner_param["serv_uuid_Custom_Service"] = self.tags.serv_uuid_Custom_Service
+
+
 
 
     def get_rssi_host_scan(self):
@@ -1183,6 +1225,69 @@ class boldscanner:
         except Exception as e:
             print(f'error in device_found {e}')
 
+    def tags_connected(self):
+        try:
+            tags=[]
+            if self.tags.limit>0:
+                for i in range(self.tags.limit):
+                    tag= self.tags.get_tag_by_index(i)
+                    if tag is not None:
+                        if tag.connected:
+                            tags.append(tag.address)
+        except Exception as e:
+            print(f'error in tags_connected {e}')
+        return tags
+
+    def all_connected(self):
+        try:
+            res=True
+            if self.tags.limit>0:
+                for i in range(self.tags.limit):
+                    tag= self.tags.get_tag_by_index(i)
+                    if tag is not None:
+                        if not tag.connected:
+                            res=False
+                    else:
+                        res=False
+        except Exception as e:
+            print(f'error in tags_connected {e}')
+        return res
+
+
+    async def check_and_reconect(self,devprocessed, nRetries=4,max_retry=1, timeout=15):
+        try:
+            webcancelprocess = False
+            if (self.tags.limit > 0):
+                try:
+                    # res_conn={}
+                    ncount = 0
+                    while ncount < nRetries:
+                        ncount = ncount + 1
+                        for tag in self.tags.items:  # tag_found:
+                            if tag.address not in devprocessed:
+                                res = await self.connect(index=tag.index, max_retry=max_retry, timeout=timeout)
+                                # res=x.connected
+                                # res=await bscanner.tags.connect(max_retry=1, index=x.index, timeout=5)
+                                if self.app.webcancel:
+                                    webcancelprocess = True
+                                    break
+                                # res_conn[x.address] = res
+                            # else:
+                            # res_conn[x.address]=True
+
+                        if self.app.webcancel:
+                            webcancelprocess = True
+                            break
+                        # if (all([res_conn[x] for x in res_conn.keys()]) and len(res_conn.keys())==bscanner.tags.limit): break
+                        if self.all_connected():
+                            break
+                except Exception as e:
+                    print(e)
+        except Exception as e:
+            print(e)
+        return webcancelprocess
+
+    #multiple retris is possible if there is multiple BLE connectors, otehrwise the deices are disconnected!!!
     async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[]):
         nscan = 0
         new_tags=[]
@@ -1192,26 +1297,40 @@ class boldscanner:
             try:
                 nscan=nscan+1
                 #scanner = BleakScanner()
-                devices = await self.scanner.discover()
+                if self.tags.limit==0:
+                    devices = await self.scanner.discover()
+                else:
+                    devices=self.tag_devices
                 for device in devices:
                     if self.webapp.webcancel: break
                     if device.name is not None:
                         try:
                             if device.name.startswith("BoldTag"):
+                                if device not in self.tag_devices:
+                                    self.tag_devices.append(device)
+
                                 if not (device.address in scan_mac_banned) and (device.address in scan_mac_filter_address or len(scan_mac_filter_address)==0) :
+
                                     if (self.webapp is not None): self.webapp.print_statuslog("BoldTag  found {}".format(device.address))
                                     ix=self.tags.find_tag(device.address)
+
                                     if ix==-1:
-                                        await self.tags.new(connect=connect, device=device,max_retry=max_retry)
+                                        ix=await self.tags.new( device=device)#,max_retry=max_retry)
+                                        if connect:
+                                            await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
                                         new_tags.append(device.address)
+
                                         filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
                                         if filterout: break
+
                                     else:
                                         # self.tags.set_current(ix)
                                         # tag=self.tags.get_tag_by_index(ix)
                                         if connect:
                                             # await self.tags.connect(max_retry=max_retry)
-                                            await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
+                                            # await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
+                                            await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
+
                                         existing_tags.append(device.address)
                                 else:
                                     if (self.webapp is not None and device.address in scan_mac_banned): self.webapp.print_statuslog(
@@ -1225,6 +1344,82 @@ class boldscanner:
             except Exception as e:
                 print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
+
+    async def connect(self,index, max_retry=3, timeout=15):
+        # res_scan=True
+        # if index is not None:
+        #     res_scan=self.set_current(index)
+        # res=False
+        # if res_scan:
+        ncount = 0
+
+        error = False
+
+        try:
+            tag = self.tags.get_tag_by_index(index)
+            res=False
+            # if self.client  is not None:
+            #     try:
+            #         res=await self.client.is_connected()
+            #     except Exception as e:
+            #         print(e)
+            #         res=False
+            #         error=True
+            #
+            # if error == True:
+            #     try:
+            #         self.client.disconnect()
+            #         self.client=None
+            #     except Exception as e:
+            #         print(e)
+
+            # if type(e) is  bleak.exc.BleakDeviceNotFoundError: type(e) is OSError  e.strerror=="The object has been closed"
+
+            if tag is not None:
+                res = tag.connected
+                error = tag.error
+                if error is not None:
+                    if type(error) is OSError:
+                        if error.strerror == "The object has been closed":
+                            self.tags.dicconnect_and_remove(tag.index)
+                            device=tag.device
+                            ix = await self.tags.new(device=device)  # ,max_retry=max_retry)
+                            await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
+
+                    elif type(error) is  bleak.exc.BleakDeviceNotFoundError:
+                        pass
+                    tag.error=None
+
+                while res != True and ncount < max_retry   :  # and self.connect_retries<self.max_connect_retries:
+                    print("connecting to {} retry:{}".format(tag.address, ncount))
+                    ncount = ncount + 1
+                    try:
+                        tag.connect_retries = tag.connect_retries + 1
+                        # await asyncio.wait_for(self.client.connect(), timeout=timeout)
+                        res = await tag.client.connect()
+                        tag.connected = res
+                        if res:
+                            self.webapp.print_statuslog("BoldTag {} connected!".format(tag.address))
+                        else:
+                            self.webapp.print_statuslog("BoldTag {} fail to connect".format(tag.address))
+                    except Exception as e:
+                        print(e)
+                        self.webapp.print_statuslog("BoldTag {} dormant - {}".format(tag.address, e))
+
+                    if tag.connected:
+                        print("BoldTag {} gathering services".format(tag.address))
+                        svcs = await tag.client.get_services()
+                        for service_1 in svcs:
+                            # if service_1.uuid==serv_uuid_Throughput_Test_Service_uuid:
+                            if service_1.uuid == tag.scanner_param["serv_uuid_Custom_Service"]:
+                                tag.set_custom_service(service_1)
+                                break
+                        # self.update_current()
+
+        except Exception as e:
+            print(e)
+            self.webapp.print_statuslog("Connection error for BoldTag  {} ".format(self.address))
+        return res
 
     def totaltags(self):
         return self.tags.limit

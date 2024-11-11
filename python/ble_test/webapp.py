@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-import certgen_py
+# import certgen_py
 
 import logging
 
@@ -1414,8 +1414,8 @@ operation="None"
 rssi_tag_scan= {}
 start_init=None
 
-localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
-#localpath="c:\\tgspoc\\"
+# localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 # page_datatype_selected=""

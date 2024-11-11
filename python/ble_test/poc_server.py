@@ -89,7 +89,7 @@ wait_for_mqtt_angles=True          #if False set CTE_Wait_Time to enough tiome f
 CTE_Wait_Time_posscan=20            #>1 if CTE_Wait_Time=1 to give time to the last tag
 CTE_Wait_Time_prescan=55            # >5 if : Only necessary of server is not always on
 actions_filter=["READ","LOCATION","UPDATE"]
-discover_rssi=True
+discover_rssi=False
 scan_mac_filter=[]#["0C4314F46DA1"]
 page_configuration="page_configuration"
 update_mac_filter=[]
@@ -1542,6 +1542,8 @@ async def main():
                 if action == "READ" or action == "UPDATE":
                     if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
                         try:
+                            #TODO implement when multiple BLE adapters are implemented , otherwise multople scans wull disconnect connected devicesin previous scanns
+                            scan_max_scans=1
                             new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans, max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address)
                         except Exception as e:
                             print(e)
@@ -1560,37 +1562,37 @@ async def main():
                         #         await asyncio.gather(*tasks)
                         # except Exception as e:
                         #     print(e)
-                try:
-                    # tag_found = [x for x in bscanner.tags.items]
-                    if (bscanner.tags.limit>0):
-                        try:
-                            # res_conn={}
-                            ncount=0
-                            while ncount<4:
-                                ncount=ncount+1
-                                for tag in bscanner.tags.items: #tag_found:
-                                    if tag.address not in devprocessed:
-                                        res=await tag.connect(max_retry=1,timeout=5)
-                                        # res=x.connected
-                                        # res=await bscanner.tags.connect(max_retry=1, index=x.index, timeout=5)
-                                        if app.webcancel:
-                                            webcancelprocess = True
-                                            break
-                                        # res_conn[x.address] = res
-                                    # else:
-                                        # res_conn[x.address]=True
-
-                                if app.webcancel:
-                                    webcancelprocess = True
-                                    break
-                                # if (all([res_conn[x] for x in res_conn.keys()]) and len(res_conn.keys())==bscanner.tags.limit): break
-                                if bscanner.tags.all_connected():
-                                    break
-                        except Exception as e:
-                            print(e)
-                except Exception as e:
-                    print(e)
-
+                # try:
+                #     # tag_found = [x for x in bscanner.tags.items]
+                #     if (bscanner.tags.limit>0):
+                #         try:
+                #             # res_conn={}
+                #             ncount=0
+                #             while ncount<4:
+                #                 ncount=ncount+1
+                #                 for tag in bscanner.tags.items: #tag_found:
+                #                     if tag.address not in devprocessed:
+                #                         res=await tag.connect(max_retry=1,timeout=15)
+                #                         # res=x.connected
+                #                         # res=await bscanner.tags.connect(max_retry=1, index=x.index, timeout=5)
+                #                         if app.webcancel:
+                #                             webcancelprocess = True
+                #                             break
+                #                         # res_conn[x.address] = res
+                #                     # else:
+                #                         # res_conn[x.address]=True
+                #
+                #                 if app.webcancel:
+                #                     webcancelprocess = True
+                #                     break
+                #                 # if (all([res_conn[x] for x in res_conn.keys()]) and len(res_conn.keys())==bscanner.tags.limit): break
+                #                 if bscanner.all_connected():
+                #                     break
+                #         except Exception as e:
+                #             print(e)
+                # except Exception as e:
+                #     print(e)
+                webcancelprocess=await bscanner.check_and_reconect(devprocessed, nRetries=4, max_retry=1, timeout=15)
                 if app.webcancel:
                     webcancelprocess = True
                     break
@@ -1612,21 +1614,22 @@ async def main():
                 devices_filter = list(set(devices_filter))
 
                 devices_filter_mac = [ x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in devices_filter]
-                devices_filtered=[]
+                devices_connected=[]
+                if bscanner.tags.limit > 0:
+                    devices_connected = bscanner.tags_connected()
                 if len(devices_filter) > 0:
-                    # devices_filtered = [x for x in [x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                   #devices_filtered = [x for x in[x if ((x.address in devices_filter_mac) and (x.name == "BoldTag")) else "" for x in bscanner.tags] if x != ""]
-                    devices_filtered = [x for x in bscanner.tags.items if x.connected and x.address in devices_filter_mac]
+                    # devices_filtered = [x for x in bscanner.tags.items if x.connected and x.address in devices_filter_mac]
+                    devices_filtered = [address for address in devices_connected if address in devices_filter_mac]
                 else:
-                    # devices_filtered = [x for x in [x if ((x.name == "BoldTag")) else "" for x in devices] if x != ""]
-                    devices_filtered = [x for x in bscanner.tags.items if x.client.is_connected()] #[x for x in [x if ((x.name == "BoldTag")) else "" for x in bscanner.tags] if x != "" and x.connected]
+                    devices_filtered=devices_connected
+                    # devices_filtered = [x for x in bscanner.tags.items if x.connected] #[x for x in [x if ((x.name == "BoldTag")) else "" for x in bscanner.tags] if x != "" and x.connected]
                 totaldevices = len(devices_filtered)
-                for d in devices_filtered:
-                    # if KeyValueCoding.getKey(d.details, 'name') == 'awesomecoolphone':
+                for address in devices_filtered:
+                    d=bscanner.tags.get_tag_by_address(address)
                     if app.webcancel:
                         webcancelprocess = True
                         break
-                    addressdetected = [x for x in list(set([x.address if x.name == "BoldTag" else "" for x in bscanner.tags])) if x != ""]
+                    addressdetected = [x for x in list(set([x.address if x.name == "BoldTag" else "" for x in bscanner.tags.items])) if x != ""]
                     #All detected devices were already processed - break
                     if sum([1 if x in devprocessed else 0 for x in addressdetected]) == len(addressdetected):
                         break
@@ -1714,10 +1717,10 @@ async def main():
                                             try:
                                                 scannaddress.append(d.address)
                                                 devprocessed.append(address)
-                                                ix = bscanner.tags.find_tag(address)
-                                                if (ix>=0):
+                                                # ix = bscanner.tags.find_tag(address)
+                                                if (d.connected):
                                                     # bscanner.tags.set_current(ix)
-                                                    res=await bscanner.tags.get_tag_by_address(address).tag_functions(action=action,uuid_filter_id=None,
+                                                    res=await d.tag_functions(action=action,uuid_filter_id=None,
                                                                                 uuid_data_type_filter=uuid_data_type_filter,
                                                                                 init_location=init_location,dfupdate=dfupdate,
                                                                                 keep_connected=True,csv_read_data=csv_read_data,
@@ -1743,9 +1746,9 @@ async def main():
                     else:
                         print("..")
                         #pass
-                print("Loop {0} devices_filtered={1}".format(nscan, [x.address for x in devices_filtered]))
+                print("Loop {0} devices_filtered={1}".format(nscan, devices_filtered))
                 print("Next Loop {0} devcount={1}".format(nscan, devcount))
-                app.print_statuslog("Next Loop {0} devices_filtered={1}".format(nscan, [x.address for x in devices_filtered]))
+                app.print_statuslog("Next Loop {0} devices_filtered={1}".format(nscan, devices_filtered))
                 app.print_statuslog("Next Loop {0} devcount={1}".format(nscan, devcount))
                 scannaddress_trim=[x.replace(":", "") for x in scannaddress]
                 if app.webcancel:
