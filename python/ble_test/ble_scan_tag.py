@@ -152,9 +152,15 @@ class ble_tag:
                     self.char_uuid[ix]["NFC"]=True
         except Exception as e:
             print(e)
+
+        self.set_client()
+        # self.client = BleakClient(self.address)
+        # self.client.set_disconnected_callback(self.handle_disconnect)
+
+    def set_client(self):
         self.client = BleakClient(self.address)
         self.client.set_disconnected_callback(self.handle_disconnect)
-
+        self.connected=False
     def set_custom_service(self,custom_service):
         self.custom_service=custom_service
 
@@ -513,7 +519,10 @@ class ble_tag:
                                             "error at param_enable_disable_tags address:{} ".format(address, ))
                                         print("error at param_enable_disable_tags address:{}".format(address,))
                                         print(e)
-
+                                if result:
+                                    csv_row_new["status"]="read"
+                                else:
+                                    csv_row_new["status"]="read error"
                                 self.csv_row_previous = self.csv_row_last.copy()
                                 csv_row_new_crc = self.gatewaydb.generate_crc32(csv_row_new)
                                 if csv_row_new_crc is None:
@@ -1345,35 +1354,23 @@ class boldscanner:
                 print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
 
+    async def redo_tag(self,tag):
+        try:
+            await tag.client.disconnect()
+            tag.set_client()
+            # device=tag.device
+            # index = await self.tags.new(device=device)  # ,max_retry=max_retry)
+            # tag = self.tags.get_tag_by_index(index)
+            # res = False
+        except Exception as e:
+            print(e)
+
     async def connect(self,index, max_retry=3, timeout=15):
-        # res_scan=True
-        # if index is not None:
-        #     res_scan=self.set_current(index)
-        # res=False
-        # if res_scan:
+
         ncount = 0
-
-        error = False
-
         try:
             tag = self.tags.get_tag_by_index(index)
             res=False
-            # if self.client  is not None:
-            #     try:
-            #         res=await self.client.is_connected()
-            #     except Exception as e:
-            #         print(e)
-            #         res=False
-            #         error=True
-            #
-            # if error == True:
-            #     try:
-            #         self.client.disconnect()
-            #         self.client=None
-            #     except Exception as e:
-            #         print(e)
-
-            # if type(e) is  bleak.exc.BleakDeviceNotFoundError: type(e) is OSError  e.strerror=="The object has been closed"
 
             if tag is not None:
                 res = tag.connected
@@ -1381,13 +1378,15 @@ class boldscanner:
                 if error is not None:
                     if type(error) is OSError:
                         if error.strerror == "The object has been closed":
-                            self.tags.dicconnect_and_remove(tag.index)
-                            device=tag.device
-                            ix = await self.tags.new(device=device)  # ,max_retry=max_retry)
-                            await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
-
+                            await self.redo_tag(tag)
+                            res = False
                     elif type(error) is  bleak.exc.BleakDeviceNotFoundError:
-                        pass
+                        await self.redo_tag(tag)
+                        res = False
+                    elif type(error) is bleak.exc.BleakError:
+                        if error.args[0]=='Not connected':
+                            await self.redo_tag(tag)
+                            res = False
                     tag.error=None
 
                 while res != True and ncount < max_retry   :  # and self.connect_retries<self.max_connect_retries:
@@ -1404,6 +1403,7 @@ class boldscanner:
                             self.webapp.print_statuslog("BoldTag {} fail to connect".format(tag.address))
                     except Exception as e:
                         print(e)
+                        tag.error=e
                         self.webapp.print_statuslog("BoldTag {} dormant - {}".format(tag.address, e))
 
                     if tag.connected:

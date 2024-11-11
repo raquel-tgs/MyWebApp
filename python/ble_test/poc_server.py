@@ -1919,7 +1919,7 @@ async def main():
                         df = pd.DataFrame(csv_read_data)
                     else:
                         df = pd.DataFrame(csv_read_data)
-                    if df.shape[0]>0 :df["status"]="read"
+                    # if df.shape[0]>0 :df["status"]="read"
 
                     #x and y always the last rows
                     cols = [x for x in list(df.columns) if x not in ["x", "y"]]
@@ -1994,7 +1994,7 @@ async def main():
                     print(e)
             else:
                 scan_control = {"tag_re_scan": [], "scan": 0, "redo_scan": False, "scan_loop": 0}
-                if len(scan_mac_filter) == 0 or True:#TODO to check!!!!!!
+                if len(scan_mac_filter) == 0 or  param_keep_data:
                     if os.path.exists(file_path_lastscan):
                         try:
                             try:
@@ -2018,10 +2018,22 @@ async def main():
                     #mark as not read
                     if os.path.exists(file_path):
                         df = pd.read_csv(file_path)
-                        webcancelprocess=True
+                        # webcancelprocess=True
                         if df.shape[0]>0:
-                            df["status"]="not read"
+                            if len(scan_mac_filter)>0:
+                                ix = df["mac"].isin(scan_mac_filter)
+                                df.loc[ix, "status"] = "not read"
+                            else:
+                                df["status"] = "not read"
                             df.to_csv(file_path, index=False)
+                    else:
+                        pd.DataFrame(columns=app.scan_columnIds).to_csv(file_path, index=False)
+                        df.to_csv(file_path, index=False)
+                else:
+                    #remove records, nothing found
+                    pd.DataFrame(columns=app.scan_columnIds).to_csv(file_path, index=False)
+                    df.to_csv(file_path, index=False)
+                    # webcancelprocess = True
 
         if webcancelprocess or app.webcancel :
             app.webcancel=False
