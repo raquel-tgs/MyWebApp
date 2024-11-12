@@ -14,7 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
-# import certgen_py
+import certgen_py
 
 import logging
 

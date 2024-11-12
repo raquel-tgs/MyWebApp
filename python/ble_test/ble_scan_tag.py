@@ -734,6 +734,8 @@ class ble_tag:
 
                                 if tag_updated:
                                     try:
+                                        #Wait for the NFC to write
+                                        time.sleep(5)
                                         newval=1
                                         char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
                                         char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
@@ -1264,7 +1266,7 @@ class boldscanner:
         return res
 
 
-    async def check_and_reconect(self,devprocessed, nRetries=4,max_retry=1, timeout=15):
+    async def check_and_reconect(self,devprocessed, nRetries=4,max_retry=1, timeout=15,scan_mac_filter_address=[]):
         try:
             webcancelprocess = False
             if (self.tags.limit > 0):
@@ -1274,18 +1276,18 @@ class boldscanner:
                     while ncount < nRetries:
                         ncount = ncount + 1
                         for tag in self.tags.items:  # tag_found:
-                            if tag.address not in devprocessed:
+                            if tag.address not in devprocessed and (tag.address in scan_mac_filter_address or len(scan_mac_filter_address)==0):
                                 res = await self.connect(index=tag.index, max_retry=max_retry, timeout=timeout)
                                 # res=x.connected
                                 # res=await bscanner.tags.connect(max_retry=1, index=x.index, timeout=5)
-                                if self.app.webcancel:
+                                if self.webapp.webcancel:
                                     webcancelprocess = True
                                     break
                                 # res_conn[x.address] = res
                             # else:
                             # res_conn[x.address]=True
 
-                        if self.app.webcancel:
+                        if self.webapp.webcancel:
                             webcancelprocess = True
                             break
                         # if (all([res_conn[x] for x in res_conn.keys()]) and len(res_conn.keys())==bscanner.tags.limit): break
@@ -1372,7 +1374,7 @@ class boldscanner:
         except Exception as e:
             print(e)
 
-    async def connect(self,index, max_retry=3, timeout=15):
+    async def connect(self,index, max_retry=3, timeout=25):
 
         ncount = 0
         try:
@@ -1404,7 +1406,7 @@ class boldscanner:
                     self.webapp.print_statuslog("connecting to {} retry:{}".format(tag.address, ncount))
                     try:
                         tag.connect_retries = tag.connect_retries + 1
-                        # await asyncio.wait_for(self.client.connect(), timeout=timeout)
+                        # res=await asyncio.wait_for(tag.client.connect(), timeout=timeout)
                         res = await tag.client.connect()
                         tag.connected = res
                         if res:

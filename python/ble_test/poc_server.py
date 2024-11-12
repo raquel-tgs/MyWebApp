@@ -1524,12 +1524,12 @@ async def main():
                 param_scan_new_tags= scan_parameters["scan_new_tags"]
                 param_enable_disable_tags= scan_parameters["enable_disable_tags"]
 
-                scan_max_retry= scan_parameters["scan_max_retry"]
+                scan_max_retry= scan_parameters["maximum_retries"]
                 scan_max_scans= scan_parameters["scan_max_scans"]
                 connect_max_retry= scan_parameters["connect_max_retry"]
                 connect_timeout= scan_parameters["connect_timeout"]
                 max_BoldTags= scan_parameters["max_BoldTags"]
-                timeout_scanner= scan_parameters["timeout_scanner"]
+                timeout_scanner= 15 #scan_parameters["timeout_scanner"]
             while (nscan < MaxScan and len(scannaddress) <MaxTags and not (sum([0 if x in scannaddress_trim else 1 for x in startCTE_address_filter])==0 and len(startCTE_address_filter)>0)
                    and not (sum([0 if x in scannaddress_trim else 1 for x in scan_mac_filter])==0 and len(scan_mac_filter)>0) #not ((len(scan_mac_filter)>0) and (len(scannaddress)==len(scan_mac_filter)))
                     and not (sum([0 if x in scannaddress_trim else 1 for x in update_mac_filter])==0 and len(update_mac_filter)>0)):  #((len(update_mac_filter)>0) and (len(scannaddress)==len(update_mac_filter)))):
@@ -1544,9 +1544,14 @@ async def main():
                         try:
                             #TODO implement when multiple BLE adapters are implemented , otherwise multople scans wull disconnect connected devicesin previous scanns
                             scan_max_scans=1
+                            scan_max_retry=1
+                            timeout_scanner=15
+                            scan_mac_banned=[]
+                            max_BoldTags=10000
+                            connect_timeout=25
                             new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans,
                                                                             max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address,
-                                                                            timeout_scanner=timeout_scanner)
+                                                                            timeout_scanner=timeout_scanner,timeout=connect_timeout)
                         except Exception as e:
                             print(e)
 
@@ -1594,7 +1599,7 @@ async def main():
                 #             print(e)
                 # except Exception as e:
                 #     print(e)
-                webcancelprocess=await bscanner.check_and_reconect(devprocessed, nRetries=4, max_retry=1, timeout=15)
+                webcancelprocess=await bscanner.check_and_reconect(devprocessed, nRetries=4, max_retry=1, timeout=15,scan_mac_filter_address=scan_mac_filter_address)
                 if app.webcancel:
                     webcancelprocess = True
                     break
