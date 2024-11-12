@@ -1298,7 +1298,7 @@ class boldscanner:
         return webcancelprocess
 
     #multiple retris is possible if there is multiple BLE connectors, otehrwise the deices are disconnected!!!
-    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[]):
+    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[],timeout_scanner=20):
         nscan = 0
         new_tags=[]
         existing_tags=[]
@@ -1308,7 +1308,10 @@ class boldscanner:
                 nscan=nscan+1
                 #scanner = BleakScanner()
                 if self.tags.limit==0:
-                    devices = await self.scanner.discover()
+                    self.webapp.print_statuslog("Starting discovering...")
+                    devices = await self.scanner.discover(timeout=timeout_scanner)
+                    self.webapp.print_statuslog("Finishing discovering...")
+                    self.webapp.print_statuslog("Starting filtering BoldTags...")
                 else:
                     devices=self.tag_devices
                 for device in devices:
@@ -1325,8 +1328,10 @@ class boldscanner:
                                     ix=self.tags.find_tag(device.address)
 
                                     if ix==-1:
+                                        self.webapp.print_statuslog("New BoldTags Found {} adding..".format(device.address))
                                         ix=await self.tags.new( device=device)#,max_retry=max_retry)
                                         if connect:
+                                            self.webapp.print_statuslog("Trying to connect to {}..".format(device.address))
                                             await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
                                         new_tags.append(device.address)
 
@@ -1337,6 +1342,7 @@ class boldscanner:
                                         # self.tags.set_current(ix)
                                         # tag=self.tags.get_tag_by_index(ix)
                                         if connect:
+                                            self.webapp.print_statuslog("Checking connection status for {}..".format(device.address))
                                             # await self.tags.connect(max_retry=max_retry)
                                             # await self.tags.connect(index=ix,max_retry=max_retry,timeout=timeout)
                                             await self.connect(index=ix, max_retry=max_retry, timeout=timeout)
@@ -1376,23 +1382,26 @@ class boldscanner:
             if tag is not None:
                 res = tag.connected
                 error = tag.error
-                if error is not None:
-                    if type(error) is OSError:
-                        if error.strerror == "The object has been closed":
+                while res != True and ncount < max_retry:  # and self.connect_retries<self.max_connect_retries:
+                    if error is not None:
+                        self.webapp.print_statuslog("Redoing connection for {} ".format(tag.address))
+                        if type(error) is OSError:
+                            if error.strerror == "The object has been closed":
+                                await self.redo_tag(tag)
+                                res = False
+                        elif type(error) is  bleak.exc.BleakDeviceNotFoundError:
                             await self.redo_tag(tag)
                             res = False
-                    elif type(error) is  bleak.exc.BleakDeviceNotFoundError:
-                        await self.redo_tag(tag)
-                        res = False
-                    elif type(error) is bleak.exc.BleakError:
-                        if error.args[0]=='Not connected':
-                            await self.redo_tag(tag)
-                            res = False
-                    tag.error=None
+                        elif type(error) is bleak.exc.BleakError:
+                            if error.args[0]=='Not connected':
+                                await self.redo_tag(tag)
+                                res = False
+                        tag.error=None
 
-                while res != True and ncount < max_retry   :  # and self.connect_retries<self.max_connect_retries:
-                    print("connecting to {} retry:{}".format(tag.address, ncount))
+                # while res != True and ncount < max_retry   :  # and self.connect_retries<self.max_connect_retries:
                     ncount = ncount + 1
+                    print("connecting to {} retry:{}".format(tag.address, ncount))
+                    self.webapp.print_statuslog("connecting to {} retry:{}".format(tag.address, ncount))
                     try:
                         tag.connect_retries = tag.connect_retries + 1
                         # await asyncio.wait_for(self.client.connect(), timeout=timeout)

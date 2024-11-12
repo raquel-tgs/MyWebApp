@@ -62,6 +62,11 @@
       <input type="number" id="maximum_retries" min="1">
     </label><br><br>
 
+    <label>
+      Maximum Retries:
+      <input type="number" id="timeout_scanner" min="1">
+    </label><br><br>
+
     <!-- Save button to submit data -->
     <button type="button" onclick="saveConfig()">Save</button>
     <button class="closebtn" onclick="window.close()">Close Window</button>
@@ -77,6 +82,7 @@
           document.getElementById("keep_data").checked = data.keep_data;
           document.getElementById("scan_new_tags").checked = data.scan_new_tags;
           document.getElementById("maximum_retries").value = data.maximum_retries;
+          document.getElementById("timeout_scanner").value = data.timeout_scanner;
 
           document.getElementById("scan_max_scans").value = data.scan_max_scans;
           document.getElementById("connect_max_retry").value = data.connect_max_retry;
@@ -101,6 +107,7 @@
       const scanNewTags = document.getElementById("scan_new_tags").checked;
       const enable_disable_tags = document.querySelector('input[name="enable_disable_tags"]:checked').value;
       const maximumRetries = parseInt(document.getElementById("maximum_retries").value, 10);
+      const timeout_scanner = parseInt(document.getElementById("timeout_scanner").value, 15);
 
       const scan_max_scans = parseInt(document.getElementById("scan_max_scans").value, 3);
       const connect_max_retry = parseInt(document.getElementById("connect_max_retry").value, 3);
@@ -114,6 +121,7 @@
         scan_new_tags: scanNewTags,
         enable_disable_tags: enable_disable_tags,
         maximum_retries: maximumRetries,
+        timeout_scanner: timeout_scanner,
 
         scan_max_scans: scan_max_scans,
         connect_max_retry: connect_max_retry,

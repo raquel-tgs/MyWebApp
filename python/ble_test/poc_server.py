@@ -1529,7 +1529,7 @@ async def main():
                 connect_max_retry= scan_parameters["connect_max_retry"]
                 connect_timeout= scan_parameters["connect_timeout"]
                 max_BoldTags= scan_parameters["max_BoldTags"]
-
+                timeout_scanner= scan_parameters["timeout_scanner"]
             while (nscan < MaxScan and len(scannaddress) <MaxTags and not (sum([0 if x in scannaddress_trim else 1 for x in startCTE_address_filter])==0 and len(startCTE_address_filter)>0)
                    and not (sum([0 if x in scannaddress_trim else 1 for x in scan_mac_filter])==0 and len(scan_mac_filter)>0) #not ((len(scan_mac_filter)>0) and (len(scannaddress)==len(scan_mac_filter)))
                     and not (sum([0 if x in scannaddress_trim else 1 for x in update_mac_filter])==0 and len(update_mac_filter)>0)):  #((len(update_mac_filter)>0) and (len(scannaddress)==len(update_mac_filter)))):
@@ -1544,7 +1544,9 @@ async def main():
                         try:
                             #TODO implement when multiple BLE adapters are implemented , otherwise multople scans wull disconnect connected devicesin previous scanns
                             scan_max_scans=1
-                            new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans, max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address)
+                            new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans,
+                                                                            max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address,
+                                                                            timeout_scanner=timeout_scanner)
                         except Exception as e:
                             print(e)
 
@@ -2013,7 +2015,7 @@ async def main():
                     else:
                         print(f"File '{file_path_lastscan}' does not exist.")
                         # pd.DataFrame(columns=scan_columnIds).to_csv(file_path, index=False)
-                        pd.DataFrame(columns=app.scan_columnIds).to_csv(file_path, index=False)
+                        pd.DataFrame(columns=app.columnIds).to_csv(file_path, index=False)
 
                     #mark as not read
                     if os.path.exists(file_path):

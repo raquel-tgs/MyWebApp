@@ -872,6 +872,8 @@ def page_data_scan():
 
 @app.route("/api/buttons/new", methods=[ 'POST'])
 def buttons_web():
+    global modalOpen
+    modalOpen=True
     print(request.method)
     interphase=request.referrer[len(request.host_url):]
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
@@ -896,9 +898,9 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     global updatedix
     global page_selected
     global dfilter_back
-    global modalOpen
+    # global modalOpen
 
-    modalOpen=True
+    # modalOpen=True
     semaphore=True
     page_selected=interphase #"page_configuration_configuration"
     try:
@@ -1099,7 +1101,8 @@ def get_initial_config():
         "scan_max_scans": scan_parameters["scan_max_scans"],
         "connect_max_retry": scan_parameters["connect_max_retry"],
         "connect_timeout": scan_parameters["connect_timeout"],
-        "max_BoldTags": scan_parameters["max_BoldTags"]
+        "max_BoldTags": scan_parameters["max_BoldTags"],
+        "timeout_scanner": scan_parameters["timeout_scanner"]
     }
     return jsonify(initial_values)
 
@@ -1448,7 +1451,8 @@ columnIds_location = ['tag_mac', 'out_prob']
 location_cvs_columnIds=None
 location_cvs_row=None
 
-scan_parameters=scan_parameters={'enable_disable_tags': "none", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags': True,"scan_max_retry" :1, "scan_max_scans" : 3, "connect_max_retry":3,"connect_timeout":15, "max_BoldTags":2}
+scan_parameters=scan_parameters={'enable_disable_tags': "none", 'keep_data': True, 'maximum_retries': 3, 'scan_new_tags':
+    True,"scan_max_retry" :1, "scan_max_scans" : 3, "connect_max_retry":3,"connect_timeout":15, "max_BoldTags":2,"timeout_scanner":15}
 
 admin_username='Admin'
 admin_password='1234'
