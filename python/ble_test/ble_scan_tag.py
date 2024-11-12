@@ -735,35 +735,34 @@ class ble_tag:
                                 if tag_updated:
                                     try:
                                         #Wait for the NFC to write
-                                        time.sleep(5)
+                                        #TODO disable for the momento - NFC issues
+                                        #TODO must be implemented outsiude the update as takes time to update the NFC!!
                                         newval=1
-                                        char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
-                                        char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
-                                        newval = newval.to_bytes(char_uuid_end_transac_length, byteorder='big', signed=False)
-                                        res = await client.write_gatt_char(service.get_characteristic(char_uuid_end_transac), newval,response=True)
-                                        #dfupdate_read.loc[index_update, id_end_transac] = 0  # clear flag
-
-                                        if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
-
+                                        # char_uuid_end_transac = self.filter_db(id="end_transac")[0]["uuid"]
+                                        # char_uuid_end_transac_length= self.filter_db(id="end_transac")[0]["length"]
+                                        # newval = newval.to_bytes(char_uuid_end_transac_length, byteorder='big', signed=False)
+                                        # res = await client.write_gatt_char(service.get_characteristic(char_uuid_end_transac), newval,response=True)
+                                        # if (not error_update): dfupdate_read.loc[index_update, "status"] = "updated"
+                                        # TODO must be implemented outsiude the update as takes time to update the NFC!!
                                         #update crc
                                         id="ble_data_crc"
-                                        valread_raw =await self.readgatt(char_uuid_ble_data_crc) # await client.read_gatt_char(char_uuid_ble_data_crc)
-                                        if valread_raw is not None:
-                                            if type(valread_raw) is bytearray:
-                                                valread = bytes(valread_raw)
-                                            else:
-                                                pass
-                                        else:
-                                            valread = bytes(b'')
-
-                                        if type(valread) is bytes:
-                                            val = valread.decode('utf-8')
-                                        else:
-                                            val = str(valread)
-                                        #if id in list(dfupdate_read.columns): dfupdate_read.loc[index_update, id] = val
-                                        #dfupdate_read.loc[index_update, "end_transac"] = 0
-                                        self.ble_data_crc=val
-                                        dfupdate_read["ble_data_crc"][0] = val
+                                        # valread_raw =await self.readgatt(char_uuid_ble_data_crc) # await client.read_gatt_char(char_uuid_ble_data_crc)
+                                        # if valread_raw is not None:
+                                        #     if type(valread_raw) is bytearray:
+                                        #         valread = bytes(valread_raw)
+                                        #     else:
+                                        #         pass
+                                        # else:
+                                        #     valread = bytes(b'')
+                                        #
+                                        # if type(valread) is bytes:
+                                        #     val = valread.decode('utf-8')
+                                        # else:
+                                        #     val = str(valread)
+                                        # #if id in list(dfupdate_read.columns): dfupdate_read.loc[index_update, id] = val
+                                        # #dfupdate_read.loc[index_update, "end_transac"] = 0
+                                        # self.ble_data_crc=val
+                                        # dfupdate_read["ble_data_crc"][0] = val
                                     except Exception as e:
                                         print(e)
                                         if app is not None:  app.print_statuslog("Error {0}".format(e))
