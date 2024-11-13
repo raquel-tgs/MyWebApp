@@ -547,7 +547,7 @@ class ble_tag:
                             if not init_location:
                                 # Stop_collecting = False
                                 # datadf = {}
-                                janhors_processed = []
+                                #janhors_processed = []
                                 # datadf_pos = {}
                                 # datadf_corr = {}
                                 # jmpos_processed = []
@@ -1299,7 +1299,7 @@ class boldscanner:
         return webcancelprocess
 
     #multiple retris is possible if there is multiple BLE connectors, otehrwise the deices are disconnected!!!
-    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[],timeout_scanner=20):
+    async def scan_tags(self,connect=False, max_retry=1, max_scans=4,timeout=15,max_tags=0,scan_mac_banned=[],scan_mac_filter_address=[],timeout_scanner=20,param_scan_new_tags=True):
         nscan = 0
         new_tags=[]
         existing_tags=[]
@@ -1308,7 +1308,7 @@ class boldscanner:
             try:
                 nscan=nscan+1
                 #scanner = BleakScanner()
-                if self.tags.limit==0:
+                if (param_scan_new_tags and (nscan==1 or self.tags.limit==0)) or self.tags.limit==0:#self.tags.limit==0:
                     self.webapp.print_statuslog("Starting discovering...")
                     devices = await self.scanner.discover(timeout=timeout_scanner)
                     self.webapp.print_statuslog("Finishing discovering...")
@@ -1356,11 +1356,22 @@ class boldscanner:
                         except Exception as e:
                             print(e)
 
+
                 if filterout:break
+
 
             except Exception as e:
                 print(e)
         return {"new_tags":new_tags,"existing_tags":existing_tags}
+
+
+    async def doconnect(self, tag):
+        try:
+            res=False
+            res = await tag.client.connect()
+        except Exception as e:
+            print(e)
+        return res
 
     async def redo_tag(self,tag):
         try:
@@ -1402,11 +1413,11 @@ class boldscanner:
                 # while res != True and ncount < max_retry   :  # and self.connect_retries<self.max_connect_retries:
                     ncount = ncount + 1
                     print("connecting to {} retry:{}".format(tag.address, ncount))
-                    self.webapp.print_statuslog("connecting to {} retry:{}".format(tag.address, ncount))
+                    if (ncount>1) : self.webapp.print_statuslog("connecting to {} retry:{}".format(tag.address, ncount-1))
                     try:
                         tag.connect_retries = tag.connect_retries + 1
-                        # res=await asyncio.wait_for(tag.client.connect(), timeout=timeout)
-                        res = await tag.client.connect()
+                        #res=await asyncio.wait_for(tag.client.connect(), timeout=timeout)
+                        res=await self.doconnect(tag)
                         tag.connected = res
                         if res:
                             self.webapp.print_statuslog("BoldTag {} connected!".format(tag.address))

@@ -173,18 +173,18 @@ def generate_pdf(mac):
     tag = get_tag_by_mac(mac)
     #logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
     logo = './static/images/logo.jpg'
-    asset ='./static/images/rodpump.jpg'
+    asset ='./static/images/'+tag['tag_id']+'.jpg'
     sig = './static/images/signature.jpg'
     path = f'./static/certs/{mac.replace(":", "")}.pdf'
     try:
         pdf = certgen_py.Asset(
             company_name = tag['certification_company_name'],
             company_id = tag['certification_company_id'],
-            certificate_id = '1234', # tag['certificate_id'],
-            expiration_date = "2023-12-31", #tag['expiration_date'],
+            certificate_id = tag['certificate_id'], # tag['certificate_id'],
+            expiration_date =tag['expiration_date'],# "2023-12-31", #tag['expiration_date'],
             test_type = tag['test_type'],
             asset_id = tag['asset_id'],
-            asset_type = "Widget", #tag['asset_type']
+            asset_type =tag['type'],# "Widget", #tag['asset_type']
             logo = logo,
             asset_image = asset,
             signature = sig

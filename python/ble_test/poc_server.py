@@ -74,12 +74,12 @@ use_MQTT = True      #Set to True to start MQTT client
 
 Stop_collecting = True
 keep_mqtt_on = True
-disableCTE_duringlocation = True
-keepactive_all_CTE_during_location = False
+disableCTE_duringlocation = True #True
+keepactive_all_CTE_during_location = False #False
 keepCTE_ON_aftert_location = False
 startCTE=True
-startCTE_address_filter=[]#["0C4314F45C27","0C4314F46E7B"]
-discover_rssi_start=False
+startCTE_address_filter=[]#["0C:43:14:F4:6E:17"]#["0C4314F45C27","0C4314F46E7B"]
+discover_rssi_start=True
 
 scan_control={"tag_re_scan":[],"scan":0, "redo_scan":False, "scan_loop":0}
 MAX_RESCAN=2
@@ -713,10 +713,11 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
             address_00 = dfanchors[(dfanchors["x"] == 0) & (dfanchors["y"] == 0)]["index"].values[0]
             dataavg["dist_00"] = np.nan
             kix = dataavg[dataavg["anchor_mac"] == address_00].index
-            dfdist0 = dataavg.loc[kix].join(dfrssi_host.set_index("address"), how="left", on="tag_mac")
-            alpha=np.atan(gateway["x"]/gateway["y"])
-            betha=np.cos(np.radians(dfdist0["k_azimuth_mu"]))
-            if gateway["dist"]>0:
+            if dfrssi_host is not None :
+                dfdist0 = dataavg.loc[kix].join(dfrssi_host.set_index("address"), how="left", on="tag_mac")
+                alpha=np.atan(gateway["x"]/gateway["y"])
+                betha=np.cos(np.radians(dfdist0["k_azimuth_mu"]))
+            if gateway["dist"]>0 and  dfrssi_host is not None :
                 r=gateway["dist"]
                 R=dfdist0["distance_host"]
                 a=gateway["dist"] * np.sin(alpha+betha)
@@ -910,7 +911,7 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
                                 dfpos_y =pd.concat([ dfpos_y,dfpos_y_1[dfpos_y_1['tag_mac'].isin(scan_control["tags"][i])]], ignore_index=True)
                                 dfpos_r =pd.concat([ dfpos_r,dfpos_r_1[dfpos_r_1['tag_mac'].isin(scan_control["tags"][i])]], ignore_index=True)
                                 dataavg =pd.concat([ dataavg,dataavg_1[dataavg_1['tag_mac'].isin(scan_control["tags"][i])]], ignore_index=True)
-                                dfrssi_host =pd.concat([ dfrssi_host,dfrssi_host_1[dfrssi_host_1['address'].isin(scan_control["tags"][i])]], ignore_index=True)
+                                if dfrssi_host_1 is not None:dfrssi_host =pd.concat([ dfrssi_host,dfrssi_host_1[dfrssi_host_1['address'].isin(scan_control["tags"][i])]], ignore_index=True)
                                 resdf =pd.concat([ resdf,resdf_1[resdf_1['tag_mac'].isin(scan_control["tags"][i])]], ignore_index=True)
                                 if data_corravg is not None and data_corravg_1 is not None and data_corravg_1.shape[0]>0:
                                     data_corravg =pd.concat([ data_corravg,data_corravg_1[data_corravg_1['tag_mac'].isin(scan_control["tags"][i])]], ignore_index=True)
@@ -929,7 +930,7 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
                                 dfpos_y = dfpos_y_1[dfpos_y_1['tag_mac'].isin(scan_control["tags"][i])]
                                 dfpos_r = dfpos_r_1[dfpos_r_1['tag_mac'].isin(scan_control["tags"][i])]
                                 dataavg = dataavg_1[dataavg_1['tag_mac'].isin(scan_control["tags"][i])]
-                                dfrssi_host = dfrssi_host_1[dfrssi_host_1['address'].isin(scan_control["tags"][i])]
+                                if dfrssi_host_1 is not None: dfrssi_host = dfrssi_host_1[dfrssi_host_1['address'].isin(scan_control["tags"][i])]
                                 resdf = resdf_1[resdf_1['tag_mac'].isin(scan_control["tags"][i])]
                                 data_corravg=data_corravg_1[data_corravg_1['tag_mac'].isin(scan_control["tags"][i])] if data_corravg_1 is not None else None
                                 if data_pos_1 is not None and data_pos_1.shape[0]>0 :
@@ -938,8 +939,8 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
                                     data_pos=None
                                 ini_concat = True
                         except Exception as e:
-
                             print(e)
+
                 if dfpos_x is not None: dfpos_x = dfpos_x.sort_values(by=['tag_mac'])
                 if dfpos_y is not None:dfpos_y = dfpos_y.sort_values(by=['tag_mac'])
                 if dfpos_r is not None:dfpos_r = dfpos_r.sort_values(by=['tag_mac'])
@@ -1213,7 +1214,7 @@ async def main():
     jmpos_processed = []
     datadf_corr = {}
     jang_corr_processed = []
-
+    startup_firstscan=True
     # app.run()
     # Run Flask app in a separate thread
 
@@ -1322,7 +1323,7 @@ async def main():
             scan_mac_banned=[]
 
         # #check if MQTTT locators and server are running. If not start them
-        # if action == "LOCATION": srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
+        if action == "LOCATION" : srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
 
         #check status of the web API - Update type of data selected by API (page_configuration)
         app.checkstatus()
@@ -1464,7 +1465,7 @@ async def main():
             uuid_data_type_filter = "base"
 
         #check if MQTTT locators and server are running. If not start them
-        if action == "LOCATION": srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
+        if action == "LOCATION" :  srv_antenna_anchor=checkmqttservers(srv_antenna_anchor)
 
         if action == "LOCATION":
             mqttsrv_status=True
@@ -1540,7 +1541,7 @@ async def main():
                     break
 
                 if action == "READ" or action == "UPDATE":
-                    if param_scan_new_tags and not redo_location:# or (not param_scan_new_tags and nscan==0):
+                    if not redo_location and nscan==0:
                         try:
                             #TODO implement when multiple BLE adapters are implemented , otherwise multople scans wull disconnect connected devicesin previous scanns
                             scan_max_scans=1
@@ -1551,17 +1552,17 @@ async def main():
                             connect_timeout=25
                             new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans,
                                                                             max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address,
-                                                                            timeout_scanner=timeout_scanner,timeout=connect_timeout)
+                                                                            timeout_scanner=timeout_scanner,timeout=connect_timeout,param_scan_new_tags=param_scan_new_tags)
                         except Exception as e:
                             print(e)
 
                         if app.webcancel:
                             webcancelprocess = True
                             break
-
-                        # try:
-                        #     tag_found=[x for x in bscanner.tags.items]
-                        #     if len(tag_found)<max_BoldTags or max_BoldTags==0:
+                    if param_scan_new_tags:
+                        scan_parameters["scan_new_tags"]=False
+                        app.scan_parameters=scan_parameters
+                        param_scan_new_tags=False
                         #         # Create asyncio tasks for each device connection
                         #         tasks = [bscanner.tags.connect(max_retry=connect_max_retry, index=x.index,timeout=connect_timeout) for x in tag_found]
                         #
@@ -1599,7 +1600,10 @@ async def main():
                 #             print(e)
                 # except Exception as e:
                 #     print(e)
-                webcancelprocess=await bscanner.check_and_reconect(devprocessed, nRetries=4, max_retry=1, timeout=15,scan_mac_filter_address=scan_mac_filter_address)
+
+                connect_max_retry=1;
+                connect_max_retry=1
+                webcancelprocess=await bscanner.check_and_reconect(devprocessed, nRetries=connect_max_retry, max_retry=connect_max_retry, timeout=15,scan_mac_filter_address=scan_mac_filter_address)
                 if app.webcancel:
                     webcancelprocess = True
                     break
@@ -1934,31 +1938,34 @@ async def main():
                     df=df[cols]
 
                     if len(scan_mac_filter)>0 or param_keep_data:
-                        if os.path.exists(file_path_lastscan):
-                            df_back = pd.read_csv(file_path_lastscan)
+                        try:
+                            if os.path.exists(file_path_lastscan):
+                                df_back = pd.read_csv(file_path_lastscan)
 
-                            #in cas change in file format
-                            for x in app.columnIds:
-                                if x not in list(df_back.columns):
-                                    df_back[x]=None
+                                #in cas change in file format
+                                for x in app.columnIds:
+                                    if x not in list(df_back.columns):
+                                        df_back[x]=None
 
-                            #update existing records with new data
-                            df_back["status"]="unknown"
-                            if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
-                                for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
-                                    for k in app.columnIds[1:-2]:
-                                        df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
-                                    df_back.loc[ix, "status"] = \
-                                    df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
-                                df_back=df_back[app.columnIds[:-2]]
+                                #update existing records with new data
+                                df_back["status"]="unknown"
+                                if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
+                                    for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
+                                        for k in app.columnIds[1:-2]:
+                                            df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
+                                        df_back.loc[ix, "status"] = \
+                                        df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
+                                    df_back=df_back[app.columnIds[:-2]]
 
-                            #add new records
-                            ix=[x  for x in df["mac"].values if x not in df_back["mac"].values ]
-                            if len(ix)>0:
-                                ixr=df["mac"].isin(ix)
-                                df_back=pd.concat([df_back,df.loc[ixr,app.columnIds[:-2]]], ignore_index=True)
+                                #add new records
+                                ix=[x  for x in df["mac"].values if x not in df_back["mac"].values ]
+                                if len(ix)>0:
+                                    ixr=df["mac"].isin(ix)
+                                    df_back=pd.concat([df_back,df.loc[ixr,app.columnIds[:-2]]], ignore_index=True)
 
-                            df=df_back
+                                df=df_back
+                        except Exception as e:
+                            print(e)
 
                     # Check if the file exists
                     if os.path.exists(file_path):
