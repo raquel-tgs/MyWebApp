@@ -4,10 +4,12 @@
 <div class="flex p-4 justify-between items-center">
   <h4 class="text-xl font-semibold">Edit Asset</h4>
   <div class="flex gap-4">
-    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new/edit">
+      <input type="hidden" name="mac" value="{{tag.mac}" />
       <button id="tag-update" class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md" value="Update" name="Update" id="Update">Save</button>
     </form>
-    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new">
+    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new/edit">
+      <input type="hidden" name="mac" value="{{tag.mac}" />
       <button id="tag-scan" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Scan" name="Scan" id="Scan">Read</button>
     </form>
     <a href="/tag-details/{{tag.mac}}"><button class="text-gray-800 bg-gray-300 px-3 py-2 rounded-md">Cancel</button></a>
@@ -154,36 +156,3 @@
 
 <script src="{{ url_for('static', filename='js/edit_tag_details.js') }}"></script>
 {% endblock %}
-
-{# 
---- editable
-*** uneditable
-### commented out
-
-tag_id ---
-asset_id ---
-ble_data_crc ###
-certificate_id ***
-type ---
-expiration_date ###
-color ---
-series ---
-asset_images_file_extension ###
-read_nfc ###
-certification_company_name ***
-certification_company_id ***
-certification_place ***
-certification_date ***
-test_type ###
-asset_diameter ---
-asset_comment ---
-batch_id ###
-batch_date ###
-machine_id ---
-asset_images_crc ###
-logo_images_crc ###
-signature_images_crc ###
-owner_company_name ###
-owner_data ###
-ndir_id ---
- #}

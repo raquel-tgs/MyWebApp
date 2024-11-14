@@ -439,25 +439,43 @@ def gateway():
 
 @app.route('/checkbox_select', methods=['POST'])
 def checkbox_select():
-    global data
-    global updatedix
+    # global data
+    # global updatedix
     data_check = request.get_json()
     row_id = data_check.get('rowId')
     checked = data_check.get('checked')
-    i = data[data["mac"] == row_id].index
+
+    toggle_checkbox_select(row_id, checked)
+
+    # i = data[data["mac"] == row_id].index
+    # data.loc[i, "select"] = 1 if checked else 0
+    # data_update.loc[i, "select"] = 1 if checked else 0
+    # if checked:
+    #     if len(updatedix) == 0:
+    #         updatedix = list(i.values)
+    #     else:
+    #         updatedix.extend(list(i.values))
+    # else:
+    #     updatedix=[x for x in [i if x!=i.values[0] else "" for x in updatedix] if x!=""]
+    # print(f"Row {row_id} checkbox is {'checked' if checked else 'unchecked'}")
+
+    return jsonify(success=True)
+
+def toggle_checkbox_select(mac, is_checked):
+    global data
+    global updatedix
+    i = data[data["mac"] == mac].index
     # if (data.loc[i, "select"].values[0] == 1 and not checked) or (data.loc[i, "select"].values[0] == 0 and checked):
-    data.loc[i, "select"] = 1 if checked else 0
-    data_update.loc[i, "select"] = 1 if checked else 0
-    if checked:
+    data.loc[i, "select"] = 1 if is_checked else 0
+    data_update.loc[i, "select"] = 1 if is_checked else 0
+    if is_checked:
         if len(updatedix) == 0:
             updatedix = list(i.values)
         else:
             updatedix.extend(list(i.values))
     else:
         updatedix=[x for x in [i if x!=i.values[0] else "" for x in updatedix] if x!=""]
-
-    print(f"Row {row_id} checkbox is {'checked' if checked else 'unchecked'}")
-    return jsonify(success=True)
+    print(f"Row {mac} checkbox is {'checked' if is_checked else 'unchecked'}")
 
 @app.route('/checkbox_read_nfc', methods=['POST'])
 def checkbox_read_nfc():
@@ -879,6 +897,26 @@ def buttons_web():
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_table'))
 
+@app.route("/api/buttons/new/details")
+def buttons_web_details():
+    mac = request.form['mac']
+    toggle_checkbox_select(mac, True)
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
+    return redirect(url_for('tag_details', tag_mac = mac))
+
+@app.route("/api/buttons/new/edit")
+def buttons_web_edit():
+    mac = request.form['mac']
+    toggle_checkbox_select(mac, True)
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
+    return redirect(url_for('edit_tag_details', tag_mac = mac))
+
+@app.route("/api/buttons/new/config")
+def buttons_web_config():
+    mac = request.form['mac']
+    toggle_checkbox_select(mac, True)
+    buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
+    return redirect(url_for('edit_tag_config', tag_mac = mac))
 
 @app.route("/api/buttons", methods=[ 'POST'])
 def buttons():

@@ -9,6 +9,10 @@
     Back
   </a>
   <div class="flex gap-4">
+    <form class="flex justify-between items-center m-0" method="post" action="/api/buttons/new/details">
+      <input type="hidden" name="mac" value="{{tag.mac}" />
+      <button id="tag-scan" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500" value="Scan" name="Scan" id="Scan">Read</button>
+    </form>
     <a href="/tag-details/edit/{{tag.mac}}"><button class="bg-indigo-100 text-indigo-700 px-3 py-2 rounded-md">Edit</button></a>
   </div>
 </div>
