@@ -67,9 +67,11 @@ perPage = 10
 
 @app.route('/tagtable', methods=['GET', 'POST'])
 def tag_table():
-    global modalOpen
+    global modal_open
     global page_selected
     global operation
+    global modal_redirect
+    modal_redirect='tag_table'
     form = SearchForm()
     data_json = json.loads(data.to_json(orient="records"))
     query = ''
@@ -98,15 +100,20 @@ def tag_table():
         prev = (currentPage - 1 if currentPage > pagesArr[0] else pagesArr[0]) if len(tags) > 1 else 1, 
         next = (currentPage + 1 if currentPage < pagesArr[-1] else pagesArr[-1]) if len(tags) > 1 else 1, 
         userRole = user_role, 
-        modalOpen = modalOpen, 
+        modal_open = modal_open, 
         operation = operation,
         form = form)
 
 @app.route('/api/close-op-modal')
 def close_op_modal():
-    global modalOpen
-    modalOpen = False
-    return redirect(url_for('tag_table'))
+    global modal_open
+    global modal_redirect
+    global mac_redirect
+    modal_open = False
+    if mac_redirect:
+        return redirect(url_for(modal_redirect, tag_mac = mac_redirect))
+    else:
+        return redirect(url_for(modal_redirect))
 
 @app.route('/api/image', methods=['GET', 'POST'])
 def get_set_image():
@@ -141,7 +148,9 @@ def get_set_image():
 @app.route('/tag-details/<tag_mac>')
 def tag_details(tag_mac):
     global page_selected
-    global modalOpen
+    global modal_open
+    global modal_redirect
+    modal_redirect='tag_details'
     page_selected="page_configuration"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
@@ -157,7 +166,7 @@ def tag_details(tag_mac):
             image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
             print(e)
-    return render_template('tag_details.html', tag = tag_data, image = image, modalOpen = modalOpen)
+    return render_template('tag_details.html', tag = tag_data, image = image, modal_open = modal_open)
 
 @app.route('/view/report/<tag_mac>')
 def view_tag_report(tag_mac):
@@ -206,7 +215,9 @@ def get_tag_by_mac(mac):
 @app.route('/tag-details/edit/<tag_mac>')
 def edit_tag_details(tag_mac):
     global page_selected
-    global modalOpen
+    global modal_open
+    global modal_redirect
+    modal_redirect='edit_tag_details'
     page_selected="page_configuration_detail"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
@@ -222,15 +233,17 @@ def edit_tag_details(tag_mac):
             image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
             print(e)
-    return render_template('edit_tag_details.html', tag = tag_data, image = image, modalOpen = modalOpen)
+    return render_template('edit_tag_details.html', tag = tag_data, image = image, modal_open = modal_open)
 
 @app.route('/tag-details/edit/config/<tag_mac>')
 def edit_tag_config(tag_mac):
     global page_selected
-    global modalOpen
+    global modal_open
+    global modal_redirect
+    modal_redirect='edit_tag_config'
     page_selected="page_configuration_configuration"
     tag_data = get_tag_by_mac(tag_mac)
-    return render_template('edit_tag_configuration.html', tag = tag_data, modalOpen = modalOpen)
+    return render_template('edit_tag_configuration.html', tag = tag_data, modal_open = modal_open)
 
 @app.route('/upload_file')
 def upload_file():
@@ -240,11 +253,16 @@ def upload_file():
 
 @app.route('/api/canceloperation_web', methods=['POST'])
 def canceloperation_web():
-    global modalOpen
-    modalOpen=False
+    global modal_open
+    global modal_redirect
+    global mac_redirect
+    modal_open=False
     canceloperation_back()
     checkstatus()
-    return redirect(url_for('tag_table'))
+    if mac_redirect:
+        return redirect(url_for(modal_redirect, tag_mac = mac_redirect))
+    else:
+        return redirect(url_for(modal_redirect))
 
 @app.route('/api/canceloperation', methods=['POST'])
 def canceloperation():
@@ -893,35 +911,43 @@ def page_data_scan():
 
 @app.route("/api/buttons/new", methods=[ 'POST'])
 def buttons_web():
-    global modalOpen
-    modalOpen=True
+    global modal_open
+    global mac_redirect
+    mac_redirect=False
+    modal_open=True
     interphase=request.referrer[len(request.host_url):]
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_table'))
 
 @app.route("/api/buttons/new/details", methods=[ 'POST'])
 def buttons_web_details():
-    global modalOpen
-    modalOpen=True
+    global modal_open
+    global mac_redirect
+    modal_open=True
     mac = request.form['mac']
+    mac_redirect = mac
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_details', tag_mac = mac))
 
 @app.route("/api/buttons/new/edit", methods=[ 'POST'])
 def buttons_web_edit():
-    global modalOpen
-    modalOpen=True
+    global modal_open
+    global mac_redirect
+    modal_open=True
     mac = request.form['mac']
+    mac_redirect = mac
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('edit_tag_details', tag_mac = mac))
 
 @app.route("/api/buttons/new/config", methods=[ 'POST'])
 def buttons_web_config():
-    global modalOpen
-    modalOpen=True
+    global modal_open
+    global mac_redirect
+    modal_open=True
     mac = request.form['mac']
+    mac_redirect = mac
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('edit_tag_config', tag_mac = mac))
@@ -944,9 +970,6 @@ def buttons_back(request_method, request_form_get_scan, request_form_get_update,
     global updatedix
     global page_selected
     global dfilter_back
-    # global modalOpen
-
-    # modalOpen=True
     semaphore=True
     page_selected=interphase #"page_configuration_configuration"
     try:
@@ -1429,7 +1452,9 @@ global webcancel
 global anchors_init
 global read_nfc_done
 global dfilter_back
-global modalOpen
+global modal_open
+global modal_redirect
+global mac_redirect
 
 read_nfc_done=False
 global admin_username
@@ -1505,7 +1530,9 @@ admin_password='1234'
 user_role=None
 isLoggedIn=False
 
-modalOpen=False
+modal_open=False
+modal_redirect='tag_table'
+mac_redirect=False
 
 if __name__ == '__main__':
 
