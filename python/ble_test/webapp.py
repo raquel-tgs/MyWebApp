@@ -141,6 +141,7 @@ def get_set_image():
 @app.route('/tag-details/<tag_mac>')
 def tag_details(tag_mac):
     global page_selected
+    global modalOpen
     page_selected="page_configuration"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
@@ -156,7 +157,7 @@ def tag_details(tag_mac):
             image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
             print(e)
-    return render_template('tag_details.html', tag = tag_data, image = image)
+    return render_template('tag_details.html', tag = tag_data, image = image, modalOpen = modalOpen)
 
 @app.route('/view/report/<tag_mac>')
 def view_tag_report(tag_mac):
@@ -205,6 +206,7 @@ def get_tag_by_mac(mac):
 @app.route('/tag-details/edit/<tag_mac>')
 def edit_tag_details(tag_mac):
     global page_selected
+    global modalOpen
     page_selected="page_configuration_detail"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
@@ -220,14 +222,15 @@ def edit_tag_details(tag_mac):
             image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
             print(e)
-    return render_template('edit_tag_details.html', tag = tag_data, image = image)
+    return render_template('edit_tag_details.html', tag = tag_data, image = image, modalOpen = modalOpen)
 
 @app.route('/tag-details/edit/config/<tag_mac>')
 def edit_tag_config(tag_mac):
     global page_selected
+    global modalOpen
     page_selected="page_configuration_configuration"
     tag_data = get_tag_by_mac(tag_mac)
-    return render_template('edit_tag_configuration.html', tag = tag_data)
+    return render_template('edit_tag_configuration.html', tag = tag_data, modalOpen = modalOpen)
 
 @app.route('/upload_file')
 def upload_file():
@@ -237,6 +240,8 @@ def upload_file():
 
 @app.route('/api/canceloperation_web', methods=['POST'])
 def canceloperation_web():
+    global modalOpen
+    modalOpen=False
     canceloperation_back()
     checkstatus()
     return redirect(url_for('tag_table'))
@@ -254,9 +259,7 @@ def canceloperation_back():
     global updatedix
     global mac_filter
     global webcancel
-    global modalOpen
     global page_selected
-    modalOpen=False
     if status=="Disabled":
 
         if operation == 'Scan':
@@ -892,13 +895,14 @@ def page_data_scan():
 def buttons_web():
     global modalOpen
     modalOpen=True
-    print(request.method)
     interphase=request.referrer[len(request.host_url):]
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_table'))
 
 @app.route("/api/buttons/new/details", methods=[ 'POST'])
 def buttons_web_details():
+    global modalOpen
+    modalOpen=True
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
@@ -906,6 +910,8 @@ def buttons_web_details():
 
 @app.route("/api/buttons/new/edit", methods=[ 'POST'])
 def buttons_web_edit():
+    global modalOpen
+    modalOpen=True
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
@@ -913,6 +919,8 @@ def buttons_web_edit():
 
 @app.route("/api/buttons/new/config", methods=[ 'POST'])
 def buttons_web_config():
+    global modalOpen
+    modalOpen=True
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))

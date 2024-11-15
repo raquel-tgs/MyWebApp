@@ -160,6 +160,44 @@
         {% endblock %}
       </div>
     </div>
+
+    {% if modalOpen %}
+    <div id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" modalOpen="{{modalOpen}}" aria-hidden="true">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl sm:p-6">
+            <div>
+              <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
+                {% if operation == 'Scan' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Scanning...</h3>
+                {% elif operation == 'Update' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Updating...</h3>
+                {% elif operation == 'Location' %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">Locating...</h3>
+                {% else %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">{{operation}}</h3>
+                {% endif %}
+                <div id="Progress_Status" class="w-full">
+                  <div id="myprogressBar" class="h-5 w-0 bg-indigo-600"></div>
+                </div>
+                <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="3" readonly id="statuslog"></textarea>
+              </div>
+            </div>
+            <div class="flex justify-end mt-5">
+              <a href="{{ url_for('close_op_modal') }}">
+              <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
+              </a>
+              <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation_web">
+                <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/standard_layout.js') }}"></script>
     <script src="{{ url_for('static', filename='js/page_scan_parameters.js') }}"></script>
