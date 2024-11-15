@@ -897,21 +897,21 @@ def buttons_web():
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_table'))
 
-@app.route("/api/buttons/new/details")
+@app.route("/api/buttons/new/details", methods=[ 'POST'])
 def buttons_web_details():
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_details', tag_mac = mac))
 
-@app.route("/api/buttons/new/edit")
+@app.route("/api/buttons/new/edit", methods=[ 'POST'])
 def buttons_web_edit():
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('edit_tag_details', tag_mac = mac))
 
-@app.route("/api/buttons/new/config")
+@app.route("/api/buttons/new/config", methods=[ 'POST'])
 def buttons_web_config():
     mac = request.form['mac']
     toggle_checkbox_select(mac, True)
