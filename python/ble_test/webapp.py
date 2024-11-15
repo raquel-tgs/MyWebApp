@@ -1455,8 +1455,8 @@ operation="None"
 rssi_tag_scan= {}
 start_init=None
 
-# localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
-localpath="c:\\tgspoc\\"
+localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
+# localpath="c:\\tgspoc\\"
 
 page_selected="page_configuration"
 # page_datatype_selected=""
