@@ -64,7 +64,7 @@ jmpos_processed=[]
 datadf_corr = {}
 jang_corr_processed=[]
 
-rssi_host_scan={}
+# rssi_host_scan={}
 scanstarted=False
 devices_processed=[]
 directory = "c:/tgspoc"
@@ -329,30 +329,30 @@ def terminate_process(process):
 #Call back advertisement
 #
 #---------------------------------------------------------------------#
-def device_found(device: BLEDevice, advertisement_data: AdvertisementData):
-    """Decode iBeacon."""
-    try:
-        bres = False
-        # print("device.name -------------------> %s" % device.name)
-        # print("nservice_uuids %s" % advertisement_data.service_uuids)
-        # print("nmanufacturer_data %s" % advertisement_data.manufacturer_data)
-        # print("local_name --------->>%s" % advertisement_data.local_name)
-        # print("service_data %s" % advertisement_data.service_data)
-        # print("rssi %s" % advertisement_data.rssi)
+# def device_found(device: BLEDevice, advertisement_data: AdvertisementData):
+#     """Decode iBeacon."""
+#     try:
+#         bres = False
+#         # print("device.name -------------------> %s" % device.name)
+#         # print("nservice_uuids %s" % advertisement_data.service_uuids)
+#         # print("nmanufacturer_data %s" % advertisement_data.manufacturer_data)
+#         # print("local_name --------->>%s" % advertisement_data.local_name)
+#         # print("service_data %s" % advertisement_data.service_data)
+#         # print("rssi %s" % advertisement_data.rssi)
 
-        if device.name is not None:
-            if device.name.startswith("BoldTag"):
-                address=device.address.replace(":","")
-                rssi=advertisement_data.rssi
-                if (address in startCTE_address_filter or len(startCTE_address_filter)==0) and discover_rssi_start:
-                    #print("RSSI {0}:{1}".format(address,rssi))
-                    tag_data_crc="0000000000000000"
-                    if len(advertisement_data.manufacturer_data.items())>0:
-                       tag_data_crc=[x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
-                    rssi_host_scan[len(rssi_host_scan)]={"address":address,"rssi_host":rssi,"tag_data_crc":tag_data_crc}
+#         if device.name is not None:
+#             if device.name.startswith("BoldTag"):
+#                 address=device.address.replace(":","")
+#                 rssi=advertisement_data.rssi
+#                 if (address in startCTE_address_filter or len(startCTE_address_filter)==0) and discover_rssi_start:
+#                     #print("RSSI {0}:{1}".format(address,rssi))
+#                     tag_data_crc="0000000000000000"
+#                     if len(advertisement_data.manufacturer_data.items())>0:
+#                        tag_data_crc=[x for x in advertisement_data.manufacturer_data.items()][0][1].hex()
+#                     rssi_host_scan[len(rssi_host_scan)]={"address":address,"rssi_host":rssi,"tag_data_crc":tag_data_crc}
 
-    except Exception as e:
-        print(f'error in device_found {e}')
+#     except Exception as e:
+#         print(f'error in device_found {e}')
 
 #---------------------------------------------------------------------#
 #                   MQTT Subscription
@@ -1190,7 +1190,7 @@ async def main():
     global datadf_corr
     global jmpos_processed
     global jang_corr_processed
-    global rssi_host_scan
+    # global rssi_host_scan
     global scanstarted
     global discover_rssi
     global discover_rssi_collect
@@ -1236,8 +1236,8 @@ async def main():
     print("MQTT thread stared")
     time_process=None
 
-    scanner = BleakScanner()
-    scanner.register_detection_callback(device_found)
+    # scanner = BleakScanner()
+    # scanner.register_detection_callback(device_found)
 
 
 
@@ -1255,7 +1255,7 @@ async def main():
                                   keepactive_all_CTE_during_location=keepactive_all_CTE_during_location,
                                     use_MQTT =use_MQTT, mqttclient = mqttclient, keep_mqtt_on = keep_mqtt_on,
                                     wait_for_mqtt_angles = wait_for_mqtt_angles, CTE_Wait_Time_prescan = CTE_Wait_Time_prescan, CTE_Wait_Time = CTE_Wait_Time,webapp=app,directory=directory)
-
+    await bscanner.discover_rssi_start()
     # webapp initialization
     app.columnIds=list(bscanner.tags.gatewaydb.csv_row.keys())#bscanner.tags.gatewaydb.scan_columnIds
     # app.cloud_columnIds = bscanner.tags.gatewaydb.cloud_scan_columnIds
@@ -1490,8 +1490,9 @@ async def main():
             if dfupdate is not None: scan_mac_filter_address.extend(list(dfupdate["mac"].values))
             app.print_statuslog(f'action: {doscan}')
             service=None
-            rssi_host_scan={}
+            # rssi_host_scan={}
             scanstarted=True
+            bscanner.rssi_host_scan_reset=True
 
 
             devcount=0
@@ -1504,10 +1505,10 @@ async def main():
             init_location=False
             start_mqtt=True
             if discover_rssi:
-                discover_rssi_start=True
+                # discover_rssi_start=True
                 bscanner.discover_rssi_collect=True
-                await scanner.start()
-                await bscanner.discover_rssi_start()
+                # await scanner.start()
+                # await bscanner.discover_rssi_start()
 
 
                 #await scanner.stop()
@@ -1773,7 +1774,8 @@ async def main():
 
         else:
             scanstarted=False
-            time.sleep(1)
+            # time.sleep(1)
+            await asyncio.sleep(1.0)
 
         Stop_collecting = True
         if (action == "UPDATE"):
@@ -1837,7 +1839,7 @@ async def main():
                         print(e)
 
             try:
-
+                rssi_host_scan = bscanner.rssi_host_scan
                 resdf, dataavg, data_posavg,scan_control, cancel_process = filter_location(file_path_angle,file_path_correction,file_path_angle_raw, file_path_correction_raw,file_path_position_raw,
                                                                            rssi_host_scan,scan_control,file_path_xposition_raw,file_path_yposition_raw,file_path_rposition_raw,
                                                                            startCTE_address_filter,val_outliers)
