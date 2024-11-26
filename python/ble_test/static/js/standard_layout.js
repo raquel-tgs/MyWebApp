@@ -28,16 +28,27 @@ function updater() {
 
       $('#op-modal-btn-close').addClass("show-block")
       $('#op-modal-btn-cancel').addClass("hide-block")
+
+      $('#modal-title').addClass('display-none')
+      $('#modal-title').removeClass('flex')
+      $('#modal-title-complete').addClass('flex')
+      $('#modal-title-complete').removeClass('display-none')
     } else {
       $('#op-modal-btn-close').removeClass("show-block")
       $('#op-modal-btn-cancel').removeClass("hide-block")
 
       $('#op-modal-btn-close').addClass("hide-block")
       $('#op-modal-btn-cancel').addClass("show-block")
+
+      $('#modal-title').removeClass('display-none')
+      $('#modal-title').addClass('flex')
+      $('#modal-title-complete').addClass('display-none')
+      $('#modal-title-complete').removeClass('flex')
     }
   });
 };
 
+// This needs to go, but some logic is needed...
 function updater_bar() {
   $.get('/databar', function(data) {
     $('#myprogressBar').css('width', data);;  // update page with new data
