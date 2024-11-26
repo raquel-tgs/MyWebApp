@@ -162,6 +162,78 @@
     </div>
 
     {% if modal_open %}
+    <div id="op-modal" class="relative z-10">
+      <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+      <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+          <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-6xl sm:p-6">
+            <div>
+              <div class="flex flex-col gap-1 mt-3 text-center sm:mt-5">
+                {% if operation == 'Scan' %}
+                <h3 class="text-base font-semibold text-gray-900">
+                  <div id="modal-title" class="flex gap-1 items-center justify-center">
+                    <div class="text-indigo-500">
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <span>Scanning...</span>
+                  </div>
+                  <div id="modal-title-complete" class="display-none items-center justify-center">
+                    <span>Scanning Complete</span>
+                  </div>
+                </h3>
+                {% elif operation == 'Update' %}
+                <h3 class="text-base font-semibold text-gray-900">
+                  <div id="modal-title" class="flex gap-1 items-center justify-center">
+                    <div class="text-indigo-500">
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <span>Updating...</span>
+                  </div>
+                  <div id="modal-title-complete" class="display-none items-center justify-center">
+                    <span>Updating Complete</span>
+                  </div>
+                </h3>
+                {% elif operation == 'Location' %}
+                <h3 class="text-base font-semibold text-gray-900">
+                  <div id="modal-title" class="flex gap-1 items-center justify-center">
+                    <div class="text-indigo-500">
+                      <svg class="animate-spin -ml-1 mr-3 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                    <span>Locating...</span>
+                  </div>
+                  <div id="modal-title-complete" class="display-none items-center justify-center">
+                    <span>Locating Complete</span>
+                  </div>
+                </h3>
+                {% else %}
+                <h3 class="text-base font-semibold text-gray-900" id="modal-title">{{operation}}</h3>
+                {% endif %}
+                <textarea class="border border-gray-500 rounded-md p-2 w-full" rows="10" id="statuslog" readonly></textarea>
+              </div>
+            </div>
+            <div class="flex justify-end mt-5">
+              <a href="{{ url_for('close_op_modal') }}">
+              <button id="op-modal-btn-close" type="button" class="border-0 rounded-md px-3 py-2 text-white bg-purple-500 hide-block">Close</button>
+              </a>
+              <form id="op-modal-btn-cancel" class="m-0" method="post" action="/api/canceloperation_web">
+                <button class="border-0 rounded-md px-3 py-2 text-white bg-purple-500">Cancel Operation</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    <!-- {% if modal_open %}
     <div id="op-modal" class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true" aria-hidden="true">
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
       <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -196,7 +268,7 @@
         </div>
       </div>
     </div>
-    {% endif %}
+    {% endif %} -->
 
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.8.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/standard_layout.js') }}"></script>

@@ -49,32 +49,50 @@
             <input aria-describedby="comments-description" name="comments" type="checkbox" data-id="{{tag.mac}}" class="tag-checkbox h-5 w-5 rounded-md border-gray-300 text-green-500 focus:ring-green-500">
           </div>
           <div class="w-44">
-            <p class="text-lg font-normal"><span class="font-bold">Asset ID </span>{{tag.asset_id}}</p>
-            <p class="text-sm font-normal"><span class="font-semibold">Series </span>{{tag.series}}</p>
+            <p class="flex gap-1 text-lg font-normal"><span class="font-bold">Asset ID</span>{{tag.asset_id}}</p>
+            <p class="flex gap-1 text-sm font-normal"><span class="font-semibold">Series</span>{{tag.series}}</p>
+          </div>
+          <div class="w-52">
+            <div class="flex items-center gap-2">
+              <p class="flex gap-1 text-lg font-normal"><span class="font-bold">Cert Exp</span>{{tag.expiration_date}}</p>
+              <div class="tooltip-wrap">
+                {% if tag.alert_level == 0 %}
+                  <div class="w-4 h-4 rounded-lg bg-green-500"></div>
+                {% elif tag.alert_level == 1 %}
+                  <div class="w-4 h-4 rounded-lg bg-yellow-500"></div>
+                {% elif tag.alert_level == 2 %}
+                  <div class="w-4 h-4 rounded-lg bg-orange-500"></div>
+                {% elif tag.alert_level == 3 %}
+                  <div class="w-4 h-4 rounded-lg bg-red-500"></div>
+                {% else %}
+                  <div class="w-4 h-4 rounded-lg bg-black"></div>
+                {% endif %}
+                <div class="tooltip-content p-2 rounded-md shadow-md bg-white text-nowrap">
+                  {{tag.alert_msg}}
+                </div>
+              </div>
+            </div>
+            <p class="flex gap-1 text-sm font-normal">Type<span class="font-semibold">{{tag.type}}</span></p>
           </div>
           <div class="w-44">
-            <p class="text-lg font-normal"><span class="font-bold">Cert Exp </span>{{tag.expiration_date}}</p>
-            <p class="text-sm font-normal">Type<span class="font-semibold"> {{tag.type}}</span></p>
+            <p class="flex gap-1 text-lg font-normal">Cert ID<span class="font-bold">{{tag.certificate_id}}</span></p>
+            <p class="flex gap-1 text-sm font-normal">Diameter<span class="font-semibold">{{tag.asset_diameter}}</span></p>
           </div>
           <div class="w-44">
-            <p class="text-lg font-normal">Cert ID<span class="font-bold"> {{tag.certificate_id}}</span></p>
-            <p class="text-sm font-normal">Diameter<span class="font-semibold"> {{tag.asset_diameter}}</span></p>
-          </div>
-          <div class="w-44">
-            <p class="text-sm font-normal"><span class="font-normal">MAC </span>{{tag.mac}}</p>
-            <p class="text-sm font-normal">Tag ID<span class="font-normal"> {{tag.tag_id}}</span></p>
+            <p class="flex gap-1 text-sm font-normal"><span class="font-normal">MAC</span>{{tag.mac}}</p>
+            <p class="flex gap-1 text-sm font-normal">Tag ID<span class="font-normal">{{tag.tag_id}}</span></p>
           </div>
           <div class="w-24">
             {% if tag.status == 'read' %}
-              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
+              <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
             {% elif tag.status == 'changed' %}
-              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
+              <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
             {% elif tag.status == 'updated' %}
-              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
+              <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
             {% elif tag.status == 'update error' %}
-              <button type="button" class="border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
+              <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
             {% else %}
-              <button type="button" class="border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
+              <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
             {% endif %}
           </div>
         </a> 

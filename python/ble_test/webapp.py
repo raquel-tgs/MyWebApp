@@ -14,6 +14,7 @@ import json
 from io import StringIO
 import shutil
 import math
+from datetime import datetime, timedelta
 import certgen_py
 
 import logging
@@ -71,10 +72,13 @@ def tag_table():
     global page_selected
     global operation
     global modal_redirect
+    global exp_warn_days
+    global exp_alarm_days
+
     modal_redirect='tag_table'
     form = SearchForm()
     data_json = json.loads(data.to_json(orient="records"))
-    query = ''
+
     tags=[]
     if form.validate_on_submit():
         query = form.q.data
@@ -83,13 +87,34 @@ def tag_table():
                 tags.append(tag)
     else:
         tags = data_json
+    
+    present = datetime.now()
+    for tag in tags:
+        try:
+            tag_exp_date = datetime.strptime(tag['expiration_date'], '%m/%d/%Y')
+            days_left = (tag_exp_date - present).days
+            tag['alert_msg'] = f"{days_left} Days Left"
+            if days_left > exp_warn_days:
+                tag['alert_level'] = 0
+            elif days_left > exp_alarm_days:
+                tag['alert_level'] = 1
+            elif days_left > 0:
+                tag['alert_level'] = 2
+            else:
+                tag['alert_msg'] = f"{days_left * -1} Expired"
+                tag['alert_level'] = 3
+        except Exception as e:
+            print('----- Error: ', e)
+            tag['alert_msg'] = 'Check Expiration Date'
+            tag['alert_level'] = -1
+    
     page_selected="tag_table"
     currentPage = request.args.get('page', 1, type=int)
     first = ((perPage*currentPage)-perPage)
     last = perPage*currentPage
     totalPages = math.ceil(len(tags)/perPage)
     pagesArr = [x + 1 for x in range(totalPages)]
-    # return render_template('editable_table.html', 
+
     return render_template('editable_table.html', 
         tags = tags[first : last], 
         totalTags = len(tags), 
@@ -460,33 +485,16 @@ def gateway():
 
 @app.route('/checkbox_select', methods=['POST'])
 def checkbox_select():
-    # global data
-    # global updatedix
     data_check = request.get_json()
     row_id = data_check.get('rowId')
     checked = data_check.get('checked')
-
     toggle_checkbox_select(row_id, checked)
-
-    # i = data[data["mac"] == row_id].index
-    # data.loc[i, "select"] = 1 if checked else 0
-    # data_update.loc[i, "select"] = 1 if checked else 0
-    # if checked:
-    #     if len(updatedix) == 0:
-    #         updatedix = list(i.values)
-    #     else:
-    #         updatedix.extend(list(i.values))
-    # else:
-    #     updatedix=[x for x in [i if x!=i.values[0] else "" for x in updatedix] if x!=""]
-    # print(f"Row {row_id} checkbox is {'checked' if checked else 'unchecked'}")
-
     return jsonify(success=True)
 
 def toggle_checkbox_select(mac, is_checked):
     global data
     global updatedix
     i = data[data["mac"] == mac].index
-    # if (data.loc[i, "select"].values[0] == 1 and not checked) or (data.loc[i, "select"].values[0] == 0 and checked):
     data.loc[i, "select"] = 1 if is_checked else 0
     data_update.loc[i, "select"] = 1 if is_checked else 0
     if is_checked:
@@ -915,7 +923,6 @@ def buttons_web():
     global mac_redirect
     mac_redirect=False
     modal_open=True
-    interphase=request.referrer[len(request.host_url):]
     buttons_back(request.method,request.form.get("Scan"),request.form.get('Update'),request.form.get('Location'))
     return redirect(url_for('tag_table'))
 
@@ -1460,6 +1467,11 @@ read_nfc_done=False
 global admin_username
 global admin_password
 global user_role
+
+global exp_warn_days
+global exp_alarm_days
+exp_warn_days = 60
+exp_alarm_days = 30
 # start_back=-1
 # length_back=-1
 app_host="0.0.0.0" #"192.168.1.196"

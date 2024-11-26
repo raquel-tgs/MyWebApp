@@ -19,7 +19,22 @@
 <div class="flex justify-between gap-1 p-4">
   <div class="flex flex-col flex-grow gap-7">
     <div>
-      <h1 class="text-xl font-semibold">{{tag.asset_id}}</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-xl font-semibold">{{tag.asset_id}}</h1>
+        <div class="w-24">
+          {% if tag.status == 'read' %}
+            <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-blue-200 text-xs font-normal">Read</button>
+          {% elif tag.status == 'changed' %}
+            <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-yellow-200 text-xs font-normal">Changed</button>
+          {% elif tag.status == 'updated' %}
+            <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-green-200 text-xs font-normal">Updated</button>
+          {% elif tag.status == 'update error' %}
+            <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-black bg-red-300 text-xs font-normal">Error</button>
+          {% else %}
+            <button type="button" class="w-20 border-0 rounded-md px-4 py-1 text-white bg-black text-xs font-normal">Unknown</button>
+          {% endif %}
+        </div>
+      </div>
       <p class="text-sm font-normal"><span class="font-bold">Cert ID </span>{{tag.certificate_id}}</p>
       <p class="text-sm font-normal"><span class="font-bold">Cert EXP </span>{{tag.expiration_date}}</p>
     </div>
