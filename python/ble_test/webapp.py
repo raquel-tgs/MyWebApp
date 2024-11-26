@@ -204,6 +204,24 @@ def view_tag_cert(tag_mac):
     print(cert)
     return render_template('view_cert.html', cert = cert, mac = tag_mac)
 
+
+class ImageBlock:
+    def __init__(self, path, dpi, pos):
+        self.path = path
+        self.dpi = dpi
+        self.pos = pos
+
+class TextNode:
+    def __init__(self, content, font_size, line_height):
+        self.content = content
+        self.font_size = font_size
+        self.line_height = line_height
+
+class TextBlock:
+    def __init__(self, nodes, pos):
+        self.nodes = nodes
+        self.pos = pos
+
 def generate_pdf(mac):
     tag = get_tag_by_mac(mac)
     #logo = os.path.join(app.root_path, app.config['IMAGE'], 'logo.jpg')
@@ -211,23 +229,51 @@ def generate_pdf(mac):
     asset ='./static/images/'+tag['tag_id']+'.jpg'
     sig = './static/images/signature.jpg'
     path = f'./static/certs/{mac.replace(":", "")}.pdf'
+
     try:
-        pdf = certgen_py.Asset(
-            company_name = tag['certification_company_name'],
-            company_id = tag['certification_company_id'],
-            certificate_id = tag['certificate_id'], # tag['certificate_id'],
-            expiration_date =tag['expiration_date'],# "2023-12-31", #tag['expiration_date'],
-            test_type = tag['test_type'],
-            asset_id = tag['asset_id'],
-            asset_type =tag['type'],# "Widget", #tag['asset_type']
-            logo = logo,
-            asset_image = asset,
-            signature = sig
+        blocks = [
+            ImageBlock(path=logo, dpi=75.0, pos=(200.0, 14.0)),
+            ImageBlock(path=sig, dpi=100.0, pos=(70.0, 220.0)),
+            TextBlock(nodes=[
+                TextNode(content=str(tag['certification_company_name']), font_size=30.0, line_height=18.0),
+                TextNode(content="Replublica Argentina y Juan Jose Castelli\nRincon de los Sauces", font_size=14.0, line_height=18.0),
+            ], pos=(20.0, 24.0)),
+            TextBlock(nodes=[
+                TextNode(content="Certificado de Inspeccion", font_size=38.0, line_height=18.0),
+            ], pos=(20.0, 58.0)),
+            TextBlock(nodes=[
+                TextNode(content="Numero de Certificado", font_size=14.0, line_height=18.0),
+                TextNode(content=str(tag['certificate_id']), font_size=16.0, line_height=18.0),
+                TextNode(content="\nFecha de Vencimiento", font_size=14.0, line_height=18.0),
+                TextNode(content=str(tag['expiration_date']), font_size=22.0, line_height=18.0),
+                TextNode(content="\nTipo de Ensayo Realizado", font_size=14.0, line_height=18.0),
+                TextNode(content=str(tag['test_type']), font_size=16.0, line_height=18.0),
+                TextNode(content="\nIdenticacion de la pieza", font_size=14.0, line_height=18.0),
+                TextNode(content=str(tag['asset_id']), font_size=16.0, line_height=18.0),
+                TextNode(content="\nTipo de pieza", font_size=14.0, line_height=18.0),
+                TextNode(content=str(tag['type']), font_size=16.0, line_height=18.0),
+                TextNode(content="\nResultado", font_size=14.0, line_height=18.0),
+                TextNode(content="Aprobado", font_size=22.0, line_height=18.0),
+                TextNode(content="\nResponsable de la certication", font_size=14.0, line_height=18.0),
+                TextNode(content="Juan Herrero", font_size=16.0, line_height=18.0),
+            ], pos=(20.0, 80.0)),
+        ]
+
+        if os.path.exists(asset):
+            blocks.append(
+                ImageBlock(path=asset, dpi=240.0, pos=(195.0, 80.0)),
+            )
+
+        certgen_py.gen_pdf(
+            path=path,
+            width=215.9,
+            height=279.4,
+            blocks=blocks
         )
-        pdf.gen_cert(path)    
+
         return f'certs/{mac.replace(":", "")}.pdf'
     except Exception as e:
-        return ''
+        return e
 
 def get_tag_by_mac(mac):
     data_json = json.loads(data.to_json(orient="records"))
@@ -1501,7 +1547,8 @@ rssi_tag_scan= {}
 start_init=None
 
 # localpath="/Users/iansear/Documents/Timbergrove/BoldForge/tgspoc/"
-localpath="c:\\tgspoc\\"
+# localpath="c:\\tgspoc\\"
+localpath="../data/"
 
 page_selected="page_configuration"
 # page_datatype_selected=""
