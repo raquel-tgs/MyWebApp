@@ -16,10 +16,15 @@
 <div class="flex justify-between items-center px-10 py-3">
   <div class="flex items-center gap-10">
     <h4 class="text-xl">Located Assets</h4>
-    <form id="search-form" class="m-0" method="POST" action="{{ url_for('tag_table') }}">
-      {{ form.csrf_token }}
-      {{ form.q }}
-      {{ form.submit }}
+    <form id="search-form" class="m-0" method="POST" action="/tagtable">
+      <input type="text" name="q" value="{{q}}" />
+      <select name="exp_filter">
+        <option value="0" {% if (0 == exp_filter) %} selected {% endif %}>Show All</option>
+        <option value="1" {% if (1 == exp_filter) %} selected {% endif %}>Show Expiring in 60 Days</option>
+        <option value="2" {% if (2 == exp_filter) %} selected {% endif %}>Show Expiring Soon</option>
+        <option value="3" {% if (3 == exp_filter) %} selected {% endif %}>Show Expired</option>
+      </select>
+      <button>Search</button>
     </form>
   </div>
   <div class="flex items-center gap-10">

@@ -1,7 +1,6 @@
 # https://jsfiddle.net/4gnXL/2/
 # credits https://blog.miguelgrinberg.com/post/beautiful-flask-tables-part-2
 #
-import sys
 import os
 import time
 import numpy as np
@@ -11,21 +10,12 @@ import datetime
 import threading
 import shutil
 import json
-from io import StringIO
 import shutil
 import math
-from datetime import datetime, timedelta
+from datetime import datetime
 import certgen_py
 
 import logging
-
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
-from wtforms.validators import DataRequired
-
-class SearchForm(FlaskForm):
-    q = StringField('Search')
-    submit = SubmitField('Search')
 
 app = Flask(__name__)
 
@@ -68,6 +58,7 @@ perPage = 10
 
 @app.route('/tagtable', methods=['GET', 'POST'])
 def tag_table():
+    global tag_table_uri
     global modal_open
     global page_selected
     global operation
@@ -75,15 +66,28 @@ def tag_table():
     global exp_warn_days
     global exp_alarm_days
 
+    if request.method == 'POST':
+        tag_table_uri['q'] = request.form.get('q')
+        tag_table_uri['exp_filter'] = request.form.get('exp_filter', type=int)
+        return redirect(url_for('tag_table', page = tag_table_uri['page'], q=tag_table_uri['q'], exp_filter=tag_table_uri['exp_filter']))
+
     modal_redirect='tag_table'
-    form = SearchForm()
+    page_selected="tag_table"
     data_json = json.loads(data.to_json(orient="records"))
 
     tags=[]
-    if form.validate_on_submit():
-        query = form.q.data
+    query = request.args.get('q')
+    if query:
         for tag in data_json:
-            if query.lower() in tag['mac'].lower() or query.lower() in tag['tag_id'].lower() or query.lower() in tag['name'].lower() or query.lower() in tag['color'].lower():
+            if (query.lower() in tag['mac'].lower() or 
+                query.lower() in tag['tag_id'].lower() or 
+                query.lower() in tag['asset_id'].lower() or 
+                query.lower() in tag['series'].lower() or 
+                query.lower() in tag['expiration_date'].lower() or 
+                query.lower() in tag['certificate_id'].lower() or 
+                query.lower() in tag['type'].lower() or 
+                query.lower() in tag['asset_diameter'].lower() or 
+                query.lower() in tag['color'].lower()):
                 tags.append(tag)
     else:
         tags = data_json
@@ -107,9 +111,20 @@ def tag_table():
             print('----- Error: ', e)
             tag['alert_msg'] = 'Check Expiration Date'
             tag['alert_level'] = -1
+
+    filtered_tags = []
+    if tag_table_uri['exp_filter'] > 0:
+        for tag_index in range(len(tags)):
+            if tags[tag_index]['alert_level'] == tag_table_uri['exp_filter']:
+                filtered_tags.append(tags[tag_index])
+    else:
+        filtered_tags = tags
+    tags = filtered_tags
     
-    page_selected="tag_table"
-    currentPage = request.args.get('page', 1, type=int)
+    currentPage = request.args.get('page', type=int)
+    if not currentPage:
+        return redirect(url_for('tag_table', page = tag_table_uri['page'], q=tag_table_uri['q'], exp_filter=tag_table_uri['exp_filter']))
+    
     first = ((perPage*currentPage)-perPage)
     last = perPage*currentPage
     totalPages = math.ceil(len(tags)/perPage)
@@ -127,7 +142,9 @@ def tag_table():
         userRole = user_role, 
         modal_open = modal_open, 
         operation = operation,
-        form = form)
+        q = tag_table_uri['q'],
+        exp_filter = tag_table_uri['exp_filter']
+    )
 
 @app.route('/api/close-op-modal')
 def close_op_modal():
@@ -694,9 +711,9 @@ def dataupdate():
     global operation
     global reloadpage
     """send current content"""
-    print("datetime:{0} status:{1} operation:{2} reloadpage:{3}".format(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),status,operation,reloadpage))
+    print("datetime:{0} status:{1} operation:{2} reloadpage:{3}".format(datetime.now().strftime('%Y-%m-%d %H:%M:%S'),status,operation,reloadpage))
 
-    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"#"+status+"#"+operation+"#"+reloadpage
+    return datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"#"+status+"#"+operation+"#"+reloadpage
 
 
 @app.route('/data_statuslog')
@@ -1518,6 +1535,9 @@ global exp_warn_days
 global exp_alarm_days
 exp_warn_days = 60
 exp_alarm_days = 30
+
+global tag_table_uri
+tag_table_uri = {'page': 1, 'q': '', 'exp_filter': 0}
 # start_back=-1
 # length_back=-1
 app_host="0.0.0.0" #"192.168.1.196"

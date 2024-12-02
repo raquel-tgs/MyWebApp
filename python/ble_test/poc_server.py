@@ -90,7 +90,7 @@ CTE_Wait_Time_posscan=20            #>1 if CTE_Wait_Time=1 to give time to the l
 CTE_Wait_Time_prescan=55            # >5 if : Only necessary of server is not always on
 actions_filter=["READ","LOCATION","UPDATE"]
 discover_rssi=False
-scan_mac_filter=[]#["0C4314F46DA1"]
+scan_mac_filter=[]#["0C4314F46DA1"] #A5DA find full mac
 page_configuration="page_configuration"
 update_mac_filter=[]
 location_filter=True
@@ -1932,7 +1932,7 @@ async def main():
                         df = pd.DataFrame(csv_read_data)
                     else:
                         df = pd.DataFrame(csv_read_data)
-                    # if df.shape[0]>0 :df["status"]="read"
+                    # if df.shape[0]>0 :df["status"]="read" uuid_data_type_filter
 
                     #x and y always the last rows
                     cols = [x for x in list(df.columns) if x not in ["x", "y"]]

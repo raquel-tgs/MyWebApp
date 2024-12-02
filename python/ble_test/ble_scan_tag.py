@@ -520,8 +520,13 @@ class ble_tag:
                                             "error at param_enable_disable_tags address:{} ".format(address, ))
                                         print("error at param_enable_disable_tags address:{}".format(address,))
                                         print(e)
-                                if result:
+                                print(uuid_data_type_filter)
+                                if result and uuid_data_type_filter == 'base':
                                     csv_row_new["status"]="read"
+                                elif result and uuid_data_type_filter == 'detail':
+                                    csv_row_new["status_detail"]="read"
+                                elif result and uuid_data_type_filter == 'configuration':
+                                    csv_row_new["status_config"]="read"
                                 else:
                                     csv_row_new["status"]="read error"
                                 self.csv_row_previous = self.csv_row_last.copy()
@@ -1031,7 +1036,7 @@ class gatewaydb:
                "ble_data_crc": None,"asset_images_crc": None,"logo_images_crc": None, "signature_images_crc": None,
                "tag_advertisement_period": None,"ble_on_period": None, "ble_on_wakeup_period": None, "ble_off_period": None, "tag_periodic_scan": None,
                "update_nfc": None, "enable_cte": None, "tag_enabled": None,"read_battery_voltage": None,
-               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None,"x": "", "y": ""}
+               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None, "status_detail": None, "status_config": None, "x": "", "y": ""}
 
 
     scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
