@@ -1031,7 +1031,7 @@ class gatewaydb:
                "ble_data_crc": None,"asset_images_crc": None,"logo_images_crc": None, "signature_images_crc": None,
                "tag_advertisement_period": None,"ble_on_period": None, "ble_on_wakeup_period": None, "ble_off_period": None, "tag_periodic_scan": None,
                "update_nfc": None, "enable_cte": None, "tag_enabled": None,"read_battery_voltage": None,
-               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None,"x": "", "y": ""}
+               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None, "status_base": None, "status_detail": None, "status_config": None, "x": "", "y": ""}
 
 
     scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
@@ -1303,7 +1303,9 @@ class boldscanner:
         nscan = 0
         new_tags=[]
         existing_tags=[]
+
         filterout=sum([1 if self.tags.get_tag_by_address(mac) is not None else 0 for mac in scan_mac_filter_address])==len(scan_mac_filter_address) and len(scan_mac_filter_address)>0
+        
         while nscan < max_scans and ((len(new_tags)+len(existing_tags))<max_tags or max_tags==0) and not filterout:
             try:
                 nscan=nscan+1
@@ -1315,6 +1317,7 @@ class boldscanner:
                     self.webapp.print_statuslog("Starting filtering BoldTags...")
                 else:
                     devices=self.tag_devices
+                print(devices)
                 for device in devices:
                     if self.webapp.webcancel: break
                     if device.name is not None:
