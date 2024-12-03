@@ -1554,6 +1554,9 @@ async def main():
                             new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans,
                                                                             max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter_address,
                                                                             timeout_scanner=timeout_scanner,timeout=connect_timeout,param_scan_new_tags=param_scan_new_tags)
+                            # new_tags,existing_tags=await bscanner.scan_tags(connect=True,max_retry=scan_max_retry, max_scans=scan_max_scans,
+                            #                                                 max_tags=max_BoldTags,scan_mac_banned=scan_mac_banned,scan_mac_filter_address=scan_mac_filter,
+                            #                                                 timeout_scanner=timeout_scanner,timeout=connect_timeout,param_scan_new_tags=param_scan_new_tags)
                         except Exception as e:
                             print(e)
 
@@ -1770,7 +1773,7 @@ async def main():
             if discover_rssi:
                 discover_rssi_start=False
                 bscanner.discover_rssi_collect = True
-                await scanner.stop()
+                # await scanner.stop()
 
         else:
             scanstarted=False
@@ -1926,13 +1929,23 @@ async def main():
             #scan location
             print("Process time {} sec".format(int(time.time() - time_process)))
             app.print_statuslog("Process time {}".format(int(time.time() - time_process)))
+            print(uuid_data_type_filter, csv_read_data)
             if len(csv_read_data)>0:
                 try:
                     if len(csv_read_data) > 1:
                         df = pd.DataFrame(csv_read_data)
                     else:
                         df = pd.DataFrame(csv_read_data)
+
+                    
                     # if df.shape[0]>0 :df["status"]="read" uuid_data_type_filter
+                    
+                    if uuid_data_type_filter == 'base':
+                        df["status_base"]="read"
+                    elif uuid_data_type_filter == 'detail':
+                        df["status_detail"]="read"
+                    elif uuid_data_type_filter == 'configuration':
+                        df["status_config"]="read"
 
                     #x and y always the last rows
                     cols = [x for x in list(df.columns) if x not in ["x", "y"]]
@@ -1955,8 +1968,20 @@ async def main():
                                     for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
                                         for k in app.columnIds[1:-2]:
                                             df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
+
                                         df_back.loc[ix, "status"] = \
                                         df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
+
+                                        if uuid_data_type_filter == 'base':
+                                            df_back.loc[ix, "status_base"] = \
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_base"].values[0]
+                                        elif uuid_data_type_filter == 'detail':
+                                            df_back.loc[ix, "status_detail"] = \
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_detail"].values[0]
+                                        elif uuid_data_type_filter == 'configuration':
+                                            df_back.loc[ix, "status_config"] = \
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_config"].values[0]
+
                                     df_back=df_back[app.columnIds[:-2]]
 
                                 #add new records
@@ -2001,7 +2026,7 @@ async def main():
                     else:
                         df_res = df
                     df_res_1=mergelocation(resdf, df_res, app_scan_columnIds)
-                    df_res_1.to_csv(file_path,index=False)
+                    df_res_1.to_csv(file_path,index=False) # if tags found
 
                 except Exception as e:
                     print("UPDATE file error")
@@ -2041,7 +2066,7 @@ async def main():
                                 df.loc[ix, "status"] = "not read"
                             else:
                                 df["status"] = "not read"
-                            df.to_csv(file_path, index=False)
+                            df.to_csv(file_path, index=False) # writes if no tags detected
                     else:
                         pd.DataFrame(columns=app.scan_columnIds).to_csv(file_path, index=False)
                         df.to_csv(file_path, index=False)

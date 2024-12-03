@@ -192,8 +192,10 @@ def tag_details(tag_mac):
     global page_selected
     global modal_open
     global modal_redirect
+    global operation
+
     modal_redirect='tag_details'
-    page_selected="page_configuration"
+    page_selected="page_configuration_detail"
     tag_data = get_tag_by_mac(tag_mac)
     image = ''
     is_image = False
@@ -208,7 +210,7 @@ def tag_details(tag_mac):
             image = f"images/{tag_data['tag_id'].replace(':', '')}.jpg"
         except Exception as e:
             print(e)
-    return render_template('tag_details.html', tag = tag_data, image = image, modal_open = modal_open)
+    return render_template('tag_details.html', tag = tag_data, image = image, modal_open = modal_open, operation = operation)
 
 @app.route('/view/report/<tag_mac>')
 def view_tag_report(tag_mac):
@@ -1412,7 +1414,7 @@ def print_statuslog(value, clear=False, addLFCR=True, addtime=False, maxlines=40
     try:
         statuslog_maxlines=statuslog_maxlines+1
 
-        dtime=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        dtime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if clear:
             if addtime:
                 statuslog = dtime + "-> " + value

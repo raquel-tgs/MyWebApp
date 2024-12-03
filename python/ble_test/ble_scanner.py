@@ -204,12 +204,12 @@ async def main():
         await scanner.start()
         await asyncio.sleep(1.0)
         await scanner.stop()
-        try:  # used try so that if user pressed other than the given key error will not be shown
-            if keyboard.is_pressed('q'):  # if key 'q' is pressed
-                print('You Pressed A Key!')
-                break  # finishing the loop
-        except:
-            break
+        # try:  # used try so that if user pressed other than the given key error will not be shown
+        #     if keyboard.is_pressed('q'):  # if key 'q' is pressed
+        #         print('You Pressed A Key!')
+        #         break  # finishing the loop
+        # except:
+        #     break
 
         if False:
             devices = await scanner.discover()
