@@ -1483,7 +1483,19 @@ async def main():
             #start tag scanning for requstd operation
             read_nfc_done = False
             scan_mac_filter=app.mac_filter
-            scan_mac_filter_address=[":".join([scan_mac_filter[0][x]+scan_mac_filter[0][x+1] for x in range(0,len(mac),2)]) for mac in scan_mac_filter]
+            if len(scan_mac_filter)>0:
+                scan_mac_filter_address=[]
+                if (len(scan_mac_filter.split("-"))>1):
+                    kaux=""
+                    for k in scan_mac_filter:
+                        for mk in k.split("-"):
+                            if len(kaux)>0:
+                                kaux =kaux+":" + [":".join( [scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in mk][0]
+                            else:
+                                kaux=[":".join([scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in mk][0]
+                        scan_mac_filter_address.append(kaux)
+                else:
+                    scan_mac_filter_address=[":".join([scan_mac_filter[0][x]+scan_mac_filter[0][x+1] for x in range(0,len(mac),2)]) for mac in scan_mac_filter]
             startCTE_address_filter=app.mac_filter if len(scan_control["tag_re_scan"])==0 else scan_control["tag_re_scan"]
             if len(startCTE_address_filter) >0 : MaxTags=len(startCTE_address_filter)
             if len(scan_mac_filter) > 0: MaxTags = len(scan_mac_filter)
@@ -1939,7 +1951,10 @@ async def main():
 
                     
                     # if df.shape[0]>0 :df["status"]="read" uuid_data_type_filter
-                    
+                    df["status_base"] = "unknown"
+                    df["status_detail"] = "unknown"
+                    df["status_config"] = "unknown"
+
                     if uuid_data_type_filter == 'base':
                         df["status_base"]="read"
                     elif uuid_data_type_filter == 'detail':
@@ -1974,13 +1989,13 @@ async def main():
 
                                         if uuid_data_type_filter == 'base':
                                             df_back.loc[ix, "status_base"] = \
-                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_base"].values[0]
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
                                         elif uuid_data_type_filter == 'detail':
                                             df_back.loc[ix, "status_detail"] = \
-                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_detail"].values[0]
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
                                         elif uuid_data_type_filter == 'configuration':
                                             df_back.loc[ix, "status_config"] = \
-                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status_config"].values[0]
+                                            df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]
 
                                     df_back=df_back[app.columnIds[:-2]]
 
