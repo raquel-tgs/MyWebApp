@@ -1128,20 +1128,31 @@ def mergelocation(resdf,df_res, scan_columnIds, filter=False):
                         cols = [x for x in list(df_res.columns) if x not in ['x', 'y']]
                         df_res=df_res[cols]
                     if "x" in list(resdf.columns) and "y" in list(resdf.columns):
-                        resdf['tag_mac_strip'] = [
-                            x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
-                            resdf['tag_mac'].values]
-                        df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y"]],  left_on="mac", right_on="tag_mac_strip", how="left")
-                        df_res = df_res[scan_columnIds]
+
+                        temp_values = list(resdf['tag_mac'].values)
+                        if len(temp_values) > 0:
+                            if len(temp_values[0]) > 30:
+                                resdf['tag_mac_strip'] = temp_values
+                            else:
+                                resdf['tag_mac_strip'] = [
+                                    x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in
+                                    resdf['tag_mac'].values]
+                            df_res = df_res.merge(resdf.set_index("tag_mac_strip")[["x", "y", "result"]],  left_on="mac", right_on="tag_mac_strip", how="left")
+                            df_res = df_res[scan_columnIds]
                             #['mac', 'name', 'tag_id', 'asset_id', 'certificate_id', 'type', 'expiration_date', 'color',
                             # 'series', 'asset_images_file_extension', 'read_nfc', 'x', 'y']]
 
                         # df_res.rename(columns={"x_y": "x", "y_y": "y"}, inplace=True)
-                        df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
-                        df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
+                            df_res['x'] = df_res['x'].apply(lambda x: '{:,.1f}'.format(x))
+                            df_res['y'] = df_res['y'].apply(lambda x: '{:,.1f}'.format(x))
+                            df_res.rename(columns={"result": "in_out"})
+
+                        else:
+                            pass
                     else:
                         df_res["x"] = np.nan
                         df_res["y"] = np.nan
+                        df_res["in_out"] = np.nan
                 except Exception as e:
                     print(e)
             else:
@@ -1483,19 +1494,23 @@ async def main():
             #start tag scanning for requstd operation
             read_nfc_done = False
             scan_mac_filter=app.mac_filter
+
+            scan_mac_filter_address = []
             if len(scan_mac_filter)>0:
-                scan_mac_filter_address=[]
-                if (len(scan_mac_filter.split("-"))>1):
-                    kaux=""
-                    for k in scan_mac_filter:
-                        for mk in k.split("-"):
-                            if len(kaux)>0:
-                                kaux =kaux+":" + [":".join( [scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in mk][0]
-                            else:
-                                kaux=[":".join([scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in mk][0]
-                        scan_mac_filter_address.append(kaux)
+                # if (len(scan_mac_filter[0].split("-"))>1):
+                #     kaux=""
+                #     for k in scan_mac_filter:
+                #         for mk in k.split("-"):
+                #             if len(kaux)>0:
+                #                 kaux =kaux+"-" + [":".join( [scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in [mk]][0]
+                #             else:
+                #                 kaux=[":".join([scan_mac_filter[0][x] + scan_mac_filter[0][x + 1] for x in range(0, len(mac), 2)]) for mac in [mk]][0]
+                #         scan_mac_filter_address.append(kaux)
+                if len(scan_mac_filter[0])>30:
+                    scan_mac_filter_address = scan_mac_filter
                 else:
                     scan_mac_filter_address=[":".join([scan_mac_filter[0][x]+scan_mac_filter[0][x+1] for x in range(0,len(mac),2)]) for mac in scan_mac_filter]
+
             startCTE_address_filter=app.mac_filter if len(scan_control["tag_re_scan"])==0 else scan_control["tag_re_scan"]
             if len(startCTE_address_filter) >0 : MaxTags=len(startCTE_address_filter)
             if len(scan_mac_filter) > 0: MaxTags = len(scan_mac_filter)
@@ -1640,7 +1655,13 @@ async def main():
                 devices_filter.extend(scan_mac_filter)
                 devices_filter = list(set(devices_filter))
 
-                devices_filter_mac = [ x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in devices_filter]
+                devices_filter_mac = []
+                if len(devices_filter) > 0:
+                    if len(devices_filter[0]) > 30:
+                        devices_filter_mac = devices_filter
+                    else:
+                        devices_filter_mac = [ x[0:2] + ":" + x[2:4] + ":" + x[4:6] + ":" + x[6:8] + ":" + x[8:10] + ":" + x[10:12] for x in devices_filter]
+
                 devices_connected=[]
                 if bscanner.tags.limit > 0:
                     devices_connected = bscanner.tags_connected()
@@ -1982,7 +2003,8 @@ async def main():
                                 if sum(df_back["mac"].isin(list(df["mac"].values)))>0:
                                     for ix in df_back[df_back["mac"].isin(list(df["mac"].values))].index:
                                         for k in app.columnIds[1:-2]:
-                                            df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
+                                            if k not in ['status_base', 'status_detail', 'status_config']:
+                                                df_back.loc[ix,k]=df[df["mac"]==df_back.loc[ix,"mac"]][k].values[0]
 
                                         df_back.loc[ix, "status"] = \
                                         df.loc[df_back.loc[ix, "mac"] == df["mac"], "status"].values[0]

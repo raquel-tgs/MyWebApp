@@ -1031,11 +1031,11 @@ class gatewaydb:
                "ble_data_crc": None,"asset_images_crc": None,"logo_images_crc": None, "signature_images_crc": None,
                "tag_advertisement_period": None,"ble_on_period": None, "ble_on_wakeup_period": None, "ble_off_period": None, "tag_periodic_scan": None,
                "update_nfc": None, "enable_cte": None, "tag_enabled": None,"read_battery_voltage": None,
-               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None, "status_base": None, "status_detail": None, "status_config": None, "x": "", "y": ""}
+               "tag_firmware": None,"altitude": None, "moved": None,"battery_voltage": None, "rssi_host": None, "last_seen": None,"manufacturer_data": None,"status_code": None,"status": None, "status_base": None, "status_detail": None, "status_config": None, "x": "", "y": "", "in_out": ""}
 
 
     scan_columnIds = ["mac", "name", "tag_id", "asset_id", "certificate_id", "type", "expiration_date", "color",
-                      "series", "read_nfc", "status", "status_code", "asset_images_file_extension","last_seen","asset_images_crc","ble_data_crc", "x", "y"]
+                      "series", "read_nfc", "status", "status_code", "asset_images_file_extension","last_seen","asset_images_crc","ble_data_crc", "x", "y", "in_out"]
 
     # csv_cfg_row = {"mac":"", "name": "","update_nfc":"","status_code":"","enable_cte":"","tag_enabled":"","tag_advertisement_period":"",
     #                "ble_on_period":"","ble_on_wakeup_period":"","ble_off_period":"","tag_periodic_scan":"","tag_mac":"","read_battery_voltage":"",
@@ -1043,7 +1043,7 @@ class gatewaydb:
     scan_cfg_columnIds = ["mac", "status_code", "enable_cte", "tag_enabled", "tag_advertisement_period",
                              "ble_on_period", "tag_mac", "read_battery_voltage",
                              "ble_on_wakeup_period", "ble_off_period", "tag_periodic_scan", "altitude", "moved",
-                             "battery_voltage", "tag_firmware","manufacturer_data","rssi_host","last_seen","asset_images_crc","ble_data_crc", "status", "x", "y"]
+                             "battery_voltage", "tag_firmware","manufacturer_data","rssi_host","last_seen","asset_images_crc","ble_data_crc", "status", "x", "y", "in_out"]
 
     # csv_det_row = {"mac":"", "name": "","certification_company_name":"","certification_company_id":"","certification_place":"","certification_date":"","test_type":"","asset_diameter":"",
     #                  "batch_id":"","batch_date":"","machine_id":"","status_code":"","ble_data_crc":"","asset_images_crc":"","logo_images_crc":"","signature_images_crc":"",
@@ -1054,7 +1054,7 @@ class gatewaydb:
                                "machine_id", "status_code", "ble_data_crc", "asset_images_crc", "logo_images_crc",
                                "signature_images_crc", "owner_company_name",
                                "owner_data", "altitude", "moved", "battery_voltage", "asset_comment", "ndir_id","last_seen",
-                               "status", "x", "y"]
+                               "status", "x", "y", "in_out"]
 
     location_cvs_row = {"tag_mac": "", "out_prob": "", "out_prob_k": "", "anchors": "", "result": "", "x": "", "y": ""}
     location_cvs_columnIds = ["tag_mac", "out_prob", "out_prob_k", "anchors", "result", "x", "y"]
@@ -1317,7 +1317,6 @@ class boldscanner:
                     self.webapp.print_statuslog("Starting filtering BoldTags...")
                 else:
                     devices=self.tag_devices
-                print(devices)
                 for device in devices:
                     if self.webapp.webcancel: break
                     if device.name is not None:

@@ -330,10 +330,11 @@ def edit_tag_config(tag_mac):
     global page_selected
     global modal_open
     global modal_redirect
+    global operation
     modal_redirect='edit_tag_config'
     page_selected="page_configuration_configuration"
     tag_data = get_tag_by_mac(tag_mac)
-    return render_template('edit_tag_configuration.html', tag = tag_data, modal_open = modal_open)
+    return render_template('edit_tag_configuration.html', tag = tag_data, modal_open = modal_open, operation = operation)
 
 @app.route('/upload_file')
 def upload_file():
@@ -1504,7 +1505,6 @@ def readscanfile(load_init=False ):
             scan_angles_raw = pd.read_csv(localpath + "scan_angles_raw.csv")
         if os.path.exists(localpath + "scan_location.csv"):
             scan_location = pd.read_csv(localpath + "scan_location.csv")
-
         if data is not None:
             data["select"]=0
             # data['x'] = data['x'].apply(lambda x: '{:,.1f}'.format(x))

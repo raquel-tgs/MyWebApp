@@ -201,6 +201,7 @@ async def main():
     scanner.register_detection_callback(device_found)
 
     while True:
+        print('---------loop----------------')
         await scanner.start()
         await asyncio.sleep(1.0)
         await scanner.stop()
