@@ -54,7 +54,7 @@ def login():
             return render_template('landing_page.html', error=error)
 
 currentPage = 1
-perPage = 10
+perPage = 5
 
 @app.route('/tagtable', methods=['GET', 'POST'])
 def tag_table():
@@ -75,8 +75,14 @@ def tag_table():
     page_selected="tag_table"
     data_json = json.loads(data.to_json(orient="records"))
 
-    tags=[]
     query = str(request.args.get('q'))
+    currentPage = request.args.get('page', type=int)
+    tag_table_uri['page'] = currentPage
+    if not currentPage or query:
+
+        return redirect(url_for('tag_table', page = tag_table_uri['page'], q=tag_table_uri['q'], exp_filter=tag_table_uri['exp_filter']))
+
+    tags=[]
     if query:
         for tag in data_json:
             if (query.lower() in str(tag['mac']).lower() or 
@@ -120,10 +126,6 @@ def tag_table():
     else:
         filtered_tags = tags
     tags = filtered_tags
-    
-    currentPage = request.args.get('page', type=int)
-    if not currentPage:
-        return redirect(url_for('tag_table', page = tag_table_uri['page'], q=tag_table_uri['q'], exp_filter=tag_table_uri['exp_filter']))
     
     first = ((perPage*currentPage)-perPage)
     last = perPage*currentPage
