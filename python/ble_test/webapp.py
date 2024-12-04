@@ -76,18 +76,18 @@ def tag_table():
     data_json = json.loads(data.to_json(orient="records"))
 
     tags=[]
-    query = request.args.get('q')
+    query = str(request.args.get('q'))
     if query:
         for tag in data_json:
-            if (query.lower() in tag['mac'].lower() or 
-                query.lower() in tag['tag_id'].lower() or 
-                query.lower() in tag['asset_id'].lower() or 
-                query.lower() in tag['series'].lower() or 
-                query.lower() in tag['expiration_date'].lower() or 
-                query.lower() in tag['certificate_id'].lower() or 
-                query.lower() in tag['type'].lower() or 
-                query.lower() in tag['asset_diameter'].lower() or 
-                query.lower() in tag['color'].lower()):
+            if (query.lower() in str(tag['mac']).lower() or 
+                query.lower() in str(tag['tag_id']).lower() or 
+                query.lower() in str(tag['asset_id']).lower() or 
+                query.lower() in str(tag['series']).lower() or 
+                query.lower() in str(tag['expiration_date']).lower() or 
+                query.lower() in str(tag['certificate_id']).lower() or 
+                query.lower() in str(tag['type']).lower() or 
+                query.lower() in str(tag['asset_diameter']).lower() or 
+                query.lower() in str(tag['color']).lower()):
                 tags.append(tag)
     else:
         tags = data_json
