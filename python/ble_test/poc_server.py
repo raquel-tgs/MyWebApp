@@ -70,7 +70,7 @@ devices_processed=[]
 directory = "c:/tgspoc"
 app_localpath=directory+'/'
 
-use_MQTT = True      #Set to True to start MQTT client
+use_MQTT = False      #Set to True to start MQTT client
 
 Stop_collecting = True
 keep_mqtt_on = True
@@ -889,6 +889,7 @@ def filter_location(file_path_angle,file_path_correction,file_path_angle_raw,fil
                 scan_control["tag_re_scan_log"].append(scan_control["tag_re_scan"])
                 scan_control["scan_data"].append({"n":scan_control["scan"]-1,"dfpos_x":dfpos_x, "dfpos_y" : dfpos_y, "dfpos_r": dfpos_r, "dataavg":dataavg, "dfrssi_host":dfrssi_host, "resdf":resdf,"data_corravg":data_corravg, "data_pos":data_pos })
         else:
+            #dfrssi_host = None# ADDED BY RAQUEL REMOVE
             try:
                 if scan_control["scan"]>0:
                     ini=False
@@ -1300,7 +1301,7 @@ async def main():
     flask_thread = Thread(target=app.run_flask_app)
     flask_thread.start()
 
-    app.print_statuslog("Starting...")
+    app.print_statuslog("Starting [BLAHBLAHBLAH]...")
     app.print_statuslog("Scanning BoldTags\n")
     # time.sleep(5)
 
