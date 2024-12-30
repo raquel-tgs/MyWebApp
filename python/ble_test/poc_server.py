@@ -1301,7 +1301,7 @@ async def main():
     flask_thread = Thread(target=app.run_flask_app)
     flask_thread.start()
 
-    app.print_statuslog("Starting [BLAHBLAHBLAH][BLAHBLAHAGAIN!!!!]:))...")
+    app.print_statuslog("Starting [TESTING RENAME]...")
     app.print_statuslog("Scanning BoldTags\n")
     # time.sleep(5)
 
